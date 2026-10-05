@@ -1,0 +1,19 @@
+{
+  "id": "./",
+  "name": "إرتَقِ - إرتَقِ بالقرآن",
+  "short_name": "إرتَقِ",
+  "description": "تطبيق إرتَقِ بالقرآن لمتابعة وحفظ ومراجعة القرآن الكريم مصحف المدينة المنورة 604 صفحة",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#064E3B",
+  "theme_color": "#064E3B",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#064E3B">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="إرتَقِ">
+  <meta name="application-name" content="إرتَقِ">
+  <meta name="description"
+    content="تطبيق إرتَقِ بالقرآن لحفظ وإنجاز ومراجعة القرآن الكريم مصحف المدينة المنورة 604 صفحة">
+
+  <title>إرتَقِ | إرتَقِ بالقرآن - لوحة إنجاز الحفظ والمراجعة</title>
+
+  <!-- PWA Manifest Link -->
+  <link rel="manifest" href="manifest.json" id="manifestPlaceholder">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Arabic Typography: Cairo for UI and Amiri Quran for unclipped Tashkeel -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Cairo:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <!-- Lucide Icons (Modular) -->
+  <script src="./js/icons.js"></script>
+
+  <!-- html2canvas for Direct Image Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            emerald: {
+              50: '#f0fdf5',
+              100: '#dcfce8',
+              200: '#bbf7d1',
+              300: '#86efad',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              850: '#0d542b',
+              900: '#064e3b',
+              950: '#022c22',
+            },
+            gold: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              200: '#fde68a',
+              300: '#fcd34d',
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309',
+              800: '#92400e',
+              900: '#78350f',
+            }
+          },
+          fontFamily: {
+            sans: ['"Cairo"', 'system-ui', '-apple-system', 'sans-serif'],
+            quran: ['"Amiri Quran"', 'serif'],
+          },
+          gridTemplateColumns: {
+            '15': 'repeat(15, minmax(0, 1fr))',
+            '20': 'repeat(20, minmax(0, 1fr))',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom Styles (Modular) -->
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+
+<body
+  class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen font-sans selection:bg-emerald-600 selection:text-white antialiased transition-colors duration-200 bg-islamic-pattern pb-28 md:pb-12">
+
+  <header
+    class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-emerald-900/10 dark:border-emerald-500/15 shadow-sm">
+    <div
+      class="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between gap-1.5 sm:gap-2">
+
+      <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        <div
+          class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700 flex items-center justify-center text-gold-400 shadow-md shadow-emerald-950/20 border border-gold-500/30 shrink-0">
+          <i data-lucide="book-open-check" class="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]"></i>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <h1
+            class="text-sm sm:text-base md:text-xl font-black tracking-tight text-emerald-950 dark:text-emerald-100 whitespace-nowrap leading-tight">
+            إرتَقِ بالقرآن
+          </h1>
+          <span
+            class="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md bg-gold-50 dark:bg-gold-950/60 text-gold-700 dark:text-gold-300 border border-gold-300 dark:border-gold-800 leading-tight whitespace-nowrap hidden min-[540px]:inline-block font-sans">
+            604 صفحة
+          </span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+        <button id="btnHeaderTamkeen"
+          class="hidden sm:flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-sm font-bold bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-sm shadow-amber-900/30 transition active:scale-95"
+          title="اختبار وتثبيت الحفظ (تمكين)">
+          <i data-lucide="brain" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-white"></i>
+          <span>تمكين</span>
+        </button>
+
+        <button id="btnInstallApp"
+          class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm shadow-emerald-900/30 transition active:scale-95 flex items-center gap-1"
+          title="تثبيت التطبيق على الشاشة الرئيسية">
+          <i data-lucide="smartphone" class="w-4 h-4 text-gold-300 shrink-0"></i>
+          <span class="hidden md:inline">تثبيت</span>
+        </button>
+
+        <button id="btnShareCard"
+          class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-semibold bg-amber-50 hover:bg-amber-100 dark:bg-gold-950/50 dark:hover:bg-gold-900 text-gold-800 dark:text-gold-300 border border-gold-300/80 dark:border-gold-800 transition shadow-xs active:scale-95 flex items-center gap-1"
+          title="عرض بطاقة الإنجاز">
+          <i data-lucide="award" class="w-4 h-4 text-gold-600 dark:text-gold-400 shrink-0"></i>
+          <span class="hidden md:inline">بطاقة الإنجاز</span>
+        </button>
+
+        <button id="btnAboutModal"
+          class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-800 transition shadow-xs active:scale-95 flex items-center gap-1"
+          title="عن التطبيق ودليل المستخدم">
+          <i data-lucide="help-circle" class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0"></i>
+          <span class="hidden md:inline">عن التطبيق</span>
+        </button>
+
+        <button id="btnBackupModal"
+          class="p-1.5 sm:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition active:scale-95 flex items-center justify-center"
+          title="النسخ الاحتياطي ونقل البيانات">
+          <i data-lucide="database" class="w-4 h-4"></i>
+        </button>
+
+        <button id="btnThemeToggle"
+          class="p-1.5 sm:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition active:scale-95 flex items-center justify-center"
+          title="تبديل النمط">
+          <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
+          <i data-lucide="sun" class="w-4 h-4 hidden dark:inline text-gold-400"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3.5 sm:py-5 space-y-4 sm:space-y-5">
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+      <div
+        class="lg:col-span-8 relative rounded-3xl bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-850 text-white p-5 sm:p-6 shadow-xl shadow-emerald-950/20 border border-emerald-800/80">
+
+        <div class="relative z-10 flex flex-col justify-between h-full space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="min-w-0 flex-1">
+              <div
+                class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-800/80 border border-emerald-700/60 text-[11px] text-gold-300 font-semibold mb-1">
+                <i data-lucide="sparkle" class="w-3 h-3 text-gold-400"></i>
+                إجمالي إنجاز الحفظ في المصحف الشريف
+              </div>
+
+              <div class="pt-0.5 pb-1">
+                <h2
+                  class="quranic-verse text-[13.5px] min-[380px]:text-[15px] sm:text-base md:text-lg font-bold text-gold-300 tracking-normal whitespace-nowrap overflow-x-auto select-none"
+                  dir="rtl">
+                  ﴿&nbsp;وَلَقَدْ&nbsp;يَسَّرْنَا&nbsp;الْقُرْآنَ&nbsp;لِلذِّكْرِ&nbsp;فَهَلْ&nbsp;مِن&nbsp;مُّدَّكِرٍ&nbsp;﴾
+                </h2>
+              </div>
+            </div>
+
+            <div
+              class="flex items-center gap-3 bg-emerald-900/80 backdrop-blur-md py-2 px-4 rounded-2xl border border-gold-500/30 shadow-inner shrink-0 self-start sm:self-auto">
+              <div class="text-right">
+                <span id="statOverallPercent"
+                  class="text-2xl sm:text-3xl font-black font-sans text-gold-400 tracking-tight leading-none">0.0%</span>
+                <span class="text-[10px] block font-bold text-emerald-200 mt-0.5">نسبة الحفظ الكلية</span>
+              </div>
+              <div
+                class="w-10 h-10 rounded-xl bg-gold-500/10 flex items-center justify-center text-gold-400 border border-gold-500/20">
+                <i data-lucide="percent" class="w-5 h-5"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="flex justify-between items-center text-xs font-semibold text-emerald-200">
+              <span class="flex items-center gap-1.5">
+                <i data-lucide="trending-up" class="w-3.5 h-3.5 text-gold-400"></i>
+                المسار المقطوع نحو ختم القرآن حفظاً
+              </span>
+              <span id="statRemainingNotice" class="text-gold-300 font-bold font-sans">باقي 604 صفحة</span>
+            </div>
+            <div
+              class="w-full h-3.5 bg-emerald-950/90 rounded-full overflow-hidden p-0.5 border border-emerald-700/40 shadow-inner">
+              <div id="statProgressBar"
+                class="h-full bg-gradient-to-l from-gold-400 via-amber-400 to-emerald-400 rounded-full transition-all duration-500 ease-out shadow-lg"
+                style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button id="btnHeroTamkeen"
+              class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs sm:text-sm font-bold font-sans transition active:scale-95 shadow-md shadow-amber-950/30">
+              <i data-lucide="brain" class="w-4 h-4 text-white"></i>
+              <span>تمكين | اختبر حفظك الآن</span>
+            </button>
+            <button id="btnMainSaveImage"
+              class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gold-500/15 hover:bg-gold-500/25 border border-gold-500/40 text-gold-300 text-xs sm:text-sm font-bold font-sans transition active:scale-95">
+              <i data-lucide="award" class="w-4 h-4"></i>
+              <span>عرض بطاقة وشهادة الإنجاز</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2.5 border-t border-emerald-800/80 text-xs font-sans">
+            <div class="bg-emerald-900/60 p-2.5 rounded-xl border border-emerald-800/60 flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-gold-500/20 text-gold-300 flex items-center justify-center font-bold">
+                <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+              </div>
+              <div>
+                <span class="text-emerald-300 text-[10px] block leading-none mb-1">الصفحات المحفوظة</span>
+                <span class="text-xs sm:text-sm font-bold text-white"><span id="statPagesMemorized">0</span> <span
+                    class="text-emerald-400/80 font-normal text-xs">/ 604</span></span>
+              </div>
+            </div>
+
+            <div class="bg-emerald-900/60 p-2.5 rounded-xl border border-emerald-800/60 flex items-center gap-2">
+              <div
+                class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold">
+                <i data-lucide="bookmark" class="w-3.5 h-3.5"></i>
+              </div>
+              <div>
+                <span class="text-emerald-300 text-[10px] block leading-none mb-1">السور المكتملة</span>
+                <span class="text-xs sm:text-sm font-bold text-white"><span id="statSurahsMemorized">0</span> <span
+                    class="text-emerald-400/80 font-normal text-xs">/ 114</span></span>
+              </div>
+            </div>
+
+            <div class="bg-emerald-900/60 p-2.5 rounded-xl border border-emerald-800/60 flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-teal-500/20 text-teal-300 flex items-center justify-center font-bold">
+                <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+              </div>
+              <div>
+                <span class="text-emerald-300 text-[10px] block leading-none mb-1">الأجزاء المكتملة</span>
+                <span class="text-xs sm:text-sm font-bold text-white"><span id="statJuzCompleted">0</span> <span
+                    class="text-emerald-400/80 font-normal text-xs">/ 30</span></span>
+              </div>
+            </div>
+
+            <div class="bg-emerald-900/60 p-2.5 rounded-xl border border-emerald-800/60 flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold">
+                <i data-lucide="hash" class="w-3.5 h-3.5"></i>
+              </div>
+              <div>
+                <span class="text-emerald-300 text-[10px] block leading-none mb-1">الآيات التقريبية</span>
+                <span class="text-xs sm:text-sm font-bold text-white"><span id="statAyahsMemorized">0</span> <span
+                    class="text-emerald-400/80 font-normal text-xs">/ 6,236</span></span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="lg:col-span-4 flex flex-col justify-between gap-3">
+        <div
+          class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 shadow-sm relative overflow-hidden">
+          <div class="flex items-center gap-2 text-xs font-bold text-emerald-800 dark:text-emerald-400 mb-1.5">
+            <span
+              class="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
+              <i data-lucide="heart-handshake" class="w-3.5 h-3.5"></i>
+            </span>
+            بُشرى لحامل القرآن
+          </div>
+          <p
+            class="text-xs font-quran text-slate-700 dark:text-slate-300 leading-relaxed italic pr-2 border-r-2 border-gold-500 my-1">
+            "يُقَالُ لِصَاحِبِ الْقُرْآنِ: اقْرَأْ وَارْتَقِ وَرَتِّلْ كَمَا كُنْتَ تُرَتِّلُ فِي الدُّنْيَا، فَإِنَّ
+            مَنْزِلَتَكَ عِنْدَ آخِرِ آيَةٍ تَقْرَؤُهَا."
+          </p>
+          <div class="text-[10px] text-slate-400 text-left mt-1 font-medium font-sans">— رواه الترمذي وأبو داود</div>
+        </div>
+
+        <div id="plannerCard"
+          class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 shadow-sm space-y-3 font-sans">
+        </div>
+
+        <div
+          class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-2.5 sm:p-3 shadow-xs">
+          <div class="flex items-center justify-center text-xs">
+            <button id="btnResetConfirm"
+              class="flex items-center gap-1.5 text-rose-500 hover:text-rose-600 dark:text-rose-400 text-xs font-semibold hover:underline transition">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              تصفير السجل
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2.5 pt-1">
+      <div class="w-full md:w-auto overflow-x-auto no-scrollbar pb-0.5">
+        <div
+          class="inline-flex items-center gap-1 p-1 rounded-2xl bg-slate-200/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-300/40 dark:border-slate-700/50 shadow-inner font-sans min-w-max">
+          <button id="tabModeSurah"
+            class="tab-btn flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold transition-all bg-white dark:bg-slate-900 text-emerald-800 dark:text-emerald-300 shadow-sm shrink-0 whitespace-nowrap">
+            <i data-lucide="book-open" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+            <span>حسب السور (114)</span>
+          </button>
+          <button id="tabModePage"
+            class="tab-btn flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all shrink-0 whitespace-nowrap">
+            <i data-lucide="layout-grid" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+            <span>شبكة الصفحات (604)</span>
+          </button>
+          <button id="tabModeJuz"
+            class="tab-btn flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all shrink-0 whitespace-nowrap">
+            <i data-lucide="layers" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+            <span>الأجزاء (30 جزء)</span>
+          </button>
+          <button id="tabModeTamkeen"
+            class="tab-btn flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all shrink-0 whitespace-nowrap">
+            <i data-lucide="brain" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500"></i>
+            <span>تمكين (اختبار الحفظ)</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 font-sans w-full md:w-auto">
+        <div class="relative flex-1 md:w-64">
+          <i data-lucide="search" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input type="text" id="globalSearchInput" placeholder="ابحث باسم السورة، رقمها، الصفحة..."
+            class="w-full pr-9 pl-3 py-2 rounded-xl text-xs sm:text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-slate-800 dark:text-slate-100 placeholder-slate-400 shadow-sm transition">
+        </div>
+
+        <select id="filterStatusSelect"
+          class="py-2 px-3 rounded-xl text-xs sm:text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-slate-800 dark:text-slate-100 shadow-sm cursor-pointer font-medium shrink-0">
+          <option value="all">عرض الكل</option>
+          <option value="memorized">المحفوظ فقط</option>
+          <option value="unmemorized">غير المحفوظ</option>
+        </select>
+      </div>
+    </div>
+
+    <section id="viewSurahs" class="block space-y-3 transition-all duration-300">
+      <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1 font-sans">
+        <span>عرض <b id="filteredSurahCount" class="text-emerald-700 dark:text-emerald-400 font-bold">114</b>
+          سورة</span>
+        <span>اضغط على بطاقة السورة لتحديد تمام حفظها</span>
+      </div>
+      <div id="surahGridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+    </section>
+
+    <section id="viewPages" class="hidden space-y-3 transition-all duration-300">
+      <div
+        class="bg-white dark:bg-slate-900 p-3.5 sm:p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-3 font-sans">
+        <div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
+            <i data-lucide="grid" class="w-4 h-4 text-emerald-600"></i>
+            شبكة مصحف المدينة المنورة (604 صفحة)
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            اضغط على رقم الصفحة للتبديل بين (محفوظ / غير محفوظ).
+          </p>
+        </div>
+        <div class="flex items-center gap-3 text-xs font-semibold">
+          <div class="flex items-center gap-1.5">
+            <span class="w-3.5 h-3.5 rounded-md bg-emerald-700 inline-block shadow-sm"></span>
+            <span class="text-slate-700 dark:text-slate-300">محفوظ</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span
+              class="w-3.5 h-3.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 inline-block"></span>
+            <span class="text-slate-700 dark:text-slate-300">غير محفوظ</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Range Selection Tool -->
+      <div
+        class="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs font-sans">
+        <div class="flex items-center gap-2">
+          <span
+            class="p-1.5 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 shrink-0">
+            <i data-lucide="sliders" class="w-4 h-4"></i>
+          </span>
+          <span class="font-bold text-slate-800 dark:text-slate-200">تحديد نطاق صفحات دفعة واحدة:</span>
+        </div>
+        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2">
+          <div class="flex items-center gap-1.5">
+            <label for="rangeStartPage" class="text-slate-500 text-[11px] font-bold shrink-0">من ص:</label>
+            <input type="number" id="rangeStartPage" min="1" max="604" placeholder="1"
+              class="w-full sm:w-16 px-2 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-center font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+          </div>
+          <div class="flex items-center gap-1.5">
+            <label for="rangeEndPage" class="text-slate-500 text-[11px] font-bold shrink-0">إلى ص:</label>
+            <input type="number" id="rangeEndPage" min="1" max="604" placeholder="20"
+              class="w-full sm:w-16 px-2 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-center font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+          </div>
+          <button type="button" onclick="applyPageRange(true)"
+            class="py-2 sm:py-1.5 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold transition shadow-sm active:scale-95 text-center">
+            حفظ النطاق
+          </button>
+          <button type="button" onclick="applyPageRange(false)"
+            class="py-2 sm:py-1.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/60 dark:hover:text-rose-400 text-slate-700 dark:text-slate-300 font-bold transition active:scale-95 text-center">
+            إلغاء النطاق
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-slate-900 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+          <span class="text-xs font-bold text-emerald-800 dark:text-emerald-400 whitespace-nowrap px-1">انتقال
+            للجزء:</span>
+          <div id="juzJumpersContainer" class="flex gap-1.5 font-sans"></div>
+        </div>
+      </div>
+
+      <div
+        class="bg-white dark:bg-slate-900 p-3 sm:p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div id="pageGridContainer"
+          class="grid grid-cols-6 sm:grid-cols-10 md:grid-cols-15 lg:grid-cols-20 gap-1.5 font-sans"></div>
+      </div>
+    </section>
+
+    <section id="viewJuz" class="hidden transition-all duration-300">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5" id="juzCardsContainer"></div>
+    </section>
+
+    <!-- Tamkeen (Interactive Quran Testing & Retention System) -->
+    <section id="viewTamkeen" class="hidden transition-all duration-300 space-y-4 font-sans">
+
+      <!-- Top Hero Banner with Statistics & Mode Filters -->
+      <div
+        class="rounded-3xl bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 text-white p-4 sm:p-6 border border-emerald-800/80 shadow-xl space-y-4">
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-amber-950/40 border border-amber-300/40">
+              <i data-lucide="brain" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+            </div>
+            <div>
+              <h2 class="text-base sm:text-xl font-black text-gold-300 flex items-center gap-2 flex-wrap">
+                <span>تَمْكِين | اختبار وتثبيت حفظ القرآن</span>
+                <span
+                  class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">تفاعلي</span>
+                <span
+                  class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Open API تلقائي
+                </span>
+              </h2>
+              <p class="text-xs text-emerald-200/90 font-medium">قِس متانة حفظك ورسوخ الآيات عبر 3 أنماط
+                اختبارية ذكية</p>
+            </div>
+          </div>
+
+          <!-- Scoreboard / Stats Bar with Reset Button -->
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <div class="grid grid-cols-4 gap-1.5 sm:gap-2 text-center text-xs flex-1">
+              <div class="bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/10 shadow-inner">
+                <span class="text-[10px] text-emerald-200 block font-medium">الأسئلة</span>
+                <span id="tamkeenStatTotal" class="text-xs sm:text-base font-bold text-white">0</span>
+              </div>
+              <div class="bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/10 shadow-inner">
+                <span class="text-[10px] text-emerald-200 block font-medium">الصحيحة</span>
+                <span id="tamkeenStatCorrect" class="text-xs sm:text-base font-bold text-emerald-300">0</span>
+              </div>
+              <div class="bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/10 shadow-inner">
+                <span class="text-[10px] text-emerald-200 block font-medium">الدقة</span>
+                <span id="tamkeenStatAccuracy" class="text-xs sm:text-base font-bold text-gold-300">0%</span>
+              </div>
+              <div class="bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/10 shadow-inner">
+                <span class="text-[10px] text-emerald-200 block font-medium">التتابع</span>
+                <span id="tamkeenStatStreak" class="text-xs sm:text-base font-bold text-amber-300">🔥 0</span>
+              </div>
+            </div>
+
+            <!-- Reset Stats Button -->
+            <button id="btnResetTamkeenStats" onclick="openResetTamkeenModal()" type="button"
+              class="self-stretch px-2 sm:px-2.5 py-1.5 rounded-2xl bg-white/10 hover:bg-rose-500/25 active:scale-95 text-emerald-200 hover:text-rose-200 border border-white/10 hover:border-rose-400/40 transition flex flex-col items-center justify-center gap-0.5 shrink-0 cursor-pointer shadow-inner"
+              title="تصفير نتائج وإحصائيات الأسئلة">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+              <span class="text-[9px] sm:text-[10px] font-bold">تصفير</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mode Selector and Scope Filter -->
+        <div
+          class="pt-3 border-t border-emerald-800/60 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <!-- Active Modes: Next Ayah and Surah ID -->
+          <div class="w-full md:w-auto overflow-x-auto no-scrollbar flex items-center gap-1.5 pb-1 md:pb-0">
+            <button id="btnTamkeenMode_all" onclick="setTamkeenMode('all')"
+              class="tamkeen-mode-btn px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shrink-0 bg-white text-emerald-950 shadow-sm">
+              🎲 شامل (النمطان معاً)
+            </button>
+            <button id="btnTamkeenMode_next_ayah" onclick="setTamkeenMode('next_ayah')"
+              class="tamkeen-mode-btn px-3 py-1.5 rounded-xl text-xs font-semibold transition whitespace-nowrap shrink-0 bg-white/10 hover:bg-white/20 text-emerald-100">
+              🔄 الآية التالية (Next Ayah)
+            </button>
+            <button id="btnTamkeenMode_surah_id" onclick="setTamkeenMode('surah_id')"
+              class="tamkeen-mode-btn px-3 py-1.5 rounded-xl text-xs font-semibold transition whitespace-nowrap shrink-0 bg-white/10 hover:bg-white/20 text-emerald-100">
+              📖 تحديد السورة (Surah ID)
+            </button>
+          </div>
+
+          <!-- Scope Selector (All Quran vs Memorized Only) -->
+          <div class="flex items-center gap-2 self-start md:self-auto shrink-0">
+            <label for="tamkeenScopeSelect"
+              class="text-xs text-emerald-200 font-bold whitespace-nowrap flex items-center gap-1">
+              <i data-lucide="sliders" class="w-3.5 h-3.5 text-gold-400"></i>
+              نطاق الأسئلة:
+            </label>
+            <select id="tamkeenScopeSelect" onchange="setTamkeenScope(this.value)"
+              class="py-1 px-3 rounded-xl text-xs bg-emerald-900 border border-emerald-700 text-white font-medium focus:outline-none focus:ring-1 focus:ring-gold-400 cursor-pointer shadow-sm">
+              <option value="all">جميع سور القرآن الكريم</option>
+              <option value="memorized">السور التي حفظتها فقط</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Active Quiz Card Container -->
+      <div id="tamkeenCard"
+        class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4">
+        <!-- Rendered dynamically by renderTamkeenQuiz() -->
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Modern Floating Mobile Bottom Navigation Bar (Hidden on md and larger) -->
+  <nav id="mobileBottomNav"
+    class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-800 shadow-[0_-4px_24px_rgba(0,0,0,0.07)] px-2 pt-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom))] transition-all duration-300">
+    <div class="grid grid-cols-4 gap-1 max-w-md mx-auto text-center font-sans">
+      <button id="mobileTabSurah" onclick="switchMode('surah')" type="button"
+        class="mobile-nav-btn flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl text-[11px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/70 shadow-xs cursor-pointer">
+        <i data-lucide="book-open" class="w-5 h-5 mb-0.5"></i>
+        <span>السور</span>
+      </button>
+
+      <button id="mobileTabPage" onclick="switchMode('page')" type="button"
+        class="mobile-nav-btn flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+        <i data-lucide="layout-grid" class="w-5 h-5 mb-0.5"></i>
+        <span>الصفحات</span>
+      </button>
+
+      <button id="mobileTabJuz" onclick="switchMode('juz')" type="button"
+        class="mobile-nav-btn flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+        <i data-lucide="layers" class="w-5 h-5 mb-0.5"></i>
+        <span>الأجزاء</span>
+      </button>
+
+      <button id="mobileTabTamkeen" onclick="switchMode('tamkeen')" type="button"
+        class="mobile-nav-btn flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:text-amber-500 cursor-pointer relative">
+        <div class="relative">
+          <i data-lucide="brain" class="w-5 h-5 mb-0.5 text-amber-500"></i>
+          <span class="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+        </div>
+        <span>تَمْكِين</span>
+      </button>
+    </div>
+  </nav>
+
+  <div id="exitConfirmModal"
+    class="fixed inset-0 z-[60] hidden bg-slate-950/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-3 sm:p-4">
+    <div
+      class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-sm rounded-3xl shadow-2xl p-5 space-y-4 font-sans text-center">
+      <div class="space-y-1">
+        <h3 class="font-bold text-slate-900 dark:text-white text-base">الخروج من التطبيق؟</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">هل تريد مغادرة الصفحة؟ بيانات حفظك محفوظة
+          على جهازك.</p>
+      </div>
+      <div class="flex gap-2">
+        <button id="btnExitStay"
+          class="flex-1 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-bold">البقاء</button>
+        <button id="btnExitLeave"
+          class="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-bold">خروج</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="resetConfirmModal"
+    class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-3 sm:p-4">
+    <div
+      class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-sm rounded-3xl shadow-2xl p-5 space-y-4 font-sans text-center">
+      <div
+        class="mx-auto w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+      </div>
+      <div class="space-y-1">
+        <h3 class="font-bold text-slate-900 dark:text-white text-base">تأكيد تصفير السجل</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">سيتم حذف جميع بيانات الحفظ نهائيًا ولا
+          يمكن التراجع عن ذلك. هل أنت متأكد؟</p>
+      </div>
+      <div class="flex gap-2">
+        <button id="btnResetCancel"
+          class="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-bold">إلغاء</button>
+        <button id="btnResetYes"
+          class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold">نعم، صفّر
+          السجل</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset Tamkeen Stats Confirmation Modal -->
+  <div id="resetTamkeenConfirmModal"
+    class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-3 sm:p-4">
+    <div
+      class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-sm rounded-3xl shadow-2xl p-5 space-y-4 font-sans text-center">
+      <div
+        class="mx-auto w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+        <i data-lucide="rotate-ccw" class="w-6 h-6"></i>
+      </div>
+      <div class="space-y-1">
+        <h3 class="font-bold text-slate-900 dark:text-white text-base">تصفير نتائج تمكين</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+          هل تريد تصفير نتائج وإحصائيات الأسئلة في تمكين (الأسئلة المجابة، الإجابات الصحيحة، نسبة الدقة والتتابع)؟
+        </p>
+      </div>
+      <div class="flex gap-2">
+        <button id="btnResetTamkeenCancel" onclick="closeResetTamkeenModal()" type="button"
+          class="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-bold transition active:scale-95">
+          إلغاء
+        </button>
+        <button id="btnResetTamkeenYes" onclick="executeResetTamkeenStats()" type="button"
+          class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold shadow-md shadow-rose-900/20 transition active:scale-95">
+          نعم، صفّر النتائج
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="installAppModal"
+    class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-3 sm:p-4">
+    <div
+      class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-md rounded-3xl shadow-2xl p-5 sm:p-6 space-y-4 font-sans">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400">
+            <i data-lucide="smartphone" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base">تثبيت التطبيق على جهازك</h3>
+            <p class="text-xs text-slate-500">ليعمل كأي تطبيق رسمي دون الحاجة للمتصفح</p>
+          </div>
+        </div>
+        <button id="btnCloseInstallModal"
+          class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3.5 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+
+        <div
+          class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-1.5">
+          <h4 class="font-bold text-emerald-800 dark:text-emerald-400 flex items-center gap-1.5">
+            <i data-lucide="compass" class="w-4 h-4"></i>
+            لهواتف أندرويد والمتصفحات الأخرى:
+          </h4>
+          <ol class="list-decimal pr-4 space-y-1">
+            <li>عند فتح الموقع عبر رابط ويب، اضغط على قائمة الخيارات <span
+                class="inline-block px-1.5 py-0.5 rounded bg-white dark:bg-slate-700 border text-[11px] font-mono">⋮
+                الثلاث نقاط</span> بأعلى المتصفح.</li>
+            <li>اختر <b>"تثبيت التطبيق" (Install app)</b> أو <b>"إضافة إلى الشاشة الرئيسية" (Add to Home screen)</b>.
+            </li>
+          </ol>
+        </div>
+
+        <div
+          class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-1.5">
+          <h4 class="font-bold text-emerald-800 dark:text-emerald-400 flex items-center gap-1.5">
+            <i data-lucide="apple" class="w-4 h-4"></i>
+            لهواتف آيفون (Safari):
+          </h4>
+          <ol class="list-decimal pr-4 space-y-1">
+            <li>اضغط على زر <b>المشاركة</b> <span
+                class="inline-block px-1.5 py-0.5 rounded bg-white dark:bg-slate-700 border text-[11px] font-mono">⎋ /
+                Share</span> في شريط المتصفح.</li>
+            <li>اختر <b>"إضافة إلى الشاشة الرئيسية" (Add to Home Screen)</b> ثم اضغط <b>إضافة</b>.</li>
+          </ol>
+        </div>
+      </div>
+
+      <button id="btnDismissInstallModal"
+        class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition">
+        حسناً، فهمت ذلك
+      </button>
+    </div>
+  </div>
+
+  <div id="backupModal"
+    class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div
+      class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl shadow-2xl p-5 sm:p-6 space-y-4 font-sans">
+      <div class="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto -mt-1 mb-2 sm:hidden"></div>
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 rounded-xl bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-400">
+            <i data-lucide="database" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base">النسخ الاحتياطي ونقل البيانات</h3>
+            <p class="text-xs text-slate-500">حفظ ونقل بيانات حفظك بأمان</p>
+          </div>
+        </div>
+        <button id="btnCloseBackupModal"
+          class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+          بياناتك محفوظة تلقائياً في ذاكرة المتصفح. لنقل تقدمك لهاتف آخر، قم بتصدير ملف النسخة واسترجاعه في أي وقت.
+        </p>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button id="btnExportJsonFile"
+            class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition shadow-sm">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            تصدير ملف النسخة
+          </button>
+
+          <label
+            class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold cursor-pointer transition">
+            <i data-lucide="upload" class="w-4 h-4"></i>
+            استيراد ملف
+            <input type="file" id="importJsonFileInput" accept=".json" class="hidden">
+          </label>
+        </div>
+
+        <div class="pt-2">
+          <label class="text-[11px] font-bold text-slate-400 block mb-1">بيانات الحفظ بصيغة JSON:</label>
+          <textarea id="jsonStateTextarea" readonly
+            class="w-full h-24 p-2 text-[11px] font-mono rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 resize-none focus:outline-none"></textarea>
+          <button id="btnCopyJsonText"
+            class="mt-2 w-full py-2 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition">
+            نسخ الكود إلى الحافظة
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="aboutAppModal"
+    class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-5">
+    <div
+      class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-2xl max-h-[90vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden font-sans">
+      <div class="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto mt-2 -mb-1 sm:hidden"></div>
+
+      <!-- Header -->
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-800 to-emerald-900 text-gold-400 flex items-center justify-center shadow-md border border-gold-500/30 shrink-0">
+            <i data-lucide="book-open-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-black text-slate-900 dark:text-white text-base sm:text-lg flex items-center gap-2">
+              عن تطبيق «إرتَقِ»
+              <span
+                class="text-[10px] px-2 py-0.5 rounded-full bg-gold-100 dark:bg-gold-950 text-gold-800 dark:text-gold-300 border border-gold-300 dark:border-gold-700 font-bold">إرتَقِ
+                بالقرآن</span>
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">دليلك الكامل للاستفادة القصوى من ميزات التطبيق</p>
+          </div>
+        </div>
+        <button id="btnCloseAboutModal"
+          class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-xl">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Scrollable Content -->
+      <div
+        class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+
+        <!-- Welcome Note -->
+        <div
+          class="p-3.5 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 flex items-start gap-3">
+          <span class="text-2xl shrink-0">✨</span>
+          <div class="space-y-1">
+            <h4 class="font-bold text-emerald-900 dark:text-emerald-200 text-xs sm:text-sm">مرحباً بك في تطبيق إرتَقِ
+            </h4>
+            <p class="text-[11px] sm:text-xs text-emerald-800/90 dark:text-emerald-300/90">
+              صُمم تطبيق «إرتَقِ بالقرآن» ليكون رفيقك المخلص لحفظ ومراجعة القرآن الكريم كاملاً (604 صفحة) بأسلوب عصري،
+              تفاعلي، ومحفز للهمة.
+            </p>
+          </div>
+        </div>
+
+        <!-- How to Use / Features for User -->
+        <div class="space-y-3">
+          <h4 class="font-black text-slate-900 dark:text-white text-xs sm:text-sm flex items-center gap-1.5">
+            <i data-lucide="compass" class="w-4 h-4 text-emerald-600"></i>
+            أبرز مميزات التطبيق وكيف تستفيد منها:
+          </h4>
+
+          <!-- Highlight Card: Tamkeen Testing Engine -->
+          <div
+            class="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 via-emerald-500/5 to-teal-500/10 border-2 border-amber-500/40 dark:border-amber-400/30 space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-black text-xs sm:text-sm text-amber-900 dark:text-amber-300 flex items-center gap-2">
+                <span
+                  class="w-7 h-7 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                  <i data-lucide="brain" class="w-4 h-4"></i>
+                </span>
+                منظومة «تَمْكِين» لاختبار وتثبيت الحفظ (جديد)
+              </span>
+              <span
+                class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/30">
+                Open API تلقائي
+              </span>
+            </div>
+            <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              محرك اختبار تفاعلي لا نهائي يجلب الآيات بالرسم العثماني مباشرة:
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">
+              <div
+                class="p-2 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800 flex items-start gap-2">
+                <span class="text-amber-500 font-bold">🔄</span>
+                <div>
+                  <strong class="text-slate-800 dark:text-slate-200 block">الآية التالية:</strong>
+                  <span class="text-slate-500 dark:text-slate-400">تُعرض آية ويُطلب منك تحديد واستحضار الآية التالية لها
+                    مباشرة.</span>
+                </div>
+              </div>
+              <div
+                class="p-2 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800 flex items-start gap-2">
+                <span class="text-amber-500 font-bold">📖</span>
+                <div>
+                  <strong class="text-slate-800 dark:text-slate-200 block">تحديد السورة:</strong>
+                  <span class="text-slate-500 dark:text-slate-400">تُعرض آية كريمة وعليك معرفة اسم السورة مع حجب اسم
+                    السورة لعدم حرق الإجابة.</span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/40 text-[10.5px] sm:text-[11px] text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+              <i data-lucide="eye-off" class="w-3.5 h-3.5 text-amber-600 shrink-0"></i>
+              <span><strong>التسميع غيباً أولاً:</strong> يتم إخفاء الخيارات تلقائياً بضبابية لطيفة لتشجيعك على استحضار
+                الآية في صدرك أولاً قبل كشفها للتأكد.</span>
+            </div>
+            <div class="flex items-center gap-1.5 px-1 text-[10.5px] text-amber-800/80 dark:text-amber-300/80">
+              <i data-lucide="rotate-ccw" class="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0"></i>
+              <span><strong>تصفير النتائج:</strong> يمكنك تصفير عداد الأسئلة والدقة وسلسلة التتابع في أي وقت عبر زر
+                «تصفير» في لوحة الإحصائيات.</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div
+              class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 space-y-1">
+              <span class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-emerald-600"></i>
+                شبكة الصفحات وتحديد النطاق
+              </span>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                انقر على أي صفحة لتحديدها كمحفوظة، أو استخدم أداة "نطاق الصفحات" لتحديد أو إلغاء صفحات متتالية دفعة
+                واحدة من صفحة X إلى Y مع مزامنة الأجزاء والسور.
+              </p>
+            </div>
+
+            <div
+              class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 space-y-1">
+              <span class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                <i data-lucide="eye" class="w-3.5 h-3.5 text-gold-500"></i>
+                معاينة صفحات المصحف الشريف
+              </span>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                اضغط على أيقونة العين (`👁️`) لعرض صفحة مصحف المدينة عالي الدقة، مع تقليب الصفحات وتبديل حالة الحفظ
+                أثناء التلاوة.
+              </p>
+            </div>
+
+            <div
+              class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 space-y-1">
+              <span class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-teal-600"></i>
+                المراجعة الذكية المتباعدة (SRS)
+              </span>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                قيّم إتقان مراجعة سورك بـ (🟢 ممتاز 28 يوماً | 🟡 متوسط 14 يوماً | 🔴 يحتاج تثبيت 4 أيام) ليتولى التطبيق
+                جدولة مواعيد المراجعة لمنع التفلت.
+              </p>
+            </div>
+
+            <div
+              class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 space-y-1">
+              <span class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                <i data-lucide="flame" class="w-3.5 h-3.5 text-amber-500"></i>
+                شعلة الأيام المتتالية (Streak)
+              </span>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                حافظ على وردك اليومي دون انقطاع لترتقي عبر 8 أوسمة نبوية تبدأ من "🌱 بداية مباركة" حتى تتوج بـ "👑 تاج
+                الوقار" (100+ يوم).
+              </p>
+            </div>
+
+            <div
+              class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 space-y-1">
+              <span class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                <i data-lucide="award" class="w-3.5 h-3.5 text-gold-600"></i>
+                شهادة وبطاقة الإنجاز الرسمية
+              </span>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                وثّق مسيرتك بشهادة شرفية موثقة باسمك وتاريخ اليوم ونسبة الختم مع إمكانية تصديرها كصورة PNG عالية الجودة
+                للمشاركة والطباعة.
+              </p>
+            </div>
+
+            <div
+              class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 space-y-1">
+              <span class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                <i data-lucide="smartphone" class="w-3.5 h-3.5 text-indigo-500"></i>
+                التثبيت والعمل أوفلاين (PWA)
+              </span>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                ثبّت التطبيق مباشرة على شاشة هاتفك أو حاسوبك بدون متجر تطبيقات، واستمتع بكامل الميزات دون الحاجة لشبكة
+                إنترنت.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Privacy & Security -->
+        <div
+          class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-1.5">
+          <h4 class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+            أمانك وخصوصية بياناتك 100%
+          </h4>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+            جميع بيانات حفظك وملاحظاتك مُخزنة محلياً على جهازك فقط وفي ذاكرة متصفحك. لا يتطلب التطبيق أي تسجيل حساب، ولا
+            يتم إرسال أي معلومة إلى أي خادم خارجي. يمكنك في أي وقت تصدير نسخة احتياطية بنقرة زر لنقل تقدمك لهاتف آخر.
+          </p>
+        </div>
+
+        <!-- Footer Hadith -->
+        <div class="text-center pt-2 space-y-1 border-t border-slate-100 dark:border-slate-800">
+          <p class="text-xs font-bold text-gold-700 dark:text-gold-300 font-quran">«خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ
+            وَعَلَّمَهُ»</p>
+          <p class="text-[10px] text-slate-400">نسأل الله تعالى أن يجعله عملاً خالصاً لوجهه الكريم ونافعاً لحفاظ كتابه
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Footer Button -->
+      <div class="p-3.5 bg-slate-50 dark:bg-slate-850 border-t border-slate-100 dark:border-slate-800 shrink-0">
+        <button id="btnDismissAboutModal"
+          class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition shadow-sm active:scale-95">
+          حسناً، استوعبت ذلك
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="achievementModal"
+    class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div
+      class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl shadow-2xl p-5 sm:p-6 space-y-4">
+      <div class="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto -mt-1 mb-2 sm:hidden"></div>
+
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5 font-sans">
+        <h3 class="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+          <i data-lucide="award" class="w-5 h-5 text-gold-500"></i>
+          بطاقة إنجاز الحفظ والمراجعة
+        </h3>
+        <button id="btnCloseAchievementModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Student / Hafiz Name input -->
+      <div
+        class="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-750 text-xs font-sans">
+        <label for="studentNameInput"
+          class="text-slate-600 dark:text-slate-300 font-bold whitespace-nowrap flex items-center gap-1.5">
+          <i data-lucide="user" class="w-4 h-4 text-emerald-600"></i>
+          اسم الحافظ:
+        </label>
+        <input type="text" id="studentNameInput" placeholder="اكتب اسمك هنا ليظهر في الشهادة..."
+          class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-600 font-bold transition">
+      </div>
+
+      <div id="printAchievementCard"
+        class="bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 text-white p-5 sm:p-6 rounded-3xl border-2 border-gold-500/50 shadow-xl space-y-3.5 relative overflow-hidden font-sans">
+        <div class="text-center space-y-1.5">
+          <span class="text-sm font-sans font-bold text-gold-300 block select-none">بسم الله الرحمن الرحيم</span>
+          <h2 class="text-xl sm:text-2xl font-black font-sans text-gold-400 select-none">شهادة إنجاز حفظ القرآن الكريم
+          </h2>
+          <div id="cardStudentNameContainer" class="hidden pt-0.5">
+            <span class="text-xs text-emerald-200 font-medium">مُنحت لِـ: </span>
+            <span id="cardStudentNameDisplay"
+              class="text-base sm:text-lg font-black text-gold-300 border-b border-gold-400/40 pb-0.5 px-2 inline-block"></span>
+          </div>
+          <p class="text-xs text-emerald-200 font-sans font-medium select-none">وفقك الله لخدمة كتابه والعمل بما فيه</p>
+          <p id="cardDateDisplay" class="text-[11px] text-gold-200/90 font-sans font-bold select-none"></p>
+        </div>
+
+        <div class="bg-emerald-900/60 rounded-2xl p-4 border border-gold-500/30 text-center my-2 font-sans space-y-2.5">
+          <div>
+            <div id="cardPercentDisplay" class="text-3xl sm:text-4xl font-black text-gold-400 font-sans">0.0%</div>
+            <span class="text-xs text-emerald-100 font-bold block mt-0.5">نسبة ما تم إنجازه من القرآن الكريم</span>
+          </div>
+
+          <div class="space-y-1.5 pt-1">
+            <div
+              class="w-full h-3 bg-emerald-950/90 rounded-full overflow-hidden p-0.5 border border-emerald-700/50 shadow-inner">
+              <div id="cardProgressBar"
+                class="h-full bg-gradient-to-l from-gold-400 via-amber-400 to-emerald-400 rounded-full transition-all duration-300 shadow-md"
+                style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between items-center text-[10px] text-emerald-200 font-medium px-1 select-none">
+              <span id="cardProgressLabel">0 من 604 صفحة</span>
+              <span id="cardRemainingNotice" class="text-gold-300 font-bold">باقي 604 صفحة</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 text-center text-xs font-sans">
+          <div class="bg-emerald-900/40 p-2.5 rounded-xl border border-emerald-800">
+            <span class="text-emerald-300 text-[10px] block font-sans mb-0.5">الصفحات</span>
+            <span class="text-white text-sm font-sans font-bold"><b id="cardPagesDisplay">0</b> / 604</span>
+          </div>
+          <div class="bg-emerald-900/40 p-2.5 rounded-xl border border-emerald-800">
+            <span class="text-emerald-300 text-[10px] block font-sans mb-0.5">السور</span>
+            <span class="text-white text-sm font-sans font-bold"><b id="cardSurahsDisplay">0</b> / 114</span>
+          </div>
+          <div class="bg-emerald-900/40 p-2.5 rounded-xl border border-emerald-800">
+            <span class="text-emerald-300 text-[10px] block font-sans mb-0.5">الأجزاء</span>
+            <span class="text-white text-sm font-sans font-bold"><b id="cardJuzDisplay">0</b> / 30</span>
+          </div>
+        </div>
+
+        <div
+          class="text-center text-xs font-sans font-bold text-gold-200/95 pt-2.5 border-t border-emerald-800/80 select-none">
+          «خيركم من تعلم القرآن وعلمه»
+        </div>
+      </div>
+
+      <div class="pt-1 font-sans">
+        <button id="btnSaveCardAsImage"
+          class="w-full py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-md shadow-emerald-950/20 active:scale-95 transition">
+          <i data-lucide="image-down" class="w-4 h-4 text-gold-300"></i>
+          <span id="btnSaveCardText">حفظ كصورة في الاستوديو</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toastNotification"
+    class="fixed bottom-20 md:bottom-5 left-4 sm:left-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2 px-4 py-2.5 rounded-2xl shadow-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold border border-slate-700 dark:border-slate-200 font-sans">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 dark:text-emerald-600"></i>
+    <span id="toastMessage">تم الحفظ بنجاح</span>
+  </div>
+
+  <!-- Page Preview Modal -->
+  <div id="pagePreviewModal"
+    class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div
+      class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-lg max-h-[94vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden font-sans">
+      <div class="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto mt-2 -mb-1 sm:hidden"></div>
+
+      <!-- Header -->
+      <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
+        <div class="flex items-center gap-2 min-w-0">
+          <div
+            class="p-1.5 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 shrink-0">
+            <i data-lucide="book-open" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <h3 id="previewPageTitle"
+              class="font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-tight truncate">صفحة 1</h3>
+            <p id="previewPageSubtitle" class="text-[11px] text-slate-500 leading-tight truncate">سورة الفاتحة • الجزء 1
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button id="btnPreviewToggleStatus" onclick="togglePreviewPageStatus()"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm">
+            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            <span id="previewStatusText">غير محفوظ</span>
+          </button>
+          <button onclick="closePagePreview()"
+            class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-xl">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Image Display Area -->
+      <div
+        class="flex-1 overflow-y-auto p-2 sm:p-4 flex items-center justify-center bg-slate-100/80 dark:bg-slate-950 min-h-[340px] relative">
+        <div id="previewLoadingSpinner"
+          class="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-slate-900/80 z-10">
+          <div class="w-9 h-9 border-3 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+
+        <!-- Authentic Mushaf Paper Wrapper (White background ensures black Arabic font is always crisp and visible in both light & dark modes) -->
+        <div
+          class="bg-white p-2 sm:p-3 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center max-w-full">
+          <img id="previewPageImage" src="" alt="صفحة المصحف"
+            class="max-w-full max-h-[67vh] object-contain rounded-lg bg-white"
+            onload="document.getElementById('previewLoadingSpinner').classList.add('hidden')"
+            onerror="handlePreviewImageError(this)">
+        </div>
+
+        <div id="previewOfflineFallback" class="hidden flex-col items-center justify-center text-center p-6 space-y-2">
+          <i data-lucide="book-open" class="w-12 h-12 text-slate-400 mb-1"></i>
+          <p class="text-sm font-bold text-slate-700 dark:text-slate-300">صفحة المصحف الشريف</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">يتطلب عرض صورة الصفحة اتصالاً بالإنترنت في المرة الأولى
+            لتخزينها في ذاكرة المتصفح.</p>
+        </div>
+      </div>
+
+      <!-- Footer / Navigation (In Arabic RTL: Next page on LEFT, Previous page on RIGHT) -->
+      <div
+        class="flex items-center justify-between px-4 py-2.5 bg-slate-50 dark:bg-slate-850 border-t border-slate-200 dark:border-slate-800 shrink-0 text-xs">
+        <!-- Right Button (First in RTL): Previous Page -->
+        <button id="btnPrevPageNav" onclick="navigatePreviewPage(-1)"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold transition">
+          <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          <span>السابقة (ص <span id="previewPrevPageNum">1</span>)</span>
+        </button>
+        <!-- Center: Current Page -->
+        <span class="text-slate-500 dark:text-slate-400 font-bold font-sans">صفحة <span id="previewCurPageNum"
+            class="text-emerald-700 dark:text-emerald-400 font-black">1</span> / 604</span>
+        <!-- Left Button (Last in RTL): Next Page -->
+        <button id="btnNextPageNav" onclick="navigatePreviewPage(1)"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold transition">
+          <span>التالية (ص <span id="previewNextPageNum">2</span>)</span>
+          <i data-lucide="chevron-left" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Application Modules (Relative paths for GitHub Pages subpath compatibility) -->
+  <script src="./js/data.js"></script>
+  <script src="./js/state.js"></script>
+  <script src="./js/tamkeen.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+
+</html>

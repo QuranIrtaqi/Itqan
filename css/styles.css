@@ -1,0 +1,83 @@
+:root {
+  box-sizing: border-box;
+}
+
+header.sticky {
+  top: 0;
+  padding-top: max(0px, env(safe-area-inset-top, 0px));
+}
+
+* {
+  font-variant-numeric: normal;
+  -webkit-font-feature-settings: "numr" 0, "onum" 0, "pnum" 0;
+  font-feature-settings: "numr" 0, "onum" 0, "pnum" 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+#printAchievementCard,
+#printAchievementCard * {
+  letter-spacing: 0 !important;
+  word-spacing: normal !important;
+}
+
+.quranic-verse {
+  font-family: 'Amiri Quran', serif;
+  line-height: 2.3;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.bg-islamic-pattern {
+  background-image: radial-gradient(rgba(217, 119, 6, 0.08) 1px, transparent 0);
+  background-size: 20px 20px;
+}
+
+.dark .bg-islamic-pattern {
+  background-image: radial-gradient(rgba(245, 158, 11, 0.12) 1px, transparent 0);
+  background-size: 20px 20px;
+}
+
+.page-box {
+  transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-box:active {
+  transform: scale(0.92);
+}
+
+/* Mobile Bottom Navigation active indicator */
+.mobile-nav-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-nav-btn:active {
+  transform: scale(0.92);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0d542b;
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #15803d;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
