@@ -1029,12 +1029,590 @@ function renderPlanner() {
       </div>
     </div>`;
 
+// ==========================================
+// SMART DAILY REVIEW WARD (الورد اليومي الذكي)
+// ==========================================
+let isReviewedTodayExpanded = false;
+
+function toggleReviewedTodayExpand() {
+  isReviewedTodayExpanded = !isReviewedTodayExpanded;
+  renderDailyWard();
+}
+
+function renderDailyWard() {
+  const container = document.getElementById('dailyWardCard');
+  if (!container) return;
+
+  const memorizedCount = Object.keys(state.memorizedSurahs || {}).length;
+  if (memorizedCount === 0) {
+    container.innerHTML = `
+      <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-sm text-right font-sans">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
+            <i data-lucide="book-open-check" class="w-5 h-5"></i>
+          </div>
+          <div class="space-y-0.5 flex-1">
+            <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">الورد اليومي الذكي للمراجعة</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+              ابدأ بتحديد السور التي تحفظها في تبويب <b>«حسب السور»</b> أو الصفحات، ليقوم النظام الذكي بجدولة ورد مراجعتك اليومي تلقائياً وفق خوارزمية التكرار المتباعد لمنع التفلت.
+            </p>
+          </div>
+        </div>
+      </div>
+    `;
+    lucide.createIcons();
+    return;
+  }
+
+  const { due, reviewedToday, totalDueCount, reviewedTodayCount, isAllDone } = getDueReviewSurahs();
+  const totalTargetToday = totalDueCount + reviewedTodayCount;
+  const progressPercent = totalTargetToday > 0 ? Math.round((reviewedTodayCount / totalTargetToday) * 100) : 100;
+
+  let contentHtml = '';
+
+  if (isAllDone && totalDueCount === 0) {
+    contentHtml = `
+      <div class="space-y-3 font-sans">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-emerald-500/20">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30">
+              <i data-lucide="award" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">الورد اليومي الذكي للمراجعة</h3>
+                <span class="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold">مكتمل 100% ✓</span>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400">أتممت مراجعة جميع السور المستحقة في ورد اليوم بنجاح</p>
+            </div>
+          </div>
+          <button type="button" onclick="switchMode('tamkeen')"
+            class="self-start sm:self-auto px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-sm transition active:scale-95 flex items-center gap-1.5">
+            <i data-lucide="brain" class="w-3.5 h-3.5"></i>
+            <span>اختبر حفظك في تمكين</span>
+          </button>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div class="flex items-center gap-2">
+            <i data-lucide="sparkle" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+            <span class="text-xs font-bold text-emerald-900 dark:text-emerald-200">
+              هنيئاً لك! لا توجد سور مستحقة للمراجعة حالياً. حافظت على عهد القرآن وتثبيت آياته اليوم.
+            </span>
+          </div>
+          ${reviewedTodayCount > 0 ? `
+            <button type="button" onclick="toggleReviewedTodayExpand()" class="text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:underline flex items-center gap-1 shrink-0">
+              <span>عرض ما روجع اليوم (${formatStdNum(reviewedTodayCount)})</span>
+              <i data-lucide="${isReviewedTodayExpanded ? 'chevron-up' : 'chevron-down'}" class="w-3.5 h-3.5"></i>
+            </button>
+          ` : ''}
+        </div>
+
+        ${isReviewedTodayExpanded && reviewedTodayCount > 0 ? `
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 pt-1">
+            ${reviewedToday.map(s => `
+              <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
+                <div>
+                  <span class="font-bold text-slate-800 dark:text-slate-100">سورة ${s.name}</span>
+                  <span class="text-[10px] text-slate-400 block">${s.totalVerses} آية</span>
+                </div>
+                <span class="text-emerald-600 dark:text-emerald-400 font-bold text-[11px]">تمت ✓</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  } else {
+    // Due surahs exist!
+    const dueItemsHtml = due.map(s => {
+      let intervalBadge = '';
+      if (s.interval <= 4) {
+        intervalBadge = `<span class="px-2 py-0.5 rounded-md bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 font-bold text-[10px] border border-rose-300/60 dark:border-rose-800 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>كل 4 أيام (تثبيت مكثف)</span>`;
+      } else if (s.interval <= 14) {
+        intervalBadge = `<span class="px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 font-bold text-[10px] border border-amber-300/60 dark:border-amber-800 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>كل 14 يوم (متوسط)</span>`;
+      } else {
+        intervalBadge = `<span class="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 font-bold text-[10px] border border-emerald-300/60 dark:border-emerald-800 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>كل 28 يوم (إتقان تام)</span>`;
+      }
+
+      const overdueText = s.overdueDays === 999 
+        ? 'لم تراجع مسبقاً' 
+        : (s.overdueDays > 0 ? `متأخرة ${formatStdNum(s.overdueDays)} يوم` : 'مستحقة اليوم');
+
+      return `
+        <div class="p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 dark:bg-slate-800/60 hover:bg-slate-100/80 dark:hover:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-start sm:items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center justify-center shrink-0 border border-emerald-500/20 font-mono">
+              ${formatStdNum(s.id)}
+            </div>
+            <div class="space-y-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">سورة ${s.name}</span>
+                <span class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">(${formatStdNum(s.totalVerses)} آية • ص ${formatStdNum(s.startPage)})</span>
+                ${intervalBadge}
+              </div>
+              <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                <span class="font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                  <i data-lucide="clock" class="w-3 h-3"></i>
+                  ${overdueText}
+                </span>
+                ${s.lastReview ? `<span class="text-slate-400">• آخر مراجعة: ${s.lastReview}</span>` : ''}
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
+            <button type="button" onclick="openPagePreview(${s.startPage})"
+              class="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold transition active:scale-95 flex items-center gap-1"
+              title="تصفح السورة في المصحف الشريف">
+              <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+              <span class="hidden sm:inline">المصحف</span>
+            </button>
+            <button type="button" onclick="rateSurahReview(${s.id}, ${s.interval}, 'متقن')"
+              class="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition active:scale-95 flex items-center gap-1.5">
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              <span>تمت المراجعة ✓</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    contentHtml = `
+      <div class="space-y-3.5 font-sans">
+        <!-- Top bar with progress and bulk action -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
+              <i data-lucide="calendar" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">الورد اليومي الذكي للمراجعة</h3>
+                <span class="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 text-[11px] font-bold">
+                  متبقي ${formatStdNum(totalDueCount)} سورة
+                </span>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                مرتبة حسب الأولوية وفترات التكرار المتباعد لتثبيت الحفظ في الصدور
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
+            <button type="button" onclick="bulkMarkAllDueReviewed()"
+              class="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-800 hover:from-emerald-800 hover:to-emerald-900 text-white font-bold text-xs shadow-md transition active:scale-95 flex items-center gap-1.5"
+              title="تحديد مراجعة جميع سور الورد اليوم">
+              <i data-lucide="check-check" class="w-4 h-4"></i>
+              <span>تمت مراجعة كل الورد اليوم ✓</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-1.5">
+          <div class="flex items-center justify-between text-xs font-bold">
+            <span class="text-slate-700 dark:text-slate-300">
+              إنجاز ورد اليوم: <b class="text-emerald-700 dark:text-emerald-400">${formatStdNum(reviewedTodayCount)}</b> من <b class="text-slate-900 dark:text-white">${formatStdNum(totalTargetToday)}</b> سورة
+            </span>
+            <span class="text-emerald-700 dark:text-emerald-400 font-mono">${formatStdNum(progressPercent)}%</span>
+          </div>
+          <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
+            <div class="bg-gradient-to-r from-emerald-600 to-gold-500 h-2.5 rounded-full transition-all duration-500" style="width: ${progressPercent}%"></div>
+          </div>
+        </div>
+
+        <!-- Due List -->
+        <div class="space-y-2">
+          ${dueItemsHtml}
+        </div>
+
+        <!-- Bottom toggle for already reviewed today -->
+        ${reviewedTodayCount > 0 ? `
+          <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <button type="button" onclick="toggleReviewedTodayExpand()" class="text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:underline flex items-center gap-1">
+              <span>سور راجعتها اليوم (${formatStdNum(reviewedTodayCount)})</span>
+              <i data-lucide="${isReviewedTodayExpanded ? 'chevron-up' : 'chevron-down'}" class="w-3.5 h-3.5"></i>
+            </button>
+            <span class="text-[11px] text-slate-400">تقبل الله طاعتك</span>
+          </div>
+
+          ${isReviewedTodayExpanded ? `
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 pt-1">
+              ${reviewedToday.map(s => `
+                <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
+                  <div>
+                    <span class="font-bold text-slate-800 dark:text-slate-100">سورة ${s.name}</span>
+                    <span class="text-[10px] text-slate-400 block">${s.totalVerses} آية</span>
+                  </div>
+                  <span class="text-emerald-600 dark:text-emerald-400 font-bold text-[11px]">تمت ✓</span>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        ` : ''}
+      </div>
+    `;
+  }
+
+  container.innerHTML = `
+    <div class="rounded-3xl bg-white dark:bg-slate-900 border border-emerald-900/10 dark:border-emerald-500/15 p-4 sm:p-5 shadow-sm text-right font-sans transition-all">
+      ${contentHtml}
+    </div>
+  `;
+
   lucide.createIcons();
+}
+
+// ==========================================
+// LOCAL NOTIFICATIONS & REMINDERS (المنبه والتذكيرات)
+// ==========================================
+function updateReminderUI() {
+  const dot = document.getElementById('reminderActiveDot');
+  const isEnabled = state.reminderSettings && state.reminderSettings.enabled;
+  if (dot) {
+    if (isEnabled) dot.classList.remove('hidden');
+    else dot.classList.add('hidden');
+  }
+
+  const chk = document.getElementById('chkReminderEnabled');
+  const timeInput = document.getElementById('reminderTimeInput');
+  if (chk && state.reminderSettings) chk.checked = !!state.reminderSettings.enabled;
+  if (timeInput && state.reminderSettings && state.reminderSettings.time) {
+    timeInput.value = state.reminderSettings.time;
+  }
+
+  updateReminderPermissionBox();
+}
+
+function updateReminderPermissionBox() {
+  const box = document.getElementById('reminderPermissionBox');
+  const text = document.getElementById('reminderPermStatusText');
+  const btn = document.getElementById('btnRequestNotificationPerm');
+  if (!box || !text || !btn) return;
+
+  if (!('Notification' in window)) {
+    text.textContent = "متصفحك لا يدعم إشعارات الويب المحلية.";
+    btn.classList.add('hidden');
+    box.className = "p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs text-rose-700 dark:text-rose-300";
+    return;
+  }
+
+  if (Notification.permission === 'granted') {
+    text.textContent = "إذن الإشعارات مفعل ومصرح به في المتصفح ✓";
+    btn.classList.add('hidden');
+    box.className = "p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 flex items-center justify-between";
+  } else if (Notification.permission === 'denied') {
+    text.textContent = "تم حظر الإشعارات في إعدادات المتصفح، يرجى تفعيلها يدوياً لتلقي التنبيهات.";
+    btn.classList.add('hidden');
+    box.className = "p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs text-rose-700 dark:text-rose-300";
+  } else {
+    text.textContent = "إذن إشعارات المتصفح مطلوب لتشغيل المنبه اليومي";
+    btn.classList.remove('hidden');
+    box.className = "p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-300 flex items-center justify-between gap-2";
+  }
+}
+
+function openRemindersModal() {
+  const modal = document.getElementById('remindersModal');
+  if (!modal) return;
+  updateReminderUI();
+  modal.classList.remove('hidden');
+}
+
+function closeRemindersModal() {
+  const modal = document.getElementById('remindersModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function setQuickReminderTime(timeStr) {
+  const timeInput = document.getElementById('reminderTimeInput');
+  if (timeInput) {
+    timeInput.value = timeStr;
+    showToast(`تم اختيار التوقيت: ${timeStr}`);
+  }
+}
+
+async function requestNotificationPermission() {
+  if (!('Notification' in window)) {
+    showToast("متصفحك لا يدعم إشعارات الويب");
+    return;
+  }
+  try {
+    const res = await Notification.requestPermission();
+    updateReminderPermissionBox();
+    if (res === 'granted') {
+      showToast("تم منح إذن الإشعارات بنجاح! ✨");
+    } else if (res === 'denied') {
+      showToast("تم رفض الإذن، يمكنك تفعيله من إعدادات المتصفح");
+    }
+  } catch (e) {
+    console.error("Permission request error:", e);
+  }
+}
+
+function saveReminderSettingsFromModal() {
+  const chk = document.getElementById('chkReminderEnabled');
+  const timeInput = document.getElementById('reminderTimeInput');
+  if (!state.reminderSettings) state.reminderSettings = { enabled: false, time: '09:00', lastNotifiedDate: null };
+
+  state.reminderSettings.enabled = chk ? chk.checked : false;
+  state.reminderSettings.time = timeInput ? timeInput.value : '09:00';
+
+  if (state.reminderSettings.enabled && 'Notification' in window && Notification.permission === 'default') {
+    requestNotificationPermission();
+  }
+
+  saveState();
+  updateReminderUI();
+  closeRemindersModal();
+  showToast(state.reminderSettings.enabled 
+    ? `تم ضبط التذكير اليومي في تمام الساعة ${state.reminderSettings.time} بنجاح 🔔` 
+    : "تم تعطيل التذكير اليومي");
+}
+
+function sendLocalNotification(title, body) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+  const options = {
+    body,
+    icon: './icons/icon-192.png',
+    badge: './icons/icon-192.png',
+    dir: 'rtl',
+    lang: 'ar',
+    tag: 'quran-ward-reminder'
+  };
+
+  try {
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.ready.then(reg => {
+        reg.showNotification(title, options);
+      }).catch(() => {
+        new Notification(title, options);
+      });
+    } else {
+      new Notification(title, options);
+    }
+  } catch (e) {
+    console.warn("Notification trigger failed:", e);
+  }
+}
+
+function testNotificationNow() {
+  if (!('Notification' in window)) {
+    showToast("متصفحك لا يدعم إشعارات الويب");
+    return;
+  }
+
+  if (Notification.permission !== 'granted') {
+    requestNotificationPermission().then(() => {
+      if (Notification.permission === 'granted') {
+        sendLocalNotification("إتقان | تذكير تجريبي 🔔", "هذا إشعار تجريبي من تطبيق إرتَقِ بالقرآن لتأكيد عمل منبه الورد بنجاح.");
+        showToast("تم إرسال الإشعار التجريبي!");
+      } else {
+        showToast("يرجى منح إذن الإشعارات أولاً لتجربة الإشعار");
+      }
+    });
+  } else {
+    sendLocalNotification("إتقان | تذكير تجريبي 🔔", "هذا إشعار تجريبي من تطبيق إرتَقِ بالقرآن لتأكيد عمل منبه الورد بنجاح.");
+    showToast("تم إرسال الإشعار التجريبي!");
+  }
+}
+
+function checkDailyReminder() {
+  if (!state.reminderSettings || !state.reminderSettings.enabled) return;
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+  const today = todayStr();
+  if (state.reminderSettings.lastNotifiedDate === today) return;
+
+  const now = new Date();
+  const currentHHMM = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+  const targetTime = state.reminderSettings.time || '09:00';
+
+  if (currentHHMM >= targetTime) {
+    const { totalDueCount } = getDueReviewSurahs();
+    let title = "إرتَقِ بالقرآن | تذكير الورد اليومي 📖";
+    let body = totalDueCount > 0
+      ? `لديك اليوم ${formatStdNum(totalDueCount)} سورة في ورد المراجعة بانتظارك. بارك الله في وقتك وحفظك!`
+      : "حان موعد وردك اليومي من القرآن الكريم! ادخل لاختبار حفظك أو تثبيت جديدك ✨";
+
+    sendLocalNotification(title, body);
+    state.reminderSettings.lastNotifiedDate = today;
+    saveState();
+  }
+}
+
+// ==========================================
+// MISTAKES NOTEBOOK (دفتر التثبيت وسجل الأخطاء)
+// ==========================================
+function updateMistakesBadge() {
+  const count = (state.mistakesNotebook && state.mistakesNotebook.length) || 0;
+  
+  const headerBadge = document.getElementById('headerMistakesCount');
+  if (headerBadge) {
+    headerBadge.textContent = formatStdNum(count);
+    if (count > 0) headerBadge.classList.remove('hidden');
+    else headerBadge.classList.add('hidden');
+  }
+
+  const tamkeenBadge = document.getElementById('tamkeenMistakesBadge');
+  if (tamkeenBadge) {
+    tamkeenBadge.textContent = formatStdNum(count);
+    if (count > 0) tamkeenBadge.classList.remove('hidden');
+    else tamkeenBadge.classList.add('hidden');
+  }
+
+  const modalBadge = document.getElementById('mistakesModalCountBadge');
+  if (modalBadge) {
+    modalBadge.textContent = count > 0 ? `${formatStdNum(count)} آية` : '0 آية';
+  }
+}
+
+function openMistakesModal() {
+  const modal = document.getElementById('mistakesModal');
+  if (!modal) return;
+  renderMistakesNotebook();
+  updateMistakesBadge();
+  modal.classList.remove('hidden');
+}
+
+function closeMistakesModal() {
+  const modal = document.getElementById('mistakesModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function renderMistakesNotebook() {
+  const container = document.getElementById('mistakesListContainer');
+  if (!container) return;
+
+  const mistakes = state.mistakesNotebook || [];
+  updateMistakesBadge();
+
+  if (mistakes.length === 0) {
+    container.innerHTML = `
+      <div class="h-full flex flex-col items-center justify-center text-center p-8 space-y-3 font-sans">
+        <div class="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-200 dark:border-emerald-800">
+          <i data-lucide="book-open-check" class="w-7 h-7"></i>
+        </div>
+        <div class="space-y-1">
+          <h4 class="font-bold text-slate-900 dark:text-white text-base">ما شاء الله تبارك الله!</h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed">
+            دفتر التثبيت خالٍ تماماً من الأخطاء. يتم تسجيل أي آية تخطئ فيها تلقائياً أثناء اختبارات تمكين لتثبيتها وإتقانها لاحقاً.
+          </p>
+        </div>
+        <button type="button" onclick="closeMistakesModal(); switchMode('tamkeen');"
+          class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition active:scale-95 flex items-center gap-1.5">
+          <i data-lucide="brain" class="w-4 h-4"></i>
+          <span>ابدأ اختبار تمكين الآن</span>
+        </button>
+      </div>
+    `;
+    lucide.createIcons();
+    return;
+  }
+
+  container.innerHTML = mistakes.map((m) => `
+    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3 font-sans transition hover:border-slate-300 dark:hover:border-slate-600">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-200 text-xs font-bold border border-emerald-300/60 dark:border-emerald-800">
+            سورة ${m.surahName || ('رقم ' + m.surahId)}
+          </span>
+          <span class="px-2 py-0.5 rounded-lg bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-mono font-bold">
+            آية ${formatStdNum(m.ayahNum)}
+          </span>
+          ${(m.count && m.count > 1) ? `
+            <span class="px-2 py-0.5 rounded-lg bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 text-[10px] font-bold">
+              تكرر ${formatStdNum(m.count)} مرات
+            </span>
+          ` : ''}
+        </div>
+        <span class="text-[10px] text-slate-400 font-medium">${m.date || ''}</span>
+      </div>
+
+      <!-- Ayah text in authentic Amiri Quran font -->
+      <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 text-right">
+        <p class="font-quran text-base sm:text-lg text-emerald-950 dark:text-emerald-100 leading-loose" dir="rtl">
+          ﴿&nbsp;${m.verse}&nbsp;﴾
+        </p>
+      </div>
+
+      <!-- Correction comparison -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+        <div class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 text-emerald-900 dark:text-emerald-200 space-y-0.5">
+          <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 block">الإجابة الصحيحة:</span>
+          <p class="font-bold font-quran text-sm">«${m.correct}»</p>
+        </div>
+        <div class="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/60 text-rose-900 dark:text-rose-200 space-y-0.5">
+          <span class="text-[10px] font-bold text-rose-700 dark:text-rose-400 block">إجابتك السابقة:</span>
+          <p class="font-medium font-quran text-sm line-through decoration-rose-500">«${m.wrongChoice || 'إجابة غير صحيحة'}»</p>
+        </div>
+      </div>
+
+      <!-- Item actions -->
+      <div class="flex items-center justify-between pt-1 gap-2">
+        <button type="button" onclick="launchMistakeRetest('${m.id}')"
+          class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs transition active:scale-95 flex items-center gap-1.5">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>إعادة الاختبار الآن</span>
+        </button>
+        <button type="button" onclick="removeMistakeFromNotebook('${m.id}')"
+          class="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition active:scale-95 flex items-center gap-1.5">
+          <i data-lucide="check" class="w-3.5 h-3.5"></i>
+          <span>تم الإتقان والتثبيت ✓</span>
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  lucide.createIcons();
+}
+
+function confirmClearMistakesNotebook() {
+  if (!state.mistakesNotebook || state.mistakesNotebook.length === 0) {
+    showToast("دفتر التثبيت فارغ بالفعل");
+    return;
+  }
+  if (confirm("هل أنت متأكد من رغبتك في تفريغ دفتر التثبيت وسجل الأخطاء بالكامل؟")) {
+    clearMistakesNotebook();
+  }
+}
+
+function launchMistakeRetest(mistakeId) {
+  const m = (state.mistakesNotebook || []).find(x => x.id === mistakeId);
+  if (!m) return;
+  closeMistakesModal();
+  switchMode('tamkeen');
+  
+  // Custom single question retest targeting this exact ayah
+  tamkeenState.currentQuestion = {
+    surahId: m.surahId,
+    surahName: m.surahName,
+    ayahNum: m.ayahNum,
+    verse: m.verse,
+    correct: m.correct,
+    mode: m.mode || 'next_ayah',
+    options: [
+      m.correct,
+      m.wrongChoice || 'إجابة بديلة',
+      'خيار تدريبي آخر'
+    ].sort(() => 0.5 - Math.random()),
+    answered: false,
+    selectedIdx: null,
+    isCorrect: null
+  };
+  tamkeenState.stats.totalQuestions++;
+  renderTamkeenQuiz();
+  showToast(`جاري اختبار تثبيت الآية (${formatStdNum(m.ayahNum)}) من سورة ${m.surahName} 🎯`);
 }
 
 function renderAll() {
   updateMetrics();
   renderPlanner();
+  renderDailyWard();
+  updateMistakesBadge();
+  updateReminderUI();
   if (state.activeView === 'surah') renderSurahs();
   else if (state.activeView === 'page') renderPages();
   else if (state.activeView === 'tamkeen') renderTamkeenQuiz();
@@ -1383,6 +1961,8 @@ document.addEventListener('DOMContentLoaded', () => {
         recoveryDays: state.recoveryDays || 0,
         recoveredDates: state.recoveredDates || {},
         lastAwardedMilestone: state.lastAwardedMilestone || 0,
+        mistakesNotebook: state.mistakesNotebook || [],
+        reminderSettings: state.reminderSettings || { enabled: false, time: '09:00', lastNotifiedDate: null },
         exportedAt: new Date().toISOString()
       }, null, 2);
       backupModal.classList.remove('hidden');
@@ -1421,6 +2001,8 @@ document.addEventListener('DOMContentLoaded', () => {
         recoveryDays: state.recoveryDays || 0,
         recoveredDates: state.recoveredDates || {},
         lastAwardedMilestone: state.lastAwardedMilestone || 0,
+        mistakesNotebook: state.mistakesNotebook || [],
+        reminderSettings: state.reminderSettings || { enabled: false, time: '09:00', lastNotifiedDate: null },
         exportedAt: new Date().toISOString()
       }, null, 2));
       const a = document.createElement('a');
@@ -1456,6 +2038,8 @@ document.addEventListener('DOMContentLoaded', () => {
             state.recoveryDays = typeof parsed.recoveryDays === 'number' ? parsed.recoveryDays : 1;
             state.recoveredDates = parsed.recoveredDates || {};
             state.lastAwardedMilestone = typeof parsed.lastAwardedMilestone === 'number' ? parsed.lastAwardedMilestone : 0;
+            state.mistakesNotebook = Array.isArray(parsed.mistakesNotebook) ? parsed.mistakesNotebook : (state.mistakesNotebook || []);
+            if (parsed.reminderSettings) state.reminderSettings = parsed.reminderSettings;
             syncCount();
             saveState();
             renderAll();
@@ -1594,6 +2178,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
   checkNewUserTutorial();
 
+  // Mistakes Notebook Modal wiring
+  const btnHeaderMistakes = document.getElementById('btnHeaderMistakes');
+  const btnCloseMistakesModal = document.getElementById('btnCloseMistakesModal');
+  const mistakesModal = document.getElementById('mistakesModal');
+
+  if (btnHeaderMistakes) {
+    btnHeaderMistakes.addEventListener('click', () => openMistakesModal());
+  }
+  if (btnCloseMistakesModal) {
+    btnCloseMistakesModal.addEventListener('click', () => closeMistakesModal());
+  }
+
+  // Reminders Modal wiring
+  const btnRemindersModal = document.getElementById('btnRemindersModal');
+  const btnCloseRemindersModal = document.getElementById('btnCloseRemindersModal');
+  const remindersModal = document.getElementById('remindersModal');
+
+  if (btnRemindersModal) {
+    btnRemindersModal.addEventListener('click', () => openRemindersModal());
+  }
+  if (btnCloseRemindersModal) {
+    btnCloseRemindersModal.addEventListener('click', () => closeRemindersModal());
+  }
+
+  // Initial check and periodic polling for daily reminder
+  checkDailyReminder();
+  setInterval(checkDailyReminder, 60000);
+
   const resetTamkeenModal = document.getElementById('resetTamkeenConfirmModal');
 
   window.addEventListener('click', (e) => {
@@ -1602,6 +2214,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === installModal) installModal.classList.add('hidden');
     if (e.target === aboutModal) aboutModal.classList.add('hidden');
     if (e.target === resetTamkeenModal) closeResetTamkeenModal();
+    if (e.target === mistakesModal) closeMistakesModal();
+    if (e.target === remindersModal) closeRemindersModal();
     const previewModal = document.getElementById('pagePreviewModal');
     if (previewModal && e.target === previewModal) previewModal.classList.add('hidden');
   });

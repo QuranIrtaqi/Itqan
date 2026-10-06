@@ -26,7 +26,10 @@ let state = {
   weekOffset: 0,
   recoveryDays: 1,
   recoveredDates: {},
-  lastAwardedMilestone: 0
+  lastAwardedMilestone: 0,
+  reminderSettings: { enabled: false, time: '20:00', lastNotifiedDate: '' },
+  mistakesNotebook: [],
+  dailyWardCompleted: {}
 };
 
 function normAr(str) {
@@ -64,6 +67,9 @@ function loadState() {
       state.recoveryDays = typeof parsed.recoveryDays === 'number' ? parsed.recoveryDays : 1;
       state.recoveredDates = parsed.recoveredDates || {};
       state.lastAwardedMilestone = typeof parsed.lastAwardedMilestone === 'number' ? parsed.lastAwardedMilestone : 0;
+      state.reminderSettings = parsed.reminderSettings || { enabled: false, time: '20:00', lastNotifiedDate: '' };
+      state.mistakesNotebook = Array.isArray(parsed.mistakesNotebook) ? parsed.mistakesNotebook : [];
+      state.dailyWardCompleted = parsed.dailyWardCompleted || {};
       state.autoSync = true;
     }
   } catch (err) {
@@ -118,11 +124,103 @@ function saveState() {
       recoveryDays: state.recoveryDays || 0,
       recoveredDates: state.recoveredDates || {},
       lastAwardedMilestone: state.lastAwardedMilestone || 0,
+      reminderSettings: state.reminderSettings || { enabled: false, time: '20:00', lastNotifiedDate: '' },
+      mistakesNotebook: state.mistakesNotebook || [],
+      dailyWardCompleted: state.dailyWardCompleted || {},
       autoSync: state.autoSync
     }));
   } catch (err) {
     console.error("خطأ في حفظ البيانات:", err);
   }
+}
+
+function getDueReviewSurahs() {
+  const t = todayStr();
+  const memorized = SURAHS.filter(s => !!state.memorizedSurahs[s.id]);
+  const due = [];
+  const reviewedToday = [];
+
+  memorized.forEach(s => {
+    const last = state.reviews[s.id];
+    const interval = (state.surahIntervals && state.surahIntervals[s.id]) || REVIEW_DAYS;
+    
+    if (last === t) {
+      reviewedToday.push({ ...s, interval, lastReview: last, isReviewedToday: true });
+    } else {
+      const daysSince = last ? daysBetween(last, t) : 999;
+      if (daysSince >= interval) {
+        due.push({
+          ...s,
+          interval,
+          lastReview: last,
+          daysSince: daysSince === 999 ? 'غير مراجعة' : daysSince,
+          overdueDays: daysSince === 999 ? 999 : (daysSince - interval),
+          urgency: interval <= 4 ? 1 : (interval <= 14 ? 2 : 3)
+        });
+      }
+    }
+  });
+
+  // Sort by urgency: shortest interval first (red 4d first), then most overdue
+  due.sort((a, b) => {
+    if (a.urgency !== b.urgency) return a.urgency - b.urgency;
+    return (b.overdueDays || 0) - (a.overdueDays || 0);
+  });
+
+  return {
+    due,
+    reviewedToday,
+    totalDueCount: due.length,
+    reviewedTodayCount: reviewedToday.length,
+    isAllDone: due.length === 0 && (reviewedToday.length > 0 || memorized.length === 0)
+  };
+}
+
+function addMistakeToNotebook(q, chosenText) {
+  if (!q || !q.ayahNum || !q.verse) return;
+  if (!state.mistakesNotebook) state.mistakesNotebook = [];
+  
+  const existingIdx = state.mistakesNotebook.findIndex(m => m.surahId === q.surahId && m.ayahNum === q.ayahNum);
+  const mistakeObj = {
+    id: 'mstk_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+    surahId: q.surahId,
+    surahName: q.surahName || (SURAHS.find(s => s.id === q.surahId)?.name) || '',
+    ayahNum: q.ayahNum,
+    verse: q.verse,
+    correct: q.correct,
+    wrongChoice: chosenText,
+    mode: q.mode || 'next_ayah',
+    date: todayStr(),
+    count: 1
+  };
+
+  if (existingIdx >= 0) {
+    state.mistakesNotebook[existingIdx].count = (state.mistakesNotebook[existingIdx].count || 1) + 1;
+    state.mistakesNotebook[existingIdx].date = todayStr();
+    state.mistakesNotebook[existingIdx].wrongChoice = chosenText;
+  } else {
+    state.mistakesNotebook.unshift(mistakeObj);
+  }
+
+  saveState();
+  if (typeof updateMistakesBadge === 'function') updateMistakesBadge();
+}
+
+function removeMistakeFromNotebook(id) {
+  if (!state.mistakesNotebook) return;
+  state.mistakesNotebook = state.mistakesNotebook.filter(m => m.id !== id);
+  saveState();
+  if (typeof updateMistakesBadge === 'function') updateMistakesBadge();
+  if (typeof renderMistakesNotebook === 'function') renderMistakesNotebook();
+  showToast("تم تثبيت وإتقان الآية وحذفها من سجل الأخطاء بنجاح ✨");
+}
+
+function clearMistakesNotebook() {
+  state.mistakesNotebook = [];
+  saveState();
+  if (typeof updateMistakesBadge === 'function') updateMistakesBadge();
+  if (typeof renderMistakesNotebook === 'function') renderMistakesNotebook();
+  showToast("تم تفريغ دفتر التثبيت والأخطاء");
 }
 
 let toastTimer = null;
@@ -446,7 +544,29 @@ function markAllReviewed() {
   state.reviewLog[t] = (state.reviewLog[t] || 0) + 1;
   saveState();
   if (typeof renderPlanner === 'function') renderPlanner();
+  if (typeof renderDailyWard === 'function') renderDailyWard();
   showToast("تم تسجيل مراجعة جميع السور المتأخرة");
+}
+
+function bulkMarkAllDueReviewed() {
+  const t = todayStr();
+  const { due } = getDueReviewSurahs();
+  if (!due || due.length === 0) {
+    showToast("لا توجد سور مستحقة للمراجعة حالياً");
+    return;
+  }
+  due.forEach(s => {
+    state.reviews[s.id] = t;
+  });
+  state.reviewLog[t] = (state.reviewLog[t] || 0) + 1;
+  saveState();
+  if (typeof renderAll === 'function') renderAll();
+  else {
+    if (typeof renderPlanner === 'function') renderPlanner();
+    if (typeof renderDailyWard === 'function') renderDailyWard();
+  }
+  if (typeof launchConfetti === 'function') launchConfetti();
+  showToast(`هنيئاً لك! تمت مراجعة جميع سور الورد اليومي (${due.length} سورة) بنجاح ✨`);
 }
 
 function markReviewed(id) {
@@ -460,6 +580,7 @@ function rateSurahReview(id, intervalDays, ratingLabel) {
   state.reviewLog[todayStr()] = (state.reviewLog[todayStr()] || 0) + 1;
   saveState();
   if (typeof renderPlanner === 'function') renderPlanner();
+  if (typeof renderDailyWard === 'function') renderDailyWard();
   const s = SURAHS.find(x => x.id === id);
   showToast(`تم تسجيل مراجعة ${s ? 'سورة ' + s.name : ''} (${ratingLabel}) - المراجعة القادمة بعد ${intervalDays} يوماً`);
 }

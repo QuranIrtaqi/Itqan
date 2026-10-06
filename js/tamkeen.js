@@ -444,6 +444,9 @@ function handleTamkeenChoice(idx) {
     }
   } else {
     tamkeenState.stats.streak = 0;
+    if (typeof addMistakeToNotebook === 'function') {
+      addMistakeToNotebook(q, chosenText);
+    }
   }
 
   saveTamkeenStats();
@@ -534,16 +537,22 @@ function renderTamkeenQuiz() {
           <div class="space-y-0.5">
             <span class="font-black text-rose-900 dark:text-rose-200 text-sm flex items-center gap-1.5">
               <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600 dark:text-rose-400"></i>
-              إجابة غير صحيحة، حاول تثبيتها جيداً
+              إجابة غير صحيحة، تم حفظ الآية في «دفتر التثبيت» ✍️
             </span>
             <p class="text-xs text-rose-800 dark:text-rose-300">
               الإجابة الصحيحة هي: <b class="font-bold text-rose-950 dark:text-white">«${q.correct}»</b>
             </p>
           </div>
-          <button onclick="nextTamkeenQuestion()" class="px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold shadow-md transition active:scale-95 shrink-0 flex items-center justify-center gap-1.5">
-            <span>السؤال التالي</span>
-            <i data-lucide="chevron-left" class="w-4 h-4"></i>
-          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="openMistakesModal()" class="px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-rose-300 dark:border-rose-700 text-rose-700 dark:text-rose-300 text-xs font-bold transition active:scale-95 flex items-center gap-1">
+              <i data-lucide="book-marked" class="w-3.5 h-3.5"></i>
+              <span>دفتر التثبيت</span>
+            </button>
+            <button onclick="nextTamkeenQuestion()" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold shadow-md transition active:scale-95 shrink-0 flex items-center justify-center gap-1.5">
+              <span>السؤال التالي</span>
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+          </div>
         </div>
       `;
     }
@@ -584,10 +593,17 @@ function renderTamkeenQuiz() {
         `}
       </div>
 
-      <button onclick="nextTamkeenQuestion()" class="text-xs font-bold text-slate-500 hover:text-emerald-700 dark:text-slate-400 dark:hover:text-emerald-300 flex items-center gap-1 py-1 px-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition active:scale-95" title="تخطي إلى سؤال آخر">
-        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-        <span>سؤال آخر</span>
-      </button>
+      <div class="flex items-center gap-1.5">
+        <button onclick="openMistakesModal()" class="text-xs font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1 py-1 px-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition active:scale-95" title="عرض دفتر التثبيت والأخطاء">
+          <i data-lucide="book-marked" class="w-3.5 h-3.5 text-amber-600"></i>
+          <span>دفتر التثبيت</span>
+          <span id="tamkeenMistakesBadge" class="px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[10px] font-mono leading-tight ${state.mistakesNotebook && state.mistakesNotebook.length ? '' : 'hidden'}">${state.mistakesNotebook ? state.mistakesNotebook.length : 0}</span>
+        </button>
+        <button onclick="nextTamkeenQuestion()" class="text-xs font-bold text-slate-500 hover:text-emerald-700 dark:text-slate-400 dark:hover:text-emerald-300 flex items-center gap-1 py-1 px-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition active:scale-95" title="تخطي إلى سؤال آخر">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>سؤال آخر</span>
+        </button>
+      </div>
     </div>
 
     <div class="space-y-2">
