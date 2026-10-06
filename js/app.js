@@ -945,9 +945,31 @@ function renderPlanner() {
   const motivator = getStreakMotivator(streak);
   const badgeTitle = motivator.current.title;
   const badgeIcon = motivator.current.icon;
+  const isAutoMode = (state.recoveryMode !== 'manual');
+
+  let manualRecoveryAlertHtml = '';
+  const firstActive = typeof getFirstActiveDate === 'function' ? getFirstActiveDate() : null;
+  if (!isAutoMode && firstActive && (state.recoveryDays || 0) > 0) {
+    const yesterday = addDays(t, -1);
+    const yesterdayKey = dayKey(yesterday);
+    const isYesterdayActive = (state.log[yesterdayKey] > 0 || !!state.reviewLog[yesterdayKey] || (state.recoveredDates && !!state.recoveredDates[yesterdayKey]));
+    if (yesterdayKey > firstActive && !isYesterdayActive) {
+      manualRecoveryAlertHtml = `
+        <div class="p-2 sm:p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-between gap-2 text-xs font-sans">
+          <div class="flex items-center gap-1.5 text-amber-900 dark:text-amber-200">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-amber-600 shrink-0"></i>
+            <span class="text-[11px] font-bold">فُوّت الورد بالأمس (${yesterdayKey})!</span>
+          </div>
+          <button type="button" onclick="applyManualRecovery('${yesterdayKey}')" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[10px] shadow-xs active:scale-95 flex items-center gap-1 shrink-0">
+            <span>استدراك الأمس 🛡️</span>
+          </button>
+        </div>
+      `;
+    }
+  }
 
   const streakHtml = `
-    <div class="bg-gradient-to-br from-amber-500/10 via-emerald-500/5 to-teal-500/10 p-3 sm:p-3.5 rounded-2xl border-2 border-amber-500/30 dark:border-amber-400/20 space-y-2">
+    <div class="bg-gradient-to-br from-amber-500/10 via-emerald-500/5 to-teal-500/10 p-3 sm:p-3.5 rounded-2xl border-2 border-amber-500/30 dark:border-amber-400/20 space-y-2.5">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="text-2xl">${badgeIcon}</span>
@@ -971,15 +993,26 @@ function renderPlanner() {
         </div>
       ` : ''}
 
-      <div class="flex items-center justify-between pt-1.5 border-t border-amber-500/20 dark:border-amber-400/10 text-xs font-sans">
+      <div class="flex flex-wrap items-center justify-between pt-1.5 border-t border-amber-500/20 dark:border-amber-400/10 text-xs font-sans gap-2">
         <div class="flex items-center gap-1.5">
           <span class="w-5 h-5 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 flex items-center justify-center font-bold text-xs shadow-xs">🛡️</span>
-          <span class="text-slate-700 dark:text-slate-200 font-bold">رصيد أيام الاستدراك:</span>
+          <span class="text-slate-700 dark:text-slate-200 font-bold">رصيد الاستدراك:</span>
           <b class="text-emerald-700 dark:text-emerald-400 font-black text-sm">${formatStdNum(state.recoveryDays || 0)}</b>
           <span class="text-[10px] text-slate-400 font-medium">يوم</span>
+          <span class="text-[10px] text-amber-700 dark:text-amber-300 font-semibold mr-1">(+1 يوم لكل أسبوع كامل 7/7)</span>
         </div>
-        <span class="text-[10px] text-amber-700 dark:text-amber-300 font-semibold">(+1 يوم لكل أسبوع كامل 7/7)</span>
+
+        <div class="inline-flex items-center p-0.5 rounded-xl bg-slate-200/80 dark:bg-slate-800 border border-slate-300/60 dark:border-slate-700 text-[10px] font-bold">
+          <button type="button" onclick="setRecoveryMode('auto')" class="px-2 py-0.5 rounded-lg transition ${isAutoMode ? 'bg-emerald-700 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}" title="استهلاك رصيد الاستدراك تلقائياً عند فوات يوم">
+            ⚡ تلقائي
+          </button>
+          <button type="button" onclick="setRecoveryMode('manual')" class="px-2 py-0.5 rounded-lg transition ${!isAutoMode ? 'bg-emerald-700 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}" title="أنت تقرر متى تستخدم رصيد الاستدراك يدوياً">
+            🖐️ يدوي
+          </button>
+        </div>
       </div>
+
+      ${manualRecoveryAlertHtml}
 
       <div class="pt-1 border-t border-amber-500/20 dark:border-amber-400/10 space-y-1">
         <p class="text-xs font-bold text-emerald-900 dark:text-emerald-300 font-quran leading-relaxed">${motivator.current.quote}</p>
@@ -1964,6 +1997,7 @@ document.addEventListener('DOMContentLoaded', () => {
         recoveryDays: state.recoveryDays || 0,
         recoveredDates: state.recoveredDates || {},
         lastAwardedMilestone: state.lastAwardedMilestone || 0,
+        recoveryMode: state.recoveryMode || 'auto',
         mistakesNotebook: state.mistakesNotebook || [],
         reminderSettings: state.reminderSettings || { enabled: false, time: '09:00', lastNotifiedDate: null },
         exportedAt: new Date().toISOString()
@@ -2003,6 +2037,7 @@ document.addEventListener('DOMContentLoaded', () => {
         userName: state.userName,
         recoveryDays: state.recoveryDays || 0,
         recoveredDates: state.recoveredDates || {},
+        recoveryMode: state.recoveryMode || 'auto',
         lastAwardedMilestone: state.lastAwardedMilestone || 0,
         mistakesNotebook: state.mistakesNotebook || [],
         reminderSettings: state.reminderSettings || { enabled: false, time: '09:00', lastNotifiedDate: null },
@@ -2040,6 +2075,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.userName = parsed.userName || '';
             state.recoveryDays = typeof parsed.recoveryDays === 'number' ? parsed.recoveryDays : 1;
             state.recoveredDates = parsed.recoveredDates || {};
+            state.recoveryMode = parsed.recoveryMode === 'manual' ? 'manual' : 'auto';
             state.lastAwardedMilestone = typeof parsed.lastAwardedMilestone === 'number' ? parsed.lastAwardedMilestone : 0;
             state.mistakesNotebook = Array.isArray(parsed.mistakesNotebook) ? parsed.mistakesNotebook : (state.mistakesNotebook || []);
             if (parsed.reminderSettings) state.reminderSettings = parsed.reminderSettings;

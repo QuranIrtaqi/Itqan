@@ -26,6 +26,7 @@ let state = {
   weekOffset: 0,
   recoveryDays: 1,
   recoveredDates: {},
+  recoveryMode: 'auto',
   lastAwardedMilestone: 0,
   reminderSettings: { enabled: false, time: '20:00', lastNotifiedDate: '' },
   mistakesNotebook: [],
@@ -66,6 +67,7 @@ function loadState() {
       state.userName = parsed.userName || '';
       state.recoveryDays = typeof parsed.recoveryDays === 'number' ? parsed.recoveryDays : 1;
       state.recoveredDates = parsed.recoveredDates || {};
+      state.recoveryMode = parsed.recoveryMode === 'manual' ? 'manual' : 'auto';
       state.lastAwardedMilestone = typeof parsed.lastAwardedMilestone === 'number' ? parsed.lastAwardedMilestone : 0;
       state.reminderSettings = parsed.reminderSettings || { enabled: false, time: '20:00', lastNotifiedDate: '' };
       state.mistakesNotebook = Array.isArray(parsed.mistakesNotebook) ? parsed.mistakesNotebook : [];
@@ -123,6 +125,7 @@ function saveState() {
       userName: state.userName,
       recoveryDays: state.recoveryDays || 0,
       recoveredDates: state.recoveredDates || {},
+      recoveryMode: state.recoveryMode || 'auto',
       lastAwardedMilestone: state.lastAwardedMilestone || 0,
       reminderSettings: state.reminderSettings || { enabled: false, time: '20:00', lastNotifiedDate: '' },
       mistakesNotebook: state.mistakesNotebook || [],
@@ -506,6 +509,73 @@ function setStudyDays(v) {
   if (typeof renderPlanner === 'function') renderPlanner();
 }
 
+function getFirstActiveDate() {
+  const activeDates = [];
+  if (state.log) {
+    for (const k in state.log) {
+      if (state.log[k] > 0) activeDates.push(k);
+    }
+  }
+  if (state.reviewLog) {
+    for (const k in state.reviewLog) {
+      if (state.reviewLog[k] > 0) activeDates.push(k);
+    }
+  }
+  if (activeDates.length === 0) return null;
+  activeDates.sort();
+  return activeDates[0];
+}
+
+function setRecoveryMode(mode) {
+  state.recoveryMode = mode === 'manual' ? 'manual' : 'auto';
+  saveState();
+  if (typeof renderAll === 'function') renderAll();
+  else if (typeof renderPlanner === 'function') renderPlanner();
+  showToast(state.recoveryMode === 'auto'
+    ? "تم تفعيل الاستدراك التلقائي ⚡ (يُستهلك الرصيد آلياً لإنقاذ السلسلة عند فوات يوم)"
+    : "تم تفعيل الاستدراك اليدوي 🖐️ (أنت من يقرر متى يستخدم رصيد الاستدراك لحماية الأيام المفوتة)");
+}
+
+function applyManualRecovery(dateKey) {
+  const t = todayStr();
+  const firstActive = getFirstActiveDate();
+
+  if (!firstActive || dateKey < firstActive) {
+    showToast("هذا اليوم يسبق تاريخ انطلاقتك في الحفظ؛ لا يتطلب استدراكاً ✨");
+    return;
+  }
+  if (dateKey >= t) {
+    showToast("الاستدراك مخصص للأيام السابقة فقط؛ سجّل ورد اليوم مباشرة");
+    return;
+  }
+  if (state.recoveredDates && state.recoveredDates[dateKey]) {
+    showToast("هذا اليوم مستدرك ومحمي بالفعل 🛡️");
+    return;
+  }
+  if ((state.recoveryDays || 0) <= 0) {
+    showToast("رصيدك من أيام الاستدراك 0 يوم. التزم أسبوعاً لكسب يوم تعويض جديد 🛡️");
+    return;
+  }
+
+  if (!state.recoveredDates) state.recoveredDates = {};
+  state.recoveredDates[dateKey] = true;
+  state.recoveryDays = Math.max(0, state.recoveryDays - 1);
+  saveState();
+  if (typeof renderAll === 'function') renderAll();
+  else if (typeof renderPlanner === 'function') renderPlanner();
+  showToast(`تم استدراك يوم ${dateKey} وحماية السلسلة بنجاح 🛡️ (الرصيد المتبقي: ${state.recoveryDays})`);
+}
+
+function cancelManualRecovery(dateKey) {
+  if (!state.recoveredDates || !state.recoveredDates[dateKey]) return;
+  delete state.recoveredDates[dateKey];
+  state.recoveryDays = (state.recoveryDays || 0) + 1;
+  saveState();
+  if (typeof renderAll === 'function') renderAll();
+  else if (typeof renderPlanner === 'function') renderPlanner();
+  showToast(`تم إلغاء استدراك يوم ${dateKey} واستعادة 1 يوم إلى رصيدك ↩️`);
+}
+
 function toggleReviewDay(key) {
   const t = todayStr();
   if (key > t) {
@@ -513,7 +583,20 @@ function toggleReviewDay(key) {
     return;
   }
   if (key < t) {
-    showToast("سجل الأيام السابقة للقراءة فقط؛ حماية السلسلة تتم برصيد أيام الاستدراك 🛡️");
+    const firstActive = getFirstActiveDate();
+    if (!firstActive || key < firstActive) {
+      showToast("هذا اليوم يسبق تاريخ انطلاقتك في الحفظ؛ لا يؤثر على سلسلتك ✨");
+      return;
+    }
+    if (state.recoveredDates && state.recoveredDates[key]) {
+      cancelManualRecovery(key);
+      return;
+    }
+    if ((state.log[key] || 0) > 0 || !!state.reviewLog[key]) {
+      showToast("هذا اليوم منجز بالفعل ومسجل في سجلك ✓");
+      return;
+    }
+    applyManualRecovery(key);
     return;
   }
   if (state.reviewLog[key]) {
@@ -592,6 +675,10 @@ function getStreak() {
   if (!state.recoveredDates) state.recoveredDates = {};
   if (typeof state.recoveryDays !== 'number') state.recoveryDays = 1;
   if (typeof state.lastAwardedMilestone !== 'number') state.lastAwardedMilestone = 0;
+  if (!state.recoveryMode) state.recoveryMode = 'auto';
+
+  const firstActive = getFirstActiveDate();
+  if (!firstActive) return 0;
 
   const isActive = k => (state.log[k] > 0 || !!state.reviewLog[k] || !!state.recoveredDates[k]);
 
@@ -602,18 +689,23 @@ function getStreak() {
 
   while (safety < 1000) {
     const k = dayKey(cur);
+
+    // CRITICAL: Stop if day is earlier than the first active date of the user!
+    if (k < firstActive) break;
+
     if (isActive(k)) {
       streak++;
       cur.setDate(cur.getDate() - 1);
     } else {
-      // Check if we can apply an accumulated recovery day to save this missed day:
-      if (k <= t && state.recoveryDays > 0 && !state.recoveredDates[k]) {
+      // k is a missed day that occurred strictly AFTER firstActive
+      if (state.recoveryMode === 'auto' && k > firstActive && state.recoveryDays > 0 && !state.recoveredDates[k]) {
         state.recoveredDates[k] = true;
         state.recoveryDays = Math.max(0, state.recoveryDays - 1);
         streak++;
         cur.setDate(cur.getDate() - 1);
         try { saveState(); } catch (e) { }
       } else {
+        // In manual mode, or out of recovery days: the streak breaks here!
         break;
       }
     }
