@@ -59,52 +59,94 @@ function updateInstallUI() {
 // ==========================================
 const COACH_MARKS_STEPS = [
   {
-    targetSelector: '#btnHeaderTamkeen',
-    fallbackSelector: 'header .flex.items-center',
-    badge: 'الخطوة 1 من 6',
-    icon: 'brain',
-    title: 'أدوات الشريط العلوي ودفتر التثبيت',
-    text: 'من هنا يمكنك الانتقال لاختبارات تمكين، وتثبيت التطبيق، وتصدير بطاقة إنجازك، وفتح دفتر التثبيت والأخطاء، ودليل التطبيق، وضبط منبه الورد، أو النقر على العنوان للصعود للأعلى فوراً.'
+    targetSelector: 'header',
+    fallbackSelector: '#btnHeaderScrollTop',
+    badge: 'الخطوة 1 من 10',
+    icon: 'compass',
+    title: 'الشريط العلوي وأدوات التحكم والوصول السريع',
+    text: 'الترويسة العلوية تمنحك وصولاً فورياً لاختبارات تمكين، تثبيت التطبيق، تصدير بطاقة الإنجاز، دفتر التثبيت، دليل التطبيق، منبه الورد، وتبديل النمط. كما يمكنك النقر على العنوان في أي وقت للصعود الفوري لأعلى الصفحة.',
+    switchView: 'surah'
   },
   {
     targetSelector: '.lg\\:col-span-8',
     fallbackSelector: '#statProgressBar',
-    badge: 'الخطوة 2 من 6',
+    badge: 'الخطوة 2 من 10',
     icon: 'percent',
     title: 'لوحة إنجاز الحفظ ومسار الختم',
-    text: 'تعرض لك هذه اللوحة تقدمك الإجمالي في حفظ المصحف الشريف (604 صفحة) بالنسبة المئوية وشريط المسار وعدد السور والأجزاء المكتملة.'
+    text: 'تتابع هنا إجمالي تقدمك في حفظ القرآن الكريم (604 صفحة) بالنسبة المئوية الحية، مع شريط تقدم المسار المتبقي نحو الختم، وإحصائيات السور والأجزاء المكتملة وعدد الآيات المحفوظة.',
+    switchView: 'surah'
   },
   {
     targetSelector: '#plannerCard',
     fallbackSelector: '#statRemainingNotice',
-    badge: 'الخطوة 3 من 6',
+    badge: 'الخطوة 3 من 10',
     icon: 'flame',
-    title: 'شعلة الالتزام والنسخ الاحتياطي',
-    text: 'تابع التزامك اليومي واحمِ سلسلتك برصيد أيام التعويض (تلقائياً أو يدوياً). كما تجد أسفل البطاقة زر «نسخ احتياطي واستعادة» وزر «تصفير السجل» للبدء من جديد كأول مرة.'
+    title: 'شعلة الالتزام ورصيد أيام التعويض (Streak)',
+    text: 'تابع التزامك اليومي وترقّ عبر 8 أوسمة نبوية متدرجة حتى تتوج بـ «👑 تاج الوقار». يحمي نظام التعويض سلسلتك من الانقطاع برصيد أيام تعويض (تلقائياً أو يدوياً) يزداد مع استمرارك كل 7 أسابيع.',
+    switchView: 'surah'
+  },
+  {
+    targetSelector: '#dailyWardContainer',
+    fallbackSelector: '#dailyWardCard',
+    badge: 'الخطوة 4 من 10',
+    icon: 'calendar-check',
+    title: 'الورد اليومي الذكي للمراجعة والحفظ',
+    text: 'بطاقة ذكية تقترح عليك يومياً السور والصفحات المستحقة للمراجعة بناءً على خوارزمية التكرار المتباعد لمنع تفلت الحفظ، مع إمكانية تسجيل إنجاز مراجعة السورة بنقرة واحدة.',
+    switchView: 'surah'
   },
   {
     targetSelector: '#tabModeSurah',
     fallbackSelector: '.tab-btn',
-    badge: 'الخطوة 4 من 6',
+    badge: 'الخطوة 5 من 10',
     icon: 'layers',
-    title: 'خيارات العرض والبحث الفوري',
-    text: 'تنقل بمرونة بين عرض السور (114 سورة) أو شبكة الصفحات (604 صفحة) أو الأجزاء، مع شريط بحث فوري وفلاتر لتصفية المحفوظ وغير المحفوظ.'
+    title: 'خيارات العرض والبحث الفوري والتصفية',
+    text: 'تنقل بمرونة فائقة بين عرض السور (114)، شبكة الصفحات (604)، الأجزاء (30)، ومحرك تمكين بدون أي تمرير جانبي، مع شريط بحث فوري بالاسم أو الرقم أو الصفحة وفلاتر المحفوظ.',
+    switchView: 'surah'
   },
   {
     targetSelector: '#surahGridContainer',
     fallbackSelector: '#viewSurahs',
-    badge: 'الخطوة 5 من 6',
+    badge: 'الخطوة 6 من 10',
     icon: 'check-circle-2',
-    title: 'تسجيل الحفظ وتقييم المراجعة',
-    text: 'انقر على أي سورة أو صفحة لتسجيل حفظها فوراً، وقيّم مراجعتك (ممتاز 28 يوم | متوسط 14 يوم | يحتاج تثبيت 4 أيام) لجدولة المراجعة الذكية ومنع التفلت.'
+    title: 'تسجيل الحفظ وجدولة المراجعة (SRS)',
+    text: 'انقر على أي سورة لتحديد تمام حفظها، وقيّم جودة مراجعتك بثلاثة مستويات: (🟢 ممتاز 28 يوماً | 🟡 متوسط 14 يوماً | 🔴 يحتاج تثبيت 4 أيام) ليتولى النظام جدولة مراجعتها بدقة.',
+    switchView: 'surah'
   },
   {
-    targetSelector: '#btnHeroTamkeen',
-    fallbackSelector: '#btnTamkeenMode_all',
-    badge: 'الخطوة 6 من 6',
-    icon: 'sparkle',
-    title: 'محرك «تمكين» لاختبار وتثبيت الحفظ',
-    text: 'اضغط هنا لبدء اختبارات لا نهائية للآيات بالرسم العثماني؛ مع إمكانية التسميع غيباً أولاً وإخفاء الخيارات حتى تستحضر الآية في صدرك!'
+    targetSelector: '#viewPages',
+    fallbackSelector: '#tabModePage',
+    badge: 'الخطوة 7 من 10',
+    icon: 'layout-grid',
+    title: 'شبكة الصفحات وتحديد النطاق دفعة واحدة',
+    text: 'استعرض صفحات المصحف الـ 604، وحدد حفظ أي صفحة بنقرة، أو استخدم أداة «نطاق الصفحات» لحفظ أو إلغاء مجموعة صفحات متتابعة دفعة واحدة (من ص X إلى ص Y) مع المزامنة التلقائية للسور والأجزاء.',
+    switchView: 'page'
+  },
+  {
+    targetSelector: '#tabModePage',
+    fallbackSelector: '#pageGridContainer',
+    badge: 'الخطوة 8 من 10',
+    icon: 'volume-2',
+    title: 'معاينة المصحف الشريف والتلاوة الصوتية',
+    text: 'اضغط على زر العين (👁️) في أي صفحة لعرض مصحف المدينة عالي الدقة، مع مشغل صوتي لـ 9 قراء (الشيخ الحصري افتراضياً)، ومتابعة رقم الآية الدقيق في السورة وموقعها، وتقليب الصفحات بالسحب (Swipe) أو الأسهم.',
+    switchView: 'page'
+  },
+  {
+    targetSelector: '#viewTamkeen',
+    fallbackSelector: '#tabModeTamkeen',
+    badge: 'الخطوة 9 من 10',
+    icon: 'brain',
+    title: 'منظومة «تَمْكِين» لاختبار وتثبيت الحفظ',
+    text: 'محرك اختبارات تفاعلي لا نهائي للآيات بالرسم العثماني؛ يدعم اختبارات الآية التالية وتحديد السورة مع ميزة حجب الخيارات للتسميع غيباً أولاً في صدرك، ومنع تكرار الأسئلة، ولوحة إحصائيات متقدمة.',
+    switchView: 'tamkeen'
+  },
+  {
+    targetSelector: '#btnBackupCard',
+    fallbackSelector: '#btnResetConfirm',
+    badge: 'الخطوة 10 من 10',
+    icon: 'database',
+    title: 'دفتر التثبيت والنسخ الاحتياطي وتصفير السجل',
+    text: 'سجل أخطائك في تمكين يُحفظ تلقائياً في «دفتر التثبيت» للتركيز عليه. كما يمكنك حفظ نسخة احتياطية (JSON) واستعادتها في أي وقت، أو تصفير السجل بالكامل للبدء من جديد كأول استخدام.',
+    switchView: 'surah'
   }
 ];
 
@@ -142,6 +184,9 @@ function getVisibleTarget(step) {
 function renderCoachStep() {
   if (!coachMarksActive) return;
   const step = COACH_MARKS_STEPS[currentCoachStep];
+  if (step.switchView && typeof switchMode === 'function') {
+    switchMode(step.switchView, false);
+  }
   const target = getVisibleTarget(step);
   const spotlight = document.getElementById('coachMarksSpotlight');
   const popover = document.getElementById('coachMarksPopover');
