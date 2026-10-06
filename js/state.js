@@ -484,6 +484,8 @@ function updateMetrics() {
   if (cardRemainingNotice) {
     cardRemainingNotice.textContent = pagesLeft === 0 ? "تم الختم بحمد الله 🎉" : `باقي ${formatStdNum(pagesLeft)} صفحة`;
   }
+  const elCardAyahs = document.getElementById('cardAyahsDisplay');
+  if (elCardAyahs) elCardAyahs.textContent = formatStdNum(totalAyahs);
   const elCardPages = document.getElementById('cardPagesDisplay');
   if (elCardPages) elCardPages.textContent = formatStdNum(memorizedPagesCount);
   const elCardSurahs = document.getElementById('cardSurahsDisplay');

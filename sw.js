@@ -1,4 +1,4 @@
-const CACHE_NAME = 'irtaqi-cache-v18';
+const CACHE_NAME = 'irtaqi-cache-v19';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
