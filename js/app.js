@@ -31,15 +31,14 @@ function updateInstallUI() {
   const banner = document.getElementById('installReminderBanner');
 
   if (installBtn) {
-    installBtn.classList.remove('animate-pulse');
     if (isInstalled) {
-      // Installed state: smaller button, icon only, without the word, no fading
-      installBtn.className = "p-1.5 sm:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition active:scale-95 flex items-center justify-center shrink-0";
-      installBtn.title = "التطبيق مثبت على جهازك";
-      if (installBtnText) installBtnText.classList.add('hidden');
+      // Installed state: remove this button completely instead of making it smaller!
+      installBtn.classList.remove('animate-pulse');
+      installBtn.classList.add('hidden');
     } else {
-      // Browser state (not installed): shows phone icon AND the word 'تثبيت' on mobile and desktop, solid (no pulse fading)
-      installBtn.className = "px-2 py-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm shadow-emerald-900/30 transition active:scale-95 flex items-center gap-1 shrink-0";
+      // Browser state (not installed): shows phone icon AND the word 'تثبيت' on mobile and desktop, WITH pulse/fade effect
+      installBtn.classList.remove('hidden');
+      installBtn.className = "px-2 py-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm shadow-emerald-900/30 transition active:scale-95 flex items-center gap-1 shrink-0 animate-pulse";
       installBtn.title = "تثبيت التطبيق على الشاشة الرئيسية";
       if (installBtnText) installBtnText.classList.remove('hidden');
     }
@@ -54,6 +53,177 @@ function updateInstallUI() {
     }
   }
 }
+
+// ==========================================
+// INTERACTIVE UI TUTORIAL & WALKTHROUGH
+// ==========================================
+const TUTORIAL_STEPS = [
+  {
+    title: "الشريط العلوي والأدوات الأساسية",
+    icon: "sliders",
+    badge: "التحكم والإعدادات",
+    desc: "كل ما تحتاجه للتحكم في حسابك ومظهر التطبيق بنقرة واحدة:",
+    items: [
+      { icon: "brain", title: "تمكين", text: "انتقال سريع لمنظومة اختبار الحفظ الذكية لتثبيت الآيات والسور." },
+      { icon: "smartphone", title: "تثبيت التطبيق", text: "تثبيت التطبيق كـ (PWA) على هاتفك ليعمل بدون إنترنت كأي تطبيق أصلي." },
+      { icon: "award", title: "بطاقة الإنجاز", text: "عرض شهادة إنجازك الموثقة باسمك ونسبة حفظك ومشاركتها كصورة." },
+      { icon: "database", title: "النسخ الاحتياطي", text: "تصدير نسخة كاملة من تقدمك واسترجاعها بأمان على أي جهاز آخر." },
+      { icon: "moon", title: "تبديل النمط", text: "التبديل الفوري بين الوضعين الليلي والنهاري المريحين للبصر." }
+    ]
+  },
+  {
+    title: "لوحة التقدم الكلي وشعلة الالتزام",
+    icon: "sparkle",
+    badge: "الإحصائيات والتحفيز",
+    desc: "لوحة ذكية تعرض رحلتك القرآنية بالأرقام والأوسمة:",
+    items: [
+      { icon: "percent", title: "إجمالي الإنجاز", text: "متابعة صفحاتك المحفوظة من أصل 604 صفحة ونسبة الختم الكلية." },
+      { icon: "flame", title: "شعلة الأيام المتتالية (Streak)", text: "تتبع استمرارك اليومي في الحفظ والمراجعة لفتح 8 أوسمة نبوية تشجيعية." },
+      { icon: "shield-check", title: "أيام التعويض الذكية (Recovery)", text: "تبدأ برصيد 1 يوم تعويض، وتكسب يوماً إضافياً كل أسبوع تلتزم فيه 7 أيام، لحماية سلسلتك إذا انشغلت يوماً." },
+      { icon: "trending-up", title: "الهدف الأسبوعي", text: "تحديد معدل حفظك الأسبوعي ومتابعة تقدمك يوماً بيوم." }
+    ]
+  },
+  {
+    title: "شبكة السور والصفحات ونطاق التحديد",
+    icon: "layout-grid",
+    badge: "التسجيل السريع",
+    desc: "طرق سهلة ومرنة لتحديد ما حفظته وتلاوة المصحف:",
+    items: [
+      { icon: "layers", title: "عرض السور والصفحات", text: "التبديل بسهولة بين قائمة السور الـ 114 وشبكة المصحف (604 صفحة)." },
+      { icon: "check", title: "تحديد الحفظ بنقرة", text: "انقر على رقم أي صفحة أو بطاقة سورة لتمييزها كمحفوظة وتحديث إحصائياتك فوراً." },
+      { icon: "hash", title: "أداة نطاق الصفحات", text: "حدد أو ألغِ حفظ صفحات متتالية دفعة واحدة (مثلاً من 1 إلى 20) لتوفير الوقت." },
+      { icon: "eye", title: "معاينة المصحف الشريف", text: "اضغط أيقونة العين لتصفح صفحات مصحف المدينة عالي الدقة وتبديل الحفظ أثناء القراءة." }
+    ]
+  },
+  {
+    title: "منظومة «تمكين» لاختبار الحفظ",
+    icon: "brain",
+    badge: "الاختبار الذكي",
+    desc: "محرك تفاعلي لا نهائي يجلب الآيات بالرسم العثماني مباشرة:",
+    items: [
+      { icon: "rotate-ccw", title: "اختبار الآية التالية", text: "تُعرض لك آية كريمة وعليك استحضار وتحديد الآية التي تليها." },
+      { icon: "book-open", title: "اختبار تحديد السورة", text: "تُعرض لك آية وعليك معرفة السورة مع حجب اسم السورة لعدم حرق الحل." },
+      { icon: "eye", title: "التسميع غيباً أولاً", text: "تُخفى الخيارات بضبابية لطيفة لتستحضر الآية في صدرك أولاً قبل الضغط لكشف الخيارات." },
+      { icon: "sliders", title: "نطاق الاختبار وتصفير النتائج", text: "يمكنك حصر الاختبار في سورك المحفوظة فقط أو كامل المصحف، وتصفير النتائج متى شئت." }
+    ]
+  },
+  {
+    title: "المراجعة المتباعدة وحفظ البيانات",
+    icon: "refresh-cw",
+    badge: "الإتقان والأمان",
+    desc: "تثبيت الحفظ في الصدور ومنع التفلت بأعلى معايير الخصوصية:",
+    items: [
+      { icon: "refresh-cw", title: "تقييم المراجعة (SRS)", text: "قيّم حفظك بعد مراجعة أي سورة (ممتاز 28 يوم | متوسط 14 يوم | يحتاج تثبيت 4 أيام) ليجدول التطبيق مواعيد المراجعة تلقائياً." },
+      { icon: "shield", title: "أمانك وخصوصيتك 100%", text: "بياناتك محفوظة محلياً في ذاكرة جهازك فقط ولا ترسل إلى أي خادم خارجي." },
+      { icon: "database", title: "النسخ الاحتياطي الدوري", text: "احرص على تنزيل نسخة احتياطية من زر قاعدة البيانات لحفظ تقدمك عند تغيير الهاتف." }
+    ]
+  }
+];
+
+let currentTutorialStep = 0;
+
+function openTutorial(stepIndex = 0) {
+  currentTutorialStep = Math.max(0, Math.min(stepIndex, TUTORIAL_STEPS.length - 1));
+  const modal = document.getElementById('tutorialModal');
+  if (!modal) return;
+  renderTutorialStep();
+  modal.classList.remove('hidden');
+}
+
+function closeTutorial(markSeen = true) {
+  const modal = document.getElementById('tutorialModal');
+  if (modal) modal.classList.add('hidden');
+  if (markSeen) {
+    localStorage.setItem('itqan_tutorial_seen', 'true');
+    const reminder = document.getElementById('newUserTutorialReminder');
+    if (reminder) reminder.classList.add('hidden');
+  }
+}
+
+function renderTutorialStep() {
+  const step = TUTORIAL_STEPS[currentTutorialStep];
+  const container = document.getElementById('tutorialStepBody');
+  const stepIndicator = document.getElementById('tutorialStepIndicator');
+  const btnPrev = document.getElementById('btnTutorialPrev');
+  const btnNext = document.getElementById('btnTutorialNext');
+  const dotsContainer = document.getElementById('tutorialDotsContainer');
+
+  if (stepIndicator) {
+    stepIndicator.textContent = `الخطوة ${formatStdNum(currentTutorialStep + 1)} من ${formatStdNum(TUTORIAL_STEPS.length)}`;
+  }
+
+  if (dotsContainer) {
+    dotsContainer.innerHTML = TUTORIAL_STEPS.map((_, i) => `
+      <button type="button" onclick="openTutorial(${i})" class="h-2 rounded-full transition-all ${
+        i === currentTutorialStep ? 'w-6 bg-gold-500' : 'w-2 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400'
+      }" title="الخطوة ${i + 1}"></button>
+    `).join('');
+  }
+
+  if (btnPrev) {
+    btnPrev.style.display = currentTutorialStep === 0 ? 'none' : 'inline-flex';
+  }
+
+  if (btnNext) {
+    if (currentTutorialStep === TUTORIAL_STEPS.length - 1) {
+      btnNext.innerHTML = `<span>إنهاء والبدء الآن ✨</span>`;
+      btnNext.className = "px-4 py-1.5 rounded-xl bg-gradient-to-r from-gold-500 to-amber-500 hover:from-gold-600 hover:to-amber-600 text-slate-950 font-bold text-xs shadow-md transition active:scale-95 flex items-center gap-1.5";
+    } else {
+      btnNext.innerHTML = `<span>التالي</span><i data-lucide="chevron-left" class="w-4 h-4"></i>`;
+      btnNext.className = "px-4 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition active:scale-95 flex items-center gap-1";
+    }
+  }
+
+  if (container) {
+    container.innerHTML = `
+      <div class="space-y-3.5">
+        <div class="flex items-center gap-3 pb-1 border-b border-slate-100 dark:border-slate-800">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <i data-lucide="${step.icon}" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-black text-slate-900 dark:text-white text-sm sm:text-base">${step.title}</h3>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 font-bold">${step.badge}</span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">${step.desc}</p>
+          </div>
+        </div>
+
+        <div class="space-y-2 max-h-[46vh] sm:max-h-[50vh] overflow-y-auto pr-1">
+          ${step.items.map(item => `
+            <div class="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 flex items-start gap-2.5">
+              <div class="w-7 h-7 rounded-xl bg-white dark:bg-slate-700 text-emerald-700 dark:text-gold-400 flex items-center justify-center shrink-0 shadow-xs border border-slate-200/60 dark:border-slate-600/60 mt-0.5">
+                <i data-lucide="${item.icon}" class="w-3.5 h-3.5"></i>
+              </div>
+              <div class="space-y-0.5 min-w-0">
+                <h4 class="font-bold text-slate-800 dark:text-slate-100 text-xs">${item.title}</h4>
+                <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">${item.text}</p>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function checkNewUserTutorial() {
+  const seen = localStorage.getItem('itqan_tutorial_seen') === 'true';
+  const dismissedInSession = sessionStorage.getItem('dismiss_tutorial_prompt') === 'true';
+  const reminder = document.getElementById('newUserTutorialReminder');
+  if (reminder) {
+    if (!seen && !dismissedInSession) {
+      reminder.classList.remove('hidden');
+    } else {
+      reminder.classList.add('hidden');
+    }
+  }
+}
+window.openTutorial = openTutorial;
+window.closeTutorial = closeTutorial;
 
 async function triggerInstallFlow() {
   if (deferredPrompt) {
@@ -1324,6 +1494,56 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnCloseAbout && aboutModal) btnCloseAbout.addEventListener('click', () => aboutModal.classList.add('hidden'));
   if (btnDismissAbout && aboutModal) btnDismissAbout.addEventListener('click', () => aboutModal.classList.add('hidden'));
 
+  // Tutorial event listeners
+  const btnStartTutorialFromBanner = document.getElementById('btnStartTutorialFromBanner');
+  const btnDismissTutorialBanner = document.getElementById('btnDismissTutorialBanner');
+  const btnLaunchTutorialFromAbout = document.getElementById('btnLaunchTutorialFromAbout');
+  const btnTutorialSkipHeader = document.getElementById('btnTutorialSkipHeader');
+  const btnTutorialPrev = document.getElementById('btnTutorialPrev');
+  const btnTutorialNext = document.getElementById('btnTutorialNext');
+  const tutorialModal = document.getElementById('tutorialModal');
+
+  if (btnStartTutorialFromBanner) {
+    btnStartTutorialFromBanner.addEventListener('click', () => openTutorial(0));
+  }
+  if (btnDismissTutorialBanner) {
+    btnDismissTutorialBanner.addEventListener('click', () => {
+      sessionStorage.setItem('dismiss_tutorial_prompt', 'true');
+      const reminder = document.getElementById('newUserTutorialReminder');
+      if (reminder) reminder.classList.add('hidden');
+    });
+  }
+  if (btnLaunchTutorialFromAbout) {
+    btnLaunchTutorialFromAbout.addEventListener('click', () => {
+      if (aboutModal) aboutModal.classList.add('hidden');
+      openTutorial(0);
+    });
+  }
+  if (btnTutorialSkipHeader) {
+    btnTutorialSkipHeader.addEventListener('click', () => closeTutorial(true));
+  }
+  if (btnTutorialPrev) {
+    btnTutorialPrev.addEventListener('click', () => {
+      if (currentTutorialStep > 0) {
+        currentTutorialStep--;
+        renderTutorialStep();
+      }
+    });
+  }
+  if (btnTutorialNext) {
+    btnTutorialNext.addEventListener('click', () => {
+      if (currentTutorialStep < TUTORIAL_STEPS.length - 1) {
+        currentTutorialStep++;
+        renderTutorialStep();
+      } else {
+        closeTutorial(true);
+        showToast("جولة موفقة! نسأل الله لك التوفيق والبركة في حفظ كتابه الكريم ✨");
+      }
+    });
+  }
+
+  checkNewUserTutorial();
+
   const resetTamkeenModal = document.getElementById('resetTamkeenConfirmModal');
 
   window.addEventListener('click', (e) => {
@@ -1331,6 +1551,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === achievementModal) achievementModal.classList.add('hidden');
     if (e.target === installModal) installModal.classList.add('hidden');
     if (e.target === aboutModal) aboutModal.classList.add('hidden');
+    if (e.target === tutorialModal) closeTutorial(false);
     if (e.target === resetTamkeenModal) closeResetTamkeenModal();
     const previewModal = document.getElementById('pagePreviewModal');
     if (previewModal && e.target === previewModal) previewModal.classList.add('hidden');
