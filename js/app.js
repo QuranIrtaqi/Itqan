@@ -471,47 +471,6 @@ function changePlannerWeek(dir) {
   renderPlanner();
 }
 
-function attachWeeklySwipe() {
-  const card = document.getElementById('weeklyProgressCard');
-  if (!card) return;
-
-  let startX = 0;
-  let startY = 0;
-
-  card.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 1) {
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-    }
-  }, { passive: true });
-
-  card.addEventListener('touchend', (e) => {
-    if (e.changedTouches.length === 1) {
-      const diffX = e.changedTouches[0].clientX - startX;
-      const diffY = e.changedTouches[0].clientY - startY;
-      if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY) * 1.3) {
-        if (diffX > 0) {
-          changePlannerWeek(-1);
-        } else {
-          changePlannerWeek(1);
-        }
-      }
-    }
-  }, { passive: true });
-
-  let lastWheel = 0;
-  card.addEventListener('wheel', (e) => {
-    if (Math.abs(e.deltaX) > 20 && Date.now() - lastWheel > 350) {
-      lastWheel = Date.now();
-      if (e.deltaX > 0) {
-        changePlannerWeek(-1);
-      } else {
-        changePlannerWeek(1);
-      }
-    }
-  }, { passive: true });
-}
-
 function attachPreviewSwipe() {
   const modal = document.getElementById('pagePreviewModal');
   if (!modal) return;
@@ -586,13 +545,16 @@ function renderPlanner() {
     `;
   }).join('');
 
+  const studyDays = state.studyDays || 7;
+  const dailyTarget = (state.goal > 0 && studyDays > 0) ? Math.max(1, Math.ceil(state.goal / studyDays)) : 1;
+  const chosenReviewDaysCount = (state.reviewDays && state.reviewDays.length > 0) ? state.reviewDays.length : 7;
+
   let goalLine = '';
   if (state.goal > 0) {
-    const studyDays = state.studyDays || 7;
     const weeklyRate = state.goal * (studyDays / 7);
     const daysNeeded = weeklyRate > 0 ? Math.ceil(left / (state.goal / 7)) : Infinity;
     const fin = isFinite(daysNeeded) ? addDays(t, daysNeeded).toLocaleDateString('ar-EG-u-nu-latn', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير محدد';
-    goalLine = `الهدف: <b class="text-slate-800 dark:text-white">${formatStdNum(state.goal)}</b> صفحة/أسبوع (${formatStdNum(studyDays)} أيام حفظ) • الختم المتوقع: <b class="text-emerald-700 dark:text-emerald-400">${fin}</b>`;
+    goalLine = `الهدف: <b class="text-slate-800 dark:text-white">${formatStdNum(state.goal)}</b> صفحة/أسبوع (بمعدل <b class="text-emerald-700 dark:text-emerald-400">${formatStdNum(dailyTarget)}</b> صفحة/يوم) • الختم المتوقع: <b class="text-emerald-700 dark:text-emerald-400">${fin}</b>`;
   } else {
     goalLine = 'حدد هدفك الأسبوعي لحساب موعد الختم المتوقع.';
   }
@@ -617,6 +579,7 @@ function renderPlanner() {
     const isDesignatedReviewDay = (state.reviewDays || []).includes(dayOfWeekIdx);
     const pagesLogged = state.log[key] || 0;
     const isReviewDone = !!state.reviewLog[key];
+    const isMemorizedGoalMet = (state.goal > 0) ? (pagesLogged >= dailyTarget) : (pagesLogged > 0);
 
     weekMemorizedTotal += pagesLogged;
     if (isReviewDone) weekReviewedTotal++;
@@ -628,7 +591,8 @@ function renderPlanner() {
       isToday,
       isDesignatedReviewDay,
       pagesLogged,
-      isReviewDone
+      isReviewDone,
+      isMemorizedGoalMet
     });
   }
 
@@ -636,7 +600,7 @@ function renderPlanner() {
   const weekRangeLabel = `من ${formatStdNum(weekDays[0].dateNum)} إلى ${formatStdNum(weekDays[6].dateNum)} ${weekStart.toLocaleDateString('ar-EG-u-nu-latn', { month: 'short' })}`;
 
   const chartHtml = `
-    <div id="weeklyProgressCard" class="bg-slate-50 dark:bg-slate-800/50 p-2.5 sm:p-3 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-2 select-none touch-pan-y">
+    <div id="weeklyProgressCard" class="bg-slate-50 dark:bg-slate-800/50 p-2.5 sm:p-3 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-2">
       <div class="flex items-center justify-between text-xs">
         <div class="flex items-center gap-1.5">
           <span class="font-bold text-slate-800 dark:text-slate-200">سجل إنجاز الأسبوع</span>
@@ -670,10 +634,18 @@ function renderPlanner() {
                 : `<span class="text-[11px] text-slate-300 dark:text-slate-600">-</span>`
               }
             </div>
-            <button onclick="toggleReviewDay('${d.key}')" title="${d.isReviewDone ? 'تمت المراجعة (انقر للإلغاء)' : 'انقر لتسجيل مراجعة هذا اليوم'}" class="w-5 h-5 rounded-md flex items-center justify-center transition ${
-              d.isReviewDone
-                ? 'bg-gold-500 text-white shadow-xs'
-                : (d.isDesignatedReviewDay ? 'border border-dashed border-gold-400 text-gold-500 dark:text-gold-400 hover:bg-gold-50 dark:hover:bg-gold-950/30' : 'text-slate-300 dark:text-slate-600 hover:text-gold-500')
+            <button onclick="toggleReviewDay('${d.key}')" title="${
+              d.isMemorizedGoalMet
+                ? `تم إنجاز هدف الحفظ (${formatStdNum(d.pagesLogged)} من ${formatStdNum(dailyTarget)} صفحة)`
+                : (d.isReviewDone ? 'تمت المراجعة لهذا اليوم' : 'انقر لتسجيل مراجعة هذا اليوم')
+            }" class="w-5 h-5 rounded-md flex items-center justify-center transition ${
+              d.isMemorizedGoalMet
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : (d.isReviewDone
+                    ? 'bg-gold-500 text-white shadow-xs'
+                    : (d.isDesignatedReviewDay
+                        ? 'border border-dashed border-gold-400 text-gold-500 dark:text-gold-400 hover:bg-gold-50 dark:hover:bg-gold-950/30'
+                        : 'text-slate-300 dark:text-slate-600 hover:text-emerald-500 border border-slate-200 dark:border-slate-700'))
             }">
               <i data-lucide="check" class="w-3 h-3 stroke-[2.5]"></i>
             </button>
@@ -683,7 +655,7 @@ function renderPlanner() {
 
       <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-800">
         <span>إجمالي حفظ الأسبوع: <b class="text-emerald-700 dark:text-emerald-400 font-bold">${formatStdNum(weekMemorizedTotal)}</b> صفحة</span>
-        <span>أيام مراجعة مكتملة: <b class="text-gold-600 dark:text-gold-400 font-bold">${formatStdNum(weekReviewedTotal)}</b> من 7</span>
+        <span>أيام مراجعة مكتملة: <b class="text-gold-600 dark:text-gold-400 font-bold">${formatStdNum(weekReviewedTotal)}</b> من ${formatStdNum(chosenReviewDaysCount)}</span>
       </div>
     </div>
   `;
@@ -745,9 +717,12 @@ function renderPlanner() {
           <input type="number" min="1" max="7" value="${state.studyDays || 7}" onchange="setStudyDays(this.value)" class="w-12 px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-center font-bold text-slate-800 dark:text-white">
           <span class="text-slate-400">أيام</span>
         </div>
+        <div class="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800">
+          الهدف اليومي: <b class="font-bold">${formatStdNum(dailyTarget)}</b> صفحة
+        </div>
       </div>
       <div class="flex flex-wrap items-center gap-1.5 text-xs pt-1">
-        <span class="text-slate-500 ml-1">أيام المراجعة المخصصة:</span>
+        <span class="text-slate-500 ml-1">أيام المراجعة المخصصة (${formatStdNum(chosenReviewDaysCount)}):</span>
         ${dayButtonsHtml}
       </div>
       <div class="text-[11px] text-slate-500">اليوم: <b class="text-slate-800 dark:text-white">${formatStdNum(today)}</b> صفحة</div>
@@ -763,7 +738,6 @@ function renderPlanner() {
       </div>
     </div>`;
 
-  attachWeeklySwipe();
   lucide.createIcons();
 }
 
@@ -779,7 +753,7 @@ function renderAll() {
 // ==========================================
 // NAVIGATION & MODE SWITCHER
 // ==========================================
-function switchMode(mode) {
+function switchMode(mode, shouldScroll = true) {
   state.activeView = mode;
   const tabSurah = document.getElementById('tabModeSurah');
   const tabPage = document.getElementById('tabModePage');
@@ -867,6 +841,20 @@ function switchMode(mode) {
     if (viewTamkeen) {
       viewTamkeen.classList.remove('hidden');
       renderTamkeenQuiz();
+    }
+  }
+
+  if (shouldScroll) {
+    const targetSection = (mode === 'surah') ? viewSurahs : (mode === 'page') ? viewPages : (mode === 'juz') ? viewJuz : viewTamkeen;
+    if (targetSection) {
+      const header = document.querySelector('header');
+      const headerHeight = header ? header.offsetHeight : 64;
+      const elementPosition = targetSection.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = elementPosition - headerHeight - 14;
+      window.scrollTo({
+        top: Math.max(0, offsetPosition),
+        behavior: 'smooth'
+      });
     }
   }
 }
@@ -997,10 +985,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabJuz = document.getElementById('tabModeJuz');
   const tabTamkeen = document.getElementById('tabModeTamkeen');
 
-  if (tabSurah) tabSurah.addEventListener('click', () => switchMode('surah'));
-  if (tabPage) tabPage.addEventListener('click', () => switchMode('page'));
-  if (tabJuz) tabJuz.addEventListener('click', () => switchMode('juz'));
-  if (tabTamkeen) tabTamkeen.addEventListener('click', () => switchMode('tamkeen'));
+  if (tabSurah) tabSurah.addEventListener('click', () => switchMode('surah', true));
+  if (tabPage) tabPage.addEventListener('click', () => switchMode('page', true));
+  if (tabJuz) tabJuz.addEventListener('click', () => switchMode('juz', true));
+  if (tabTamkeen) tabTamkeen.addEventListener('click', () => switchMode('tamkeen', true));
 
   const mobileTabs = {
     surah: document.getElementById('mobileTabSurah'),
@@ -1009,13 +997,13 @@ document.addEventListener('DOMContentLoaded', () => {
     tamkeen: document.getElementById('mobileTabTamkeen'),
   };
 
-  if (mobileTabs.surah) mobileTabs.surah.addEventListener('click', () => switchMode('surah'));
-  if (mobileTabs.page) mobileTabs.page.addEventListener('click', () => switchMode('page'));
-  if (mobileTabs.juz) mobileTabs.juz.addEventListener('click', () => switchMode('juz'));
-  if (mobileTabs.tamkeen) mobileTabs.tamkeen.addEventListener('click', () => switchMode('tamkeen'));
+  if (mobileTabs.surah) mobileTabs.surah.addEventListener('click', () => switchMode('surah', true));
+  if (mobileTabs.page) mobileTabs.page.addEventListener('click', () => switchMode('page', true));
+  if (mobileTabs.juz) mobileTabs.juz.addEventListener('click', () => switchMode('juz', true));
+  if (mobileTabs.tamkeen) mobileTabs.tamkeen.addEventListener('click', () => switchMode('tamkeen', true));
 
-  // Ensure active mode is applied on init
-  switchMode(state.activeView || 'surah');
+  // Ensure active mode is applied on init without auto-scrolling
+  switchMode(state.activeView || 'surah', false);
 
   const searchInput = document.getElementById('globalSearchInput');
   if (searchInput) {
