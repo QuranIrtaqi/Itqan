@@ -823,8 +823,7 @@ const PAGE_RECITERS = [
   { id: 'ar.mahermuaiqly', name: 'ماهر المعيقلي' },
   { id: 'ar.saoodshuraym', name: 'سعود الشريم' },
   { id: 'ar.hudhaify', name: 'علي عبد الرحمن الحذيفي' },
-  { id: 'ar.ahmedajamy', name: 'أحمد بن علي العجمي' },
-  { id: 'ar.aymanswoid', name: 'أيمن سويد' }
+  { id: 'ar.ahmedajamy', name: 'أحمد بن علي العجمي' }
 ];
 
 let selectedPageReciter = 'ar.husary';
