@@ -1029,6 +1029,9 @@ function renderPlanner() {
       </div>
     </div>`;
 
+  lucide.createIcons();
+}
+
 // ==========================================
 // SMART DAILY REVIEW WARD (الورد اليومي الذكي)
 // ==========================================
