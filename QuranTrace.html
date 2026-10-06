@@ -527,18 +527,17 @@
         </div>
       </div>
 
-      <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm sticky top-14 sm:top-16 z-20">
-        <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
-          <span class="text-xs font-bold text-emerald-800 dark:text-emerald-400 whitespace-nowrap px-1">انتقال سريع للجزء:</span>
+      <div id="stickyJuzNavWrapper" class="sticky-juz-nav bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md">
+        <div class="flex items-center gap-2 overflow-x-auto pb-0.5 text-xs no-scrollbar">
+          <span class="text-xs font-bold text-emerald-800 dark:text-emerald-400 whitespace-nowrap px-1 shrink-0 flex items-center gap-1">
+            <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+            <span>الأجزاء:</span>
+          </span>
           <div id="juzJumpersContainer" class="flex gap-1.5 font-sans"></div>
         </div>
       </div>
 
-      <div
-        class="bg-white dark:bg-slate-900 p-3 sm:p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div id="pageGridContainer"
-          class="grid grid-cols-6 sm:grid-cols-10 md:grid-cols-15 lg:grid-cols-20 gap-1.5 font-sans"></div>
-      </div>
+      <div id="pageGridContainer" class="space-y-4 font-sans"></div>
     </section>
 
     <section id="viewJuz" class="hidden transition-all duration-300">

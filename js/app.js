@@ -462,41 +462,131 @@ function renderPages() {
   const query = normAr(state.searchQuery);
   const filter = state.currentFilter;
 
+  let totalVisiblePages = 0;
   let html = '';
-  for (let p = 1; p <= 604; p++) {
-    const isDone = !!state.memorizedPages[p];
-    const surahNames = getSurahsForPage(p);
-    const juz = getJuzForPage(p);
 
-    let matches = true;
-    if (query) {
-      const matchNum = p.toString() === query;
-      const matchSurah = normAr(surahNames).includes(query);
-      const matchJuz = normAr(`جزء ${juz}`).includes(query) || juz.toString() === query;
-      matches = matchNum || matchSurah || matchJuz;
+  AJZA.forEach(j => {
+    let juzPagesHtml = '';
+    let juzDoneCount = 0;
+    let juzVisibleCount = 0;
+    const totalInJuz = (j.end - j.start + 1);
+    const midPointPage = Math.ceil((j.start + j.end) / 2);
+    const hizb1Num = (j.juz * 2) - 1;
+    const hizb2Num = j.juz * 2;
+
+    for (let p = j.start; p <= j.end; p++) {
+      const isDone = !!state.memorizedPages[p];
+      if (isDone) juzDoneCount++;
+
+      const surahNames = getSurahsForPage(p);
+      const juz = j.juz;
+
+      let matches = true;
+      if (query) {
+        const matchNum = p.toString() === query;
+        const matchSurah = normAr(surahNames).includes(query);
+        const matchJuz = normAr(`جزء ${juz}`).includes(query) || juz.toString() === query;
+        matches = matchNum || matchSurah || matchJuz;
+      }
+      if (filter === 'memorized' && !isDone) matches = false;
+      if (filter === 'unmemorized' && isDone) matches = false;
+
+      if (matches) {
+        juzVisibleCount++;
+        totalVisiblePages++;
+      }
+
+      // Add Hizb 2 separator divider before the second half of the Juz
+      if (p === midPointPage) {
+        juzPagesHtml += `
+          <div class="col-span-full my-2.5 py-1 px-3 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-between text-[11px] font-bold text-emerald-800 dark:text-emerald-300">
+            <span class="flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+              الحزب ${formatStdNum(hizb2Num)} (النصف الثاني)
+            </span>
+            <span class="text-[10px] font-normal opacity-75">ص ${formatStdNum(midPointPage)} - ${formatStdNum(j.end)}</span>
+          </div>
+        `;
+      }
+
+      const opacityClass = matches ? 'opacity-100' : 'opacity-20 pointer-events-none';
+
+      juzPagesHtml += `
+        <div 
+          id="page-cell-${p}"
+          onclick="togglePage(${p})" 
+          title="صفحة ${formatStdNum(p)} | جزء ${formatStdNum(juz)} | سورة ${surahNames}"
+          class="page-box cursor-pointer relative group h-11 sm:h-12 rounded-xl text-xs font-bold flex flex-col items-center justify-center transition-all shadow-sm active:scale-95 touch-manipulation select-none ${opacityClass} ${isDone
+          ? 'bg-emerald-700 text-white shadow-emerald-800/30'
+          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-100 hover:text-emerald-900 dark:hover:bg-emerald-950 dark:hover:text-emerald-200 border border-slate-200/90 dark:border-slate-700'
+        }">
+          <button type="button" onclick="event.stopPropagation(); openPagePreview(${p})" title="معاينة الصفحة في المصحف" class="absolute -top-0.5 -left-0.5 w-6 h-6 flex items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:text-emerald-700 dark:hover:text-gold-300 opacity-75 sm:opacity-0 group-hover:opacity-100 transition active:scale-90">
+            <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+          </button>
+          <span>${formatStdNum(p)}</span>
+          <span class="text-[8px] font-normal opacity-70">ج${formatStdNum(juz)}</span>
+        </div>
+      `;
     }
-    if (filter === 'memorized' && !isDone) matches = false;
-    if (filter === 'unmemorized' && isDone) matches = false;
 
-    const opacityClass = matches ? 'opacity-100' : 'opacity-20 pointer-events-none';
+    // Skip displaying the Juz card entirely if there is an active search and no pages matched
+    if (query && juzVisibleCount === 0) return;
+
+    const juzPct = Math.round((juzDoneCount / totalInJuz) * 100);
+    const isJuzComplete = juzDoneCount === totalInJuz;
 
     html += `
-      <div 
-        id="page-cell-${p}"
-        onclick="togglePage(${p})" 
-        title="صفحة ${formatStdNum(p)} | جزء ${formatStdNum(juz)} | سورة ${surahNames}"
-        class="page-box cursor-pointer relative group h-11 sm:h-12 rounded-xl text-xs font-bold flex flex-col items-center justify-center transition-all shadow-sm active:scale-95 touch-manipulation select-none ${opacityClass} ${isDone
-        ? 'bg-emerald-700 text-white shadow-emerald-800/30'
-        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-100 hover:text-emerald-900 dark:hover:bg-emerald-950 dark:hover:text-emerald-200 border border-slate-200/90 dark:border-slate-700'
-      }">
-        <button type="button" onclick="event.stopPropagation(); openPagePreview(${p})" title="معاينة الصفحة في المصحف" class="absolute -top-0.5 -left-0.5 w-6 h-6 flex items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:text-emerald-700 dark:hover:text-gold-300 opacity-75 sm:opacity-0 group-hover:opacity-100 transition active:scale-90">
-          <i data-lucide="eye" class="w-3.5 h-3.5"></i>
-        </button>
-        <span>${formatStdNum(p)}</span>
-        <span class="text-[8px] font-normal opacity-70">ج${formatStdNum(juz)}</span>
+      <section id="juz-block-${j.juz}" class="bg-white/95 dark:bg-slate-900/95 border ${isJuzComplete ? 'border-emerald-500/60 shadow-emerald-900/10' : 'border-slate-200/90 dark:border-slate-800'} rounded-2xl p-3.5 sm:p-5 shadow-sm space-y-3 transition scroll-mt-28">
+        <!-- رأس الجزء -->
+        <div class="flex items-center justify-between flex-wrap gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800/80">
+          <div class="flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold ${isJuzComplete ? 'bg-emerald-700 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'}">
+              ${formatStdNum(j.juz)}
+            </span>
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">الجزء ${formatStdNum(j.juz)}</h4>
+                <span class="text-[11px] text-emerald-700 dark:text-emerald-400 font-quran font-normal">(${j.name})</span>
+              </div>
+              <p class="text-[10px] text-slate-400 font-sans">
+                الحزب ${formatStdNum(hizb1Num)} و${formatStdNum(hizb2Num)} • الصفحات ${formatStdNum(j.start)} - ${formatStdNum(j.end)}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold px-2 py-0.5 rounded-full ${isJuzComplete ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'}">
+              ${formatStdNum(juzDoneCount)}/${formatStdNum(totalInJuz)} (${juzPct}%)
+            </span>
+            <div class="flex items-center gap-1">
+              <button onclick="markWholeJuz(${j.juz}, true)" title="حفظ الجزء بالكامل" class="px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900 text-[11px] font-bold transition active:scale-95">
+                حفظ الكل
+              </button>
+              <button onclick="markWholeJuz(${j.juz}, false)" title="إلغاء حفظ الجزء" class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 text-[11px] font-bold transition active:scale-95">
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- شبكة صفحات الجزء مع فواصل الأحزاب -->
+        <div class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-1.5 sm:gap-2">
+          ${juzPagesHtml}
+        </div>
+      </section>
+    `;
+  });
+
+  if (!html) {
+    html = `
+      <div class="text-center py-12 bg-white/70 dark:bg-slate-900/70 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-6 space-y-2">
+        <i data-lucide="search-x" class="w-10 h-10 text-slate-400 mx-auto"></i>
+        <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300">لا توجد صفحات مطابقة</h4>
+        <p class="text-xs text-slate-500">جرب البحث برقم صفحة آخر أو إلغاء التصفية الحالية</p>
       </div>
     `;
   }
+
   container.innerHTML = html;
   lucide.createIcons();
 }
@@ -570,13 +660,27 @@ function jumpToPage(page, juzNum) {
   if (juzNum) {
     document.querySelectorAll('#juzJumpersContainer button').forEach(b => b.classList.remove('juz-jumper-active'));
     const btn = document.getElementById(`juz-btn-${juzNum}`);
-    if (btn) btn.classList.add('juz-jumper-active');
+    if (btn) {
+      btn.classList.add('juz-jumper-active');
+      btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
   }
+
+  // First try scrolling to the specific page cell
   const el = document.getElementById(`page-cell-${page}`);
   if (el) {
     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     el.classList.add('ring-4', 'ring-gold-400');
     setTimeout(() => el.classList.remove('ring-4', 'ring-gold-400'), 1500);
+    return;
+  }
+
+  // Fallback to scrolling to the juz section block
+  if (juzNum) {
+    const juzBlock = document.getElementById(`juz-block-${juzNum}`);
+    if (juzBlock) {
+      juzBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 }
 

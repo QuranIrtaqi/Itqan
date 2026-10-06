@@ -399,6 +399,31 @@ function getTamkeenEligibleQuestions() {
   return unasked.length > 0 ? unasked : (pool.length > 0 ? pool : TAMKEEN_STATIC_FALLBACKS);
 }
 
+const TAMKEEN_RECITERS = [
+  { id: 'ar.husary', name: 'الشيخ محمود خليل الحصري (مرتل)' },
+  { id: 'ar.minshawi', name: 'الشيخ محمد صديق المنشاوي' },
+  { id: 'ar.hudhaify', name: 'الشيخ علي الحذيفي (إمام المسجد النبوي)' },
+  { id: 'ar.alafasy', name: 'الشيخ مشاري راشد العفاسي' }
+];
+
+let selectedReciter = 'ar.husary';
+try {
+  const savedReciter = localStorage.getItem('quran_tracker_reciter');
+  if (savedReciter && TAMKEEN_RECITERS.some(r => r.id === savedReciter)) {
+    selectedReciter = savedReciter;
+  }
+} catch (e) { }
+
+function setTamkeenReciter(reciterId) {
+  selectedReciter = reciterId;
+  try { localStorage.setItem('quran_tracker_reciter', reciterId); } catch (e) { }
+  stopTamkeenAudio();
+  const reciterObj = TAMKEEN_RECITERS.find(r => r.id === reciterId);
+  if (typeof showToast === 'function') {
+    showToast(`تم تعيين القارئ: ${reciterObj ? reciterObj.name : reciterId}`);
+  }
+}
+
 function getGlobalAyahNumber(surahId, ayahNumInSurah) {
   let count = 0;
   for (let i = 1; i < surahId; i++) {
@@ -440,7 +465,7 @@ function toggleTamkeenAudio() {
   }
 
   const globalAyahNum = q.globalAyahNum || getGlobalAyahNumber(q.surahId, q.ayahNum);
-  const audioUrl = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${globalAyahNum}.mp3`;
+  const audioUrl = `https://cdn.islamic.network/quran/audio/128/${selectedReciter}/${globalAyahNum}.mp3`;
 
   if (!currentTamkeenAudio || currentTamkeenAudio.dataset.url !== audioUrl) {
     if (currentTamkeenAudio) {
@@ -766,14 +791,21 @@ function renderTamkeenQuiz() {
           «${displayedVerse}»
         </p>
 
-        <div class="mt-3 pt-2.5 border-t border-gold-300/40 dark:border-emerald-800/40 flex items-center justify-center gap-2">
-          <button id="btnTamkeenAudioPlay" onclick="toggleTamkeenAudio()" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 hover:bg-white dark:bg-slate-800/90 dark:hover:bg-slate-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold shadow-xs border border-emerald-300/60 dark:border-emerald-700/60 transition active:scale-95" title="الاستماع لتلاوة الآية بصوت الشيخ مشاري العفاسي">
-            <i id="tamkeenAudioIcon" data-lucide="volume-2" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
+        <div class="mt-3 pt-2.5 border-t border-gold-300/40 dark:border-emerald-800/40 flex flex-wrap items-center justify-center gap-2">
+          <button id="btnTamkeenAudioPlay" onclick="toggleTamkeenAudio()" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-xs transition active:scale-95" title="الاستماع لتلاوة الآية الكريمة">
+            <i id="tamkeenAudioIcon" data-lucide="volume-2" class="w-4 h-4 text-gold-300"></i>
             <span id="tamkeenAudioText">استمع للتلاوة</span>
             <span id="tamkeenAudioWaves" class="hidden audio-playing-indicator">
               <span></span><span></span><span></span><span></span>
             </span>
           </button>
+
+          <div class="flex items-center gap-1.5 text-xs">
+            <label for="tamkeenReciterSelect" class="text-slate-500 dark:text-slate-400 font-bold text-[11px] whitespace-nowrap">القارئ:</label>
+            <select id="tamkeenReciterSelect" onchange="setTamkeenReciter(this.value)" class="py-1 px-2.5 rounded-xl text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:ring-1 focus:ring-emerald-600 shadow-xs cursor-pointer">
+              ${TAMKEEN_RECITERS.map(r => `<option value="${r.id}" ${r.id === selectedReciter ? 'selected' : ''}>${r.name}</option>`).join('')}
+            </select>
+          </div>
         </div>
       </div>
     </div>
