@@ -16,15 +16,76 @@ let deferredPrompt = null;
   }
 })();
 
+function isAppInstalled() {
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true
+    || (document.referrer && document.referrer.includes('android-app://'));
+  const storedInstalled = localStorage.getItem('quran_app_installed') === 'true';
+  return isStandalone || storedInstalled;
+}
+
+function updateInstallUI() {
+  const isInstalled = isAppInstalled();
+  const installBtn = document.getElementById('btnInstallApp');
+  const installBtnText = document.getElementById('installBtnText');
+  const banner = document.getElementById('installReminderBanner');
+
+  if (installBtn) {
+    installBtn.classList.remove('animate-pulse');
+    if (isInstalled) {
+      // Installed state: smaller button, icon only, without the word, no fading
+      installBtn.className = "p-1.5 sm:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition active:scale-95 flex items-center justify-center shrink-0";
+      installBtn.title = "التطبيق مثبت على جهازك";
+      if (installBtnText) installBtnText.classList.add('hidden');
+    } else {
+      // Browser state (not installed): shows phone icon AND the word 'تثبيت' on mobile and desktop, solid (no pulse fading)
+      installBtn.className = "px-2 py-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm shadow-emerald-900/30 transition active:scale-95 flex items-center gap-1 shrink-0";
+      installBtn.title = "تثبيت التطبيق على الشاشة الرئيسية";
+      if (installBtnText) installBtnText.classList.remove('hidden');
+    }
+  }
+
+  if (banner) {
+    const isDismissed = sessionStorage.getItem('dismiss_install_banner') === 'true';
+    if (isInstalled || isDismissed) {
+      banner.classList.add('hidden');
+    } else {
+      banner.classList.remove('hidden');
+    }
+  }
+}
+
+async function triggerInstallFlow() {
+  if (deferredPrompt) {
+    try {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        localStorage.setItem('quran_app_installed', 'true');
+        updateInstallUI();
+        showToast("تم طلب تثبيت التطبيق بنجاح!");
+      }
+      deferredPrompt = null;
+    } catch (e) {
+      const installModal = document.getElementById('installAppModal');
+      if (installModal) installModal.classList.remove('hidden');
+    }
+  } else {
+    const installModal = document.getElementById('installAppModal');
+    if (installModal) installModal.classList.remove('hidden');
+  }
+}
+
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  const installBtn = document.getElementById('btnInstallApp');
-  if (installBtn) installBtn.classList.add('animate-pulse');
+  updateInstallUI();
 });
 
 window.addEventListener('appinstalled', () => {
   deferredPrompt = null;
+  localStorage.setItem('quran_app_installed', 'true');
+  updateInstallUI();
   showToast("تم تثبيت التطبيق بنجاح على شاشتك الرئيسية!");
 });
 
@@ -951,28 +1012,37 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnInstall = document.getElementById('btnInstallApp');
   const btnDismissInstall = document.getElementById('btnDismissInstallModal');
   const btnCloseInstall = document.getElementById('btnCloseInstallModal');
+  const btnBannerInstall = document.getElementById('btnBannerInstall');
+  const btnDismissInstallBanner = document.getElementById('btnDismissInstallBanner');
 
   if (btnInstall) {
-    btnInstall.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        try {
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          if (outcome === 'accepted') {
-            showToast("تم طلب تثبيت التطبيق بنجاح!");
-          }
-          deferredPrompt = null;
-        } catch (e) {
-          if (installModal) installModal.classList.remove('hidden');
-        }
+    btnInstall.addEventListener('click', () => {
+      if (isAppInstalled()) {
+        showToast("التطبيق مثبت بالفعل على جهازك ويعمل دون اتصال!");
       } else {
-        if (installModal) installModal.classList.remove('hidden');
+        triggerInstallFlow();
       }
+    });
+  }
+
+  if (btnBannerInstall) {
+    btnBannerInstall.addEventListener('click', () => {
+      triggerInstallFlow();
+    });
+  }
+
+  if (btnDismissInstallBanner) {
+    btnDismissInstallBanner.addEventListener('click', () => {
+      sessionStorage.setItem('dismiss_install_banner', 'true');
+      const banner = document.getElementById('installReminderBanner');
+      if (banner) banner.classList.add('hidden');
     });
   }
 
   if (btnCloseInstall) btnCloseInstall.addEventListener('click', () => installModal.classList.add('hidden'));
   if (btnDismissInstall) btnDismissInstall.addEventListener('click', () => installModal.classList.add('hidden'));
+
+  updateInstallUI();
 
   const btnHeaderTamkeen = document.getElementById('btnHeaderTamkeen');
   const viewTamkeen = document.getElementById('viewTamkeen');
@@ -1057,7 +1127,7 @@ document.addEventListener('DOMContentLoaded', () => {
       state.log = {};
       state.ayahs = {};
       state.reviewLog = {};
-      state.recoveryDays = 0;
+      state.recoveryDays = 1;
       state.recoveredDates = {};
       state.lastAwardedMilestone = 0;
       tamkeenState.stats = { total: 0, correct: 0, streak: 0, bestStreak: 0 };
@@ -1166,7 +1236,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.reviewLog = parsed.reviewLog || {};
             state.surahIntervals = parsed.surahIntervals || {};
             state.userName = parsed.userName || '';
-            state.recoveryDays = typeof parsed.recoveryDays === 'number' ? parsed.recoveryDays : 0;
+            state.recoveryDays = typeof parsed.recoveryDays === 'number' ? parsed.recoveryDays : 1;
             state.recoveredDates = parsed.recoveredDates || {};
             state.lastAwardedMilestone = typeof parsed.lastAwardedMilestone === 'number' ? parsed.lastAwardedMilestone : 0;
             syncCount();

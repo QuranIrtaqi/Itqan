@@ -24,7 +24,7 @@ let state = {
   searchQuery: '',
   activeView: 'surah',
   weekOffset: 0,
-  recoveryDays: 0,
+  recoveryDays: 1,
   recoveredDates: {},
   lastAwardedMilestone: 0
 };
@@ -61,7 +61,7 @@ function loadState() {
       state.reviewLog = parsed.reviewLog || {};
       state.surahIntervals = parsed.surahIntervals || {};
       state.userName = parsed.userName || '';
-      state.recoveryDays = typeof parsed.recoveryDays === 'number' ? parsed.recoveryDays : 0;
+      state.recoveryDays = typeof parsed.recoveryDays === 'number' ? parsed.recoveryDays : 1;
       state.recoveredDates = parsed.recoveredDates || {};
       state.lastAwardedMilestone = typeof parsed.lastAwardedMilestone === 'number' ? parsed.lastAwardedMilestone : 0;
       state.autoSync = true;
@@ -467,7 +467,7 @@ function rateSurahReview(id, intervalDays, ratingLabel) {
 function getStreak() {
   const t = todayStr();
   if (!state.recoveredDates) state.recoveredDates = {};
-  if (typeof state.recoveryDays !== 'number') state.recoveryDays = 0;
+  if (typeof state.recoveryDays !== 'number') state.recoveryDays = 1;
   if (typeof state.lastAwardedMilestone !== 'number') state.lastAwardedMilestone = 0;
 
   const isActive = k => (state.log[k] > 0 || !!state.reviewLog[k] || !!state.recoveredDates[k]);
