@@ -579,10 +579,11 @@ function renderPlanner() {
     const isDesignatedReviewDay = (state.reviewDays || []).includes(dayOfWeekIdx);
     const pagesLogged = state.log[key] || 0;
     const isReviewDone = !!state.reviewLog[key];
+    const isRecovered = !!(state.recoveredDates && state.recoveredDates[key]);
     const isMemorizedGoalMet = (state.goal > 0) ? (pagesLogged >= dailyTarget) : (pagesLogged > 0);
 
     weekMemorizedTotal += pagesLogged;
-    if (isReviewDone) weekReviewedTotal++;
+    if (isReviewDone || isRecovered) weekReviewedTotal++;
 
     weekDays.push({
       key,
@@ -592,7 +593,8 @@ function renderPlanner() {
       isDesignatedReviewDay,
       pagesLogged,
       isReviewDone,
-      isMemorizedGoalMet
+      isMemorizedGoalMet,
+      isRecovered
     });
   }
 
@@ -621,33 +623,34 @@ function renderPlanner() {
 
       <div class="grid grid-cols-7 gap-1 sm:gap-1.5 text-center text-xs">
         ${weekDays.map(d => `
-          <div class="p-1.5 rounded-xl border flex flex-col items-center justify-between gap-1 transition ${
-            d.isToday
-              ? 'bg-emerald-50 dark:bg-emerald-950/70 border-emerald-400 dark:border-emerald-700 shadow-xs'
-              : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800'
-          }">
+          <div class="p-1.5 rounded-xl border flex flex-col items-center justify-between gap-1 transition ${d.isToday
+      ? 'bg-emerald-50 dark:bg-emerald-950/70 border-emerald-400 dark:border-emerald-700 shadow-xs'
+      : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800'
+    }">
             <span class="text-[10px] text-slate-400 font-medium block">${d.name}</span>
             <span class="text-xs font-bold ${d.isToday ? 'text-emerald-700 dark:text-emerald-400 font-black' : 'text-slate-700 dark:text-slate-300'}">${formatStdNum(d.dateNum)}</span>
             <div class="w-full flex items-center justify-center py-0.5">
               ${d.pagesLogged > 0
-                ? `<span class="inline-block px-1.5 py-0.2 rounded-full bg-emerald-600 text-white text-[10px] font-bold leading-tight shadow-xs">+${formatStdNum(d.pagesLogged)}</span>`
-                : `<span class="text-[11px] text-slate-300 dark:text-slate-600">-</span>`
-              }
+      ? `<span class="inline-block px-1.5 py-0.2 rounded-full bg-emerald-600 text-white text-[10px] font-bold leading-tight shadow-xs">+${formatStdNum(d.pagesLogged)}</span>`
+      : (d.isRecovered ? `<span class="text-[9px] text-teal-600 dark:text-teal-400 font-bold whitespace-nowrap">🛡️ مستدرك</span>` : `<span class="text-[11px] text-slate-300 dark:text-slate-600">-</span>`)
+    }
             </div>
-            <button onclick="toggleReviewDay('${d.key}')" title="${
-              d.isMemorizedGoalMet
-                ? `تم إنجاز هدف الحفظ (${formatStdNum(d.pagesLogged)} من ${formatStdNum(dailyTarget)} صفحة)`
-                : (d.isReviewDone ? 'تمت المراجعة لهذا اليوم' : 'انقر لتسجيل مراجعة هذا اليوم')
-            }" class="w-5 h-5 rounded-md flex items-center justify-center transition ${
-              d.isMemorizedGoalMet
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : (d.isReviewDone
-                    ? 'bg-gold-500 text-white shadow-xs'
-                    : (d.isDesignatedReviewDay
-                        ? 'border border-dashed border-gold-400 text-gold-500 dark:text-gold-400 hover:bg-gold-50 dark:hover:bg-gold-950/30'
-                        : 'text-slate-300 dark:text-slate-600 hover:text-emerald-500 border border-slate-200 dark:border-slate-700'))
-            }">
-              <i data-lucide="check" class="w-3 h-3 stroke-[2.5]"></i>
+            <button onclick="toggleReviewDay('${d.key}')" title="${d.isRecovered
+      ? 'يوم مستدرك تم إنقاذ سلسلته بواسطة رصيد الاستدراك 🛡️'
+      : (d.isMemorizedGoalMet
+        ? `تم إنجاز هدف الحفظ (${formatStdNum(d.pagesLogged)} من ${formatStdNum(dailyTarget)} صفحة)`
+        : (d.isReviewDone ? 'تمت المراجعة لهذا اليوم' : (d.isToday ? 'انقر لتسجيل مراجعة هذا اليوم' : 'سجل قراءة فقط')))
+    }" class="w-5 h-5 rounded-md flex items-center justify-center transition ${d.isRecovered
+      ? 'bg-teal-600 text-white shadow-xs'
+      : (d.isMemorizedGoalMet
+        ? 'bg-emerald-600 text-white shadow-xs'
+        : (d.isReviewDone
+          ? 'bg-gold-500 text-white shadow-xs'
+          : (d.isDesignatedReviewDay
+            ? 'border border-dashed border-gold-400 text-gold-500 dark:text-gold-400 hover:bg-gold-50 dark:hover:bg-gold-950/30'
+            : 'text-slate-300 dark:text-slate-600 hover:text-emerald-500 border border-slate-200 dark:border-slate-700')))
+    }">
+              <i data-lucide="${d.isRecovered ? 'shield-check' : 'check'}" class="w-3 h-3 stroke-[2.5]"></i>
             </button>
           </div>
         `).join('')}
@@ -673,7 +676,7 @@ function renderPlanner() {
           <div>
             <div class="flex items-center gap-1.5">
               <span class="text-xs sm:text-sm font-black text-amber-900 dark:text-amber-200">${badgeTitle}</span>
-              <span class="text-[10px] px-2 py-0.2 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold">وسام نبوي</span>
+              <span class="text-[10px] px-2 py-0.2 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold">وسام شريف</span>
             </div>
             <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">سلسلة ثبات يومي: <b class="text-amber-600 dark:text-amber-400 font-bold text-xs sm:text-sm">${formatStdNum(streak)}</b> يوم متتالي 🔥</p>
           </div>
@@ -690,7 +693,17 @@ function renderPlanner() {
         </div>
       ` : ''}
 
-      <div class="pt-1.5 border-t border-amber-500/20 dark:border-amber-400/10 space-y-1">
+      <div class="flex items-center justify-between pt-1.5 border-t border-amber-500/20 dark:border-amber-400/10 text-xs font-sans">
+        <div class="flex items-center gap-1.5">
+          <span class="w-5 h-5 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 flex items-center justify-center font-bold text-xs shadow-xs">🛡️</span>
+          <span class="text-slate-700 dark:text-slate-200 font-bold">رصيد أيام الاستدراك:</span>
+          <b class="text-emerald-700 dark:text-emerald-400 font-black text-sm">${formatStdNum(state.recoveryDays || 0)}</b>
+          <span class="text-[10px] text-slate-400 font-medium">يوم</span>
+        </div>
+        <span class="text-[10px] text-amber-700 dark:text-amber-300 font-semibold">(+1 يوم لكل أسبوع كامل 7/7)</span>
+      </div>
+
+      <div class="pt-1 border-t border-amber-500/20 dark:border-amber-400/10 space-y-1">
         <p class="text-xs font-bold text-emerald-900 dark:text-emerald-300 font-quran leading-relaxed">${motivator.current.quote}</p>
         <p class="text-[11px] text-amber-800/90 dark:text-amber-300/80 leading-normal">${motivator.current.encouragement}</p>
       </div>
@@ -1044,6 +1057,9 @@ document.addEventListener('DOMContentLoaded', () => {
       state.log = {};
       state.ayahs = {};
       state.reviewLog = {};
+      state.recoveryDays = 0;
+      state.recoveredDates = {};
+      state.lastAwardedMilestone = 0;
       tamkeenState.stats = { total: 0, correct: 0, streak: 0, bestStreak: 0 };
       saveTamkeenStats();
       updateTamkeenStatsUI();
@@ -1077,6 +1093,9 @@ document.addEventListener('DOMContentLoaded', () => {
         reviewLog: state.reviewLog,
         surahIntervals: state.surahIntervals,
         userName: state.userName,
+        recoveryDays: state.recoveryDays || 0,
+        recoveredDates: state.recoveredDates || {},
+        lastAwardedMilestone: state.lastAwardedMilestone || 0,
         exportedAt: new Date().toISOString()
       }, null, 2);
       backupModal.classList.remove('hidden');
@@ -1112,6 +1131,9 @@ document.addEventListener('DOMContentLoaded', () => {
         reviewLog: state.reviewLog,
         surahIntervals: state.surahIntervals,
         userName: state.userName,
+        recoveryDays: state.recoveryDays || 0,
+        recoveredDates: state.recoveredDates || {},
+        lastAwardedMilestone: state.lastAwardedMilestone || 0,
         exportedAt: new Date().toISOString()
       }, null, 2));
       const a = document.createElement('a');
@@ -1144,6 +1166,9 @@ document.addEventListener('DOMContentLoaded', () => {
             state.reviewLog = parsed.reviewLog || {};
             state.surahIntervals = parsed.surahIntervals || {};
             state.userName = parsed.userName || '';
+            state.recoveryDays = typeof parsed.recoveryDays === 'number' ? parsed.recoveryDays : 0;
+            state.recoveredDates = parsed.recoveredDates || {};
+            state.lastAwardedMilestone = typeof parsed.lastAwardedMilestone === 'number' ? parsed.lastAwardedMilestone : 0;
             syncCount();
             saveState();
             renderAll();

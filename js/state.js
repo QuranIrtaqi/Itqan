@@ -23,7 +23,10 @@ let state = {
   currentFilter: 'all',
   searchQuery: '',
   activeView: 'surah',
-  weekOffset: 0
+  weekOffset: 0,
+  recoveryDays: 0,
+  recoveredDates: {},
+  lastAwardedMilestone: 0
 };
 
 function normAr(str) {
@@ -58,6 +61,9 @@ function loadState() {
       state.reviewLog = parsed.reviewLog || {};
       state.surahIntervals = parsed.surahIntervals || {};
       state.userName = parsed.userName || '';
+      state.recoveryDays = typeof parsed.recoveryDays === 'number' ? parsed.recoveryDays : 0;
+      state.recoveredDates = parsed.recoveredDates || {};
+      state.lastAwardedMilestone = typeof parsed.lastAwardedMilestone === 'number' ? parsed.lastAwardedMilestone : 0;
       state.autoSync = true;
     }
   } catch (err) {
@@ -109,6 +115,9 @@ function saveState() {
       reviewLog: state.reviewLog,
       surahIntervals: state.surahIntervals,
       userName: state.userName,
+      recoveryDays: state.recoveryDays || 0,
+      recoveredDates: state.recoveredDates || {},
+      lastAwardedMilestone: state.lastAwardedMilestone || 0,
       autoSync: state.autoSync
     }));
   } catch (err) {
@@ -398,6 +407,15 @@ function setStudyDays(v) {
 }
 
 function toggleReviewDay(key) {
+  const t = todayStr();
+  if (key > t) {
+    showToast("لا يمكن تسجيل مراجعة لأيام قادمة");
+    return;
+  }
+  if (key < t) {
+    showToast("سجل الأيام السابقة للقراءة فقط؛ حماية السلسلة تتم برصيد أيام الاستدراك 🛡️");
+    return;
+  }
   if (state.reviewLog[key]) {
     delete state.reviewLog[key];
     showToast("تم إلغاء المراجعة لهذا اليوم");
@@ -448,22 +466,47 @@ function rateSurahReview(id, intervalDays, ratingLabel) {
 
 function getStreak() {
   const t = todayStr();
-  const rest = 7 - state.studyDays;
-  const active = k => state.log[k] > 0 || !!state.reviewLog[k];
-  const d = active(t) ? new Date(t + 'T00:00:00') : addDays(t, -1);
-  const misses = [];
-  let n = 0, i = 0;
-  while (i < 800) {
-    if (active(dayKey(d))) {
-      n++;
+  if (!state.recoveredDates) state.recoveredDates = {};
+  if (typeof state.recoveryDays !== 'number') state.recoveryDays = 0;
+  if (typeof state.lastAwardedMilestone !== 'number') state.lastAwardedMilestone = 0;
+
+  const isActive = k => (state.log[k] > 0 || !!state.reviewLog[k] || !!state.recoveredDates[k]);
+
+  // Start from today if active; otherwise check yesterday
+  let cur = isActive(t) ? new Date(t + 'T00:00:00') : addDays(t, -1);
+  let streak = 0;
+  let safety = 0;
+
+  while (safety < 1000) {
+    const k = dayKey(cur);
+    if (isActive(k)) {
+      streak++;
+      cur.setDate(cur.getDate() - 1);
     } else {
-      misses.push(i);
-      if (misses.filter(m => m > i - 7).length > rest) break;
+      // Check if we can apply an accumulated recovery day to save this missed day:
+      if (k <= t && state.recoveryDays > 0 && !state.recoveredDates[k]) {
+        state.recoveredDates[k] = true;
+        state.recoveryDays = Math.max(0, state.recoveryDays - 1);
+        streak++;
+        cur.setDate(cur.getDate() - 1);
+        try { saveState(); } catch (e) { }
+      } else {
+        break;
+      }
     }
-    d.setDate(d.getDate() - 1);
-    i++;
+    safety++;
   }
-  return n;
+
+  // Award 1 recovery day for every completed perfect 7-day streak milestone:
+  const completedWeeks = Math.floor(streak / 7);
+  if (completedWeeks > state.lastAwardedMilestone) {
+    const newlyEarned = completedWeeks - state.lastAwardedMilestone;
+    state.recoveryDays += newlyEarned;
+    state.lastAwardedMilestone = completedWeeks;
+    try { saveState(); } catch (e) { }
+  }
+
+  return streak;
 }
 
 function getStreakMotivator(streak) {
