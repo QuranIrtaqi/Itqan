@@ -1951,59 +1951,126 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnResetYes && resetModal) {
     btnResetYes.addEventListener('click', () => {
+      // 1. Reset all state properties completely as if accessing for the very first time
       state.memorizedPages = {};
       state.memorizedSurahs = {};
       state.reviews = {};
       state.log = {};
-      state.ayahs = {};
+      state.goal = 0;
+      state.studyDays = 7;
+      state.reviewDays = [];
       state.reviewLog = {};
+      state.surahIntervals = {};
+      state.userName = '';
+      state.ayahs = {};
+      state.lastCount = null;
+      state.autoSync = true;
+      state.currentFilter = 'all';
+      state.searchQuery = '';
+      state.weekOffset = 0;
       state.recoveryDays = 1;
       state.recoveredDates = {};
+      state.recoveryMode = 'auto';
       state.lastAwardedMilestone = 0;
-      tamkeenState.stats = { total: 0, correct: 0, streak: 0, bestStreak: 0 };
-      saveTamkeenStats();
-      updateTamkeenStatsUI();
+      state.reminderSettings = { enabled: false, time: '20:00', lastNotifiedDate: '' };
+      state.mistakesNotebook = [];
+      state.dailyWardCompleted = {};
+
+      // 2. Reset Tamkeen stats and session questions
+      if (typeof tamkeenState !== 'undefined') {
+        tamkeenState.stats = { total: 0, correct: 0, streak: 0, bestStreak: 0 };
+        tamkeenState.currentQuestion = null;
+        tamkeenState.isAnswered = false;
+        tamkeenState.history = [];
+      }
+      if (typeof saveTamkeenStats === 'function') saveTamkeenStats();
+      if (typeof updateTamkeenStatsUI === 'function') updateTamkeenStatsUI();
+
+      // 3. Clear LocalStorage and SessionStorage completely for this user
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem('quran_tracker_tamkeen_stats');
+        localStorage.removeItem('itqan_tutorial_seen');
+        sessionStorage.removeItem('dismiss_tutorial_prompt');
+        Object.keys(localStorage).forEach(k => {
+          if (k.startsWith('tamkeen_surah_')) {
+            localStorage.removeItem(k);
+          }
+        });
+      } catch (e) {
+        console.error("خطأ أثناء تصفير التخزين:", e);
+      }
+
+      // 4. Reset form inputs
+      const studentInput = document.getElementById('studentNameInput');
+      if (studentInput) studentInput.value = '';
+
+      const searchInput = document.getElementById('searchSurah');
+      if (searchInput) searchInput.value = '';
+
+      const filterSelect = document.getElementById('filterStatusSelect');
+      if (filterSelect) filterSelect.value = 'all';
+
+      const reminderTimeInput = document.getElementById('reminderTimeInput');
+      if (reminderTimeInput) reminderTimeInput.value = '20:00';
+
+      const reminderToggle = document.getElementById('reminderToggle');
+      if (reminderToggle) reminderToggle.checked = false;
+
+      // 5. Save clean state and refresh UI
       syncCount();
       saveState();
+      switchMode('surah', false);
       renderAll();
+
+      if (typeof renderMistakesNotebook === 'function') renderMistakesNotebook();
+      if (typeof updateMistakesBadge === 'function') updateMistakesBadge();
+      if (typeof updateStudentNameDisplay === 'function') updateStudentNameDisplay();
+      if (typeof checkNewUserTutorial === 'function') checkNewUserTutorial();
+
       resetModal.classList.add('hidden');
-      showToast("تم تصفير جميع بيانات الحفظ ونتائج تمكين.");
+      showToast("تم تصفير جميع البيانات بنجاح والبدء من جديد كأول مرة!");
     });
   }
 
   const backupModal = document.getElementById('backupModal');
   const jsonTextarea = document.getElementById('jsonStateTextarea');
   const btnBackup = document.getElementById('btnBackupModal');
+  const btnBackupCard = document.getElementById('btnBackupCard');
   const btnCloseBackup = document.getElementById('btnCloseBackupModal');
   const btnExportJson = document.getElementById('btnExportJsonFile');
   const btnCopyJson = document.getElementById('btnCopyJsonText');
   const importInput = document.getElementById('importJsonFileInput');
 
-  if (btnBackup && backupModal && jsonTextarea) {
-    btnBackup.addEventListener('click', () => {
-      jsonTextarea.value = JSON.stringify({
-        memorizedPages: state.memorizedPages,
-        memorizedSurahs: state.memorizedSurahs,
-        reviews: state.reviews,
-        log: state.log,
-        goal: state.goal,
-        studyDays: state.studyDays,
-        ayahs: state.ayahs,
-        reviewDays: state.reviewDays,
-        reviewLog: state.reviewLog,
-        surahIntervals: state.surahIntervals,
-        userName: state.userName,
-        recoveryDays: state.recoveryDays || 0,
-        recoveredDates: state.recoveredDates || {},
-        lastAwardedMilestone: state.lastAwardedMilestone || 0,
-        recoveryMode: state.recoveryMode || 'auto',
-        mistakesNotebook: state.mistakesNotebook || [],
-        reminderSettings: state.reminderSettings || { enabled: false, time: '09:00', lastNotifiedDate: null },
-        exportedAt: new Date().toISOString()
-      }, null, 2);
-      backupModal.classList.remove('hidden');
-    });
-  }
+  const openBackupModal = () => {
+    if (!backupModal || !jsonTextarea) return;
+    jsonTextarea.value = JSON.stringify({
+      memorizedPages: state.memorizedPages,
+      memorizedSurahs: state.memorizedSurahs,
+      reviews: state.reviews,
+      log: state.log,
+      goal: state.goal,
+      studyDays: state.studyDays,
+      ayahs: state.ayahs,
+      reviewDays: state.reviewDays,
+      reviewLog: state.reviewLog,
+      surahIntervals: state.surahIntervals,
+      userName: state.userName,
+      recoveryDays: state.recoveryDays || 0,
+      recoveredDates: state.recoveredDates || {},
+      lastAwardedMilestone: state.lastAwardedMilestone || 0,
+      recoveryMode: state.recoveryMode || 'auto',
+      mistakesNotebook: state.mistakesNotebook || [],
+      dailyWardCompleted: state.dailyWardCompleted || {},
+      reminderSettings: state.reminderSettings || { enabled: false, time: '20:00', lastNotifiedDate: null },
+      exportedAt: new Date().toISOString()
+    }, null, 2);
+    backupModal.classList.remove('hidden');
+    if (window.lucide) lucide.createIcons();
+  };
+
+  if (btnBackup) btnBackup.addEventListener('click', openBackupModal);
+  if (btnBackupCard) btnBackupCard.addEventListener('click', openBackupModal);
 
   if (btnCloseBackup && backupModal) btnCloseBackup.addEventListener('click', () => backupModal.classList.add('hidden'));
 
@@ -2136,6 +2203,19 @@ document.addEventListener('DOMContentLoaded', () => {
     themeBtn.addEventListener('click', () => {
       const isDark = document.documentElement.classList.toggle('dark');
       try { localStorage.setItem('quran_tracker_theme', isDark ? 'dark' : 'light'); } catch (e) { }
+    });
+  }
+
+  const btnHeaderScrollTop = document.getElementById('btnHeaderScrollTop');
+  if (btnHeaderScrollTop) {
+    btnHeaderScrollTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    btnHeaderScrollTop.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     });
   }
 

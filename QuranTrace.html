@@ -92,14 +92,19 @@
     <div
       class="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between gap-1.5 sm:gap-2">
 
-      <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+      <div id="btnHeaderScrollTop"
+        onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
+        role="button"
+        tabindex="0"
+        title="العودة لأعلى الصفحة"
+        class="flex items-center gap-1.5 sm:gap-3 shrink-0 cursor-pointer select-none group transition-transform active:scale-95">
         <div
-          class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700 flex items-center justify-center text-gold-400 shadow-md shadow-emerald-950/20 border border-gold-500/30 shrink-0">
+          class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700 flex items-center justify-center text-gold-400 shadow-md shadow-emerald-950/20 border border-gold-500/30 shrink-0 group-hover:scale-105 transition-transform">
           <i data-lucide="book-open-check" class="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]"></i>
         </div>
         <div class="flex items-center gap-1.5">
           <h1
-            class="text-sm sm:text-base md:text-xl font-black tracking-tight text-emerald-950 dark:text-emerald-100 whitespace-nowrap leading-tight">
+            class="text-sm sm:text-base md:text-xl font-black tracking-tight text-emerald-950 dark:text-emerald-100 whitespace-nowrap leading-tight group-hover:text-emerald-700 dark:group-hover:text-gold-300 transition-colors">
             إرتَقِ بالقرآن
           </h1>
           <span
@@ -388,12 +393,21 @@
         </div>
 
         <div
-          class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-2.5 sm:p-3 shadow-xs">
+          class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-2.5 sm:p-3 shadow-xs space-y-2">
           <div class="flex items-center justify-center text-xs">
             <button id="btnResetConfirm"
-              class="flex items-center gap-1.5 text-rose-500 hover:text-rose-600 dark:text-rose-400 text-xs font-semibold hover:underline transition">
+              class="flex items-center gap-1.5 text-rose-500 hover:text-rose-600 dark:text-rose-400 text-xs font-semibold hover:underline transition py-0.5">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               تصفير السجل
+            </button>
+          </div>
+          <div class="border-t border-slate-100 dark:border-slate-800/80"></div>
+          <div class="flex items-center justify-center text-xs">
+            <button id="btnBackupCard"
+              class="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 text-xs font-semibold hover:underline transition py-0.5"
+              title="النسخ الاحتياطي واستعادة البيانات">
+              <i data-lucide="database" class="w-3.5 h-3.5"></i>
+              نسخ احتياطي واستعادة
             </button>
           </div>
         </div>
@@ -706,16 +720,16 @@
         <i data-lucide="alert-triangle" class="w-6 h-6"></i>
       </div>
       <div class="space-y-1">
-        <h3 class="font-bold text-slate-900 dark:text-white text-base">تأكيد تصفير السجل</h3>
-        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">سيتم حذف جميع بيانات الحفظ نهائيًا ولا
-          يمكن التراجع عن ذلك. هل أنت متأكد؟</p>
+        <h3 class="font-bold text-slate-900 dark:text-white text-base">تأكيد تصفير السجل والبيانات بالكامل</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+          سيتم حذف جميع بيانات الحفظ، المراجعات، أيام التعويض، دفتر التثبيت ونتائج تمكين والبدء من جديد كأنك تفتح التطبيق لأول مرة. هل أنت متأكد؟
+        </p>
       </div>
       <div class="flex gap-2">
         <button id="btnResetCancel"
           class="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-bold">إلغاء</button>
         <button id="btnResetYes"
-          class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold">نعم، صفّر
-          السجل</button>
+          class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold">نعم، تصفير شامل</button>
       </div>
     </div>
   </div>
