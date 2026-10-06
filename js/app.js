@@ -1949,8 +1949,13 @@ function updateMistakesBadge() {
   const headerBadge = document.getElementById('headerMistakesCount');
   if (headerBadge) {
     headerBadge.textContent = formatStdNum(count);
-    if (count > 0) headerBadge.classList.remove('hidden');
-    else headerBadge.classList.add('hidden');
+    if (count > 0) {
+      headerBadge.classList.remove('hidden');
+      headerBadge.classList.add('flex');
+    } else {
+      headerBadge.classList.add('hidden');
+      headerBadge.classList.remove('flex');
+    }
   }
 
   const tamkeenBadge = document.getElementById('tamkeenMistakesBadge');

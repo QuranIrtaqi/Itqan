@@ -90,21 +90,21 @@
   <header
     class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-emerald-900/10 dark:border-emerald-500/15 shadow-sm">
     <div
-      class="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between gap-1.5 sm:gap-2">
+      class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-1.5 sm:py-2.5 flex items-center justify-between gap-1 sm:gap-2">
 
       <div id="btnHeaderScrollTop"
         onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
         role="button"
         tabindex="0"
         title="العودة لأعلى الصفحة"
-        class="flex items-center gap-1.5 sm:gap-3 shrink-0 cursor-pointer select-none group transition-transform active:scale-95">
+        class="flex items-center gap-1.5 sm:gap-2.5 shrink-0 cursor-pointer select-none group transition-transform active:scale-95">
         <div
-          class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700 flex items-center justify-center text-gold-400 shadow-md shadow-emerald-950/20 border border-gold-500/30 shrink-0 group-hover:scale-105 transition-transform">
-          <i data-lucide="book-open-check" class="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]"></i>
+          class="w-7 h-7 min-[380px]:w-8 min-[380px]:h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700 flex items-center justify-center text-gold-400 shadow-md shadow-emerald-950/20 border border-gold-500/30 shrink-0 group-hover:scale-105 transition-transform">
+          <i data-lucide="book-open-check" class="w-3.5 h-3.5 min-[380px]:w-4 min-[380px]:h-4 sm:w-5 sm:h-5 stroke-[2.2]"></i>
         </div>
         <div class="flex items-center gap-1.5">
           <h1
-            class="text-sm sm:text-base md:text-xl font-black tracking-tight text-emerald-950 dark:text-emerald-100 whitespace-nowrap leading-tight group-hover:text-emerald-700 dark:group-hover:text-gold-300 transition-colors">
+            class="text-xs min-[360px]:text-sm sm:text-base md:text-xl font-black tracking-tight text-emerald-950 dark:text-emerald-100 whitespace-nowrap leading-tight group-hover:text-emerald-700 dark:group-hover:text-gold-300 transition-colors">
             إرتَقِ بالقرآن
           </h1>
           <span
@@ -123,14 +123,14 @@
         </button>
 
         <button id="btnInstallApp"
-          class="px-2 py-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm shadow-emerald-900/30 transition active:scale-95 flex items-center gap-1 shrink-0 animate-pulse"
+          class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm shadow-emerald-900/30 transition active:scale-95 flex items-center gap-1 shrink-0 animate-pulse"
           title="تثبيت التطبيق على الشاشة الرئيسية">
           <i data-lucide="smartphone" class="w-4 h-4 text-gold-300 shrink-0"></i>
-          <span id="installBtnText" class="inline">تثبيت</span>
+          <span id="installBtnText" class="hidden min-[480px]:inline">تثبيت</span>
         </button>
 
         <button id="btnShareCard"
-          class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-semibold bg-amber-50 hover:bg-amber-100 dark:bg-gold-950/50 dark:hover:bg-gold-900 text-gold-800 dark:text-gold-300 border border-gold-300/80 dark:border-gold-800 transition shadow-xs active:scale-95 flex items-center gap-1"
+          class="hidden min-[340px]:flex p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-semibold bg-amber-50 hover:bg-amber-100 dark:bg-gold-950/50 dark:hover:bg-gold-900 text-gold-800 dark:text-gold-300 border border-gold-300/80 dark:border-gold-800 transition shadow-xs active:scale-95 items-center gap-1"
           title="عرض بطاقة الإنجاز">
           <i data-lucide="award" class="w-4 h-4 text-gold-600 dark:text-gold-400 shrink-0"></i>
           <span class="hidden md:inline">بطاقة الإنجاز</span>
@@ -141,7 +141,8 @@
           title="دفتر التثبيت وسجل الأخطاء">
           <i data-lucide="book-marked" class="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0"></i>
           <span class="hidden md:inline">دفتر التثبيت</span>
-          <span id="headerMistakesCount" class="hidden px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[10px] font-bold font-mono">0</span>
+          <span id="headerMistakesCount"
+            class="hidden absolute -top-1 -right-1 min-w-[17px] h-[17px] px-1 rounded-full bg-rose-600 text-white text-[9.5px] font-bold font-sans items-center justify-center ring-2 ring-white dark:ring-slate-900 shadow-xs leading-none">0</span>
         </button>
 
         <button id="btnAboutModal"
