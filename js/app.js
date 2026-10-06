@@ -2163,8 +2163,8 @@ function switchMode(mode, shouldScroll = true) {
     tamkeen: document.getElementById('mobileTabTamkeen'),
   };
 
-  const activeClasses = ['bg-white', 'dark:bg-slate-900', 'text-emerald-800', 'dark:text-emerald-300', 'shadow-sm'];
-  const inactiveClasses = ['text-slate-600', 'dark:text-slate-400'];
+  const activeClasses = ['bg-white', 'dark:bg-slate-900', 'text-emerald-800', 'dark:text-emerald-300', 'shadow-sm', 'font-bold'];
+  const inactiveClasses = ['text-slate-600', 'dark:text-slate-400', 'font-semibold'];
 
   [tabSurah, tabPage, tabJuz, tabTamkeen].forEach(tab => {
     if (tab) {
