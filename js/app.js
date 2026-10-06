@@ -36,11 +36,11 @@ function updateInstallUI() {
       installBtn.classList.remove('animate-pulse');
       installBtn.classList.add('hidden');
     } else {
-      // Browser state (not installed): shows phone icon AND the word 'تثبيت' on mobile and desktop, WITH pulse/fade effect
+      // Browser state (not installed): shows phone icon on mobile, plus text on larger screens
       installBtn.classList.remove('hidden');
-      installBtn.className = "px-2 py-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm shadow-emerald-900/30 transition active:scale-95 flex items-center gap-1 shrink-0 animate-pulse";
+      installBtn.className = "p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm shadow-emerald-900/30 transition active:scale-95 flex items-center gap-1 shrink-0 animate-pulse";
       installBtn.title = "تثبيت التطبيق على الشاشة الرئيسية";
-      if (installBtnText) installBtnText.classList.remove('hidden');
+      if (installBtnText) installBtnText.className = "hidden min-[480px]:inline";
     }
   }
 

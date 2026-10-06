@@ -213,13 +213,13 @@
     <!-- Install Reminder Banner in Browser -->
     <div id="installReminderBanner"
       class="hidden relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-900 via-emerald-850 to-teal-900 text-white p-3.5 sm:p-4 shadow-md border border-emerald-700/60 transition-all">
-      <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0">
           <div
-            class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gold-400/20 border border-gold-400/30 flex items-center justify-center shrink-0 text-gold-300">
+            class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gold-400/20 border border-gold-400/30 flex items-center justify-center shrink-0 text-gold-300 mt-0.5 sm:mt-0">
             <i data-lucide="download" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </div>
-          <div class="min-w-0">
+          <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2 flex-wrap">
               <h3 class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5">
                 <span>تثبيت تطبيق إتقان على جهازك</span>
@@ -228,15 +228,15 @@
                 class="inline-block px-1.5 py-0.5 rounded text-[10px] bg-gold-400/20 text-gold-300 border border-gold-400/30 font-semibold">تطبيق
                 متقدم PWA</span>
             </div>
-            <p class="text-[11px] sm:text-xs text-emerald-100/90 truncate sm:whitespace-normal mt-0.5">
+            <p class="text-[11px] sm:text-xs text-emerald-100/90 leading-relaxed mt-1">
               يمكنك تثبيت التطبيق للوصول السريع والعمل بدون إنترنت وحفظ تقدمك بكل سهولة.
             </p>
           </div>
         </div>
 
-        <div class="flex items-center gap-2 shrink-0">
+        <div class="flex items-center gap-2 shrink-0 self-end sm:self-auto">
           <button id="btnBannerInstall"
-            class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-gold-500 to-amber-500 hover:from-gold-600 hover:to-amber-600 text-slate-950 font-bold text-xs shadow-sm transition active:scale-95 flex items-center gap-1.5">
+            class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-gold-500 to-amber-500 hover:from-gold-600 hover:to-amber-600 text-slate-950 font-bold text-xs shadow-sm transition active:scale-95 flex items-center gap-1.5">
             <i data-lucide="smartphone" class="w-3.5 h-3.5 shrink-0"></i>
             <span>تثبيت الآن</span>
           </button>
