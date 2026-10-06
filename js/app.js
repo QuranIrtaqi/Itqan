@@ -771,9 +771,9 @@ function applyPageRange(isMemorized) {
 let currentPreviewPage = 1;
 
 const PAGE_RECITERS = [
+  { id: 'ar.husary', name: 'محمود خليل الحصري' },
   { id: 'ar.alafasy', name: 'مشاري راشد العفاسي' },
   { id: 'ar.minshawi', name: 'محمد صديق المنشاوي (مرتل)' },
-  { id: 'ar.husary', name: 'محمود خليل الحصري' },
   { id: 'ar.abdulbasitmurattal', name: 'عبد الباسط عبد الصمد (مرتل)' },
   { id: 'ar.mahermuaiqly', name: 'ماهر المعيقلي' },
   { id: 'ar.saoodshuraym', name: 'سعود الشريم' },
@@ -782,11 +782,11 @@ const PAGE_RECITERS = [
   { id: 'ar.aymanswoid', name: 'أيمن سويد' }
 ];
 
-let selectedPageReciter = 'ar.alafasy';
+let selectedPageReciter = 'ar.husary';
 try {
-  const savedReciter = localStorage.getItem('quran_preview_reciter');
+  const savedReciter = localStorage.getItem('quran_preview_reciter_v2') || localStorage.getItem('quran_preview_reciter');
   if (savedReciter && PAGE_RECITERS.some(r => r.id === savedReciter)) {
-    selectedPageReciter = savedReciter;
+    selectedPageReciter = localStorage.getItem('quran_preview_reciter_v2') ? savedReciter : (savedReciter === 'ar.alafasy' ? 'ar.husary' : savedReciter);
   }
 } catch (e) { }
 
@@ -837,7 +837,9 @@ function updatePageAudioUIState(isPlaying, isLoading = false, ayahIndex = 0) {
     if (ayahText && currentPageAyahsData && currentPageAyahsData[ayahIndex]) {
       const curAyah = currentPageAyahsData[ayahIndex];
       const sName = curAyah.surah && curAyah.surah.name ? curAyah.surah.name.replace(/^سُورَةُ\s*/, '') : '';
-      ayahText.textContent = `الآية ${formatStdNum(ayahIndex + 1)} من ${formatStdNum(currentPageAyahsData.length)}${sName ? ' • ' + sName : ''}`;
+      const ayahNumInSurah = curAyah.numberInSurah;
+      const totalInPage = currentPageAyahsData.length;
+      ayahText.textContent = `${sName ? sName + ' : ' : ''}الآية ${formatStdNum(ayahNumInSurah)} (${formatStdNum(ayahIndex + 1)} من ${formatStdNum(totalInPage)})`;
     }
   } else {
     if (currentPreviewAudio && currentPreviewAudio.paused && currentPageAyahsData) {
@@ -851,6 +853,13 @@ function updatePageAudioUIState(isPlaying, isLoading = false, ayahIndex = 0) {
       if (navControls) {
         navControls.classList.remove('hidden');
         navControls.classList.add('flex');
+      }
+      if (ayahText && currentPageAyahsData[ayahIndex]) {
+        const curAyah = currentPageAyahsData[ayahIndex];
+        const sName = curAyah.surah && curAyah.surah.name ? curAyah.surah.name.replace(/^سُورَةُ\s*/, '') : '';
+        const ayahNumInSurah = curAyah.numberInSurah;
+        const totalInPage = currentPageAyahsData.length;
+        ayahText.textContent = `${sName ? sName + ' : ' : ''}الآية ${formatStdNum(ayahNumInSurah)} (${formatStdNum(ayahIndex + 1)} من ${formatStdNum(totalInPage)})`;
       }
     } else {
       if (icon) icon.setAttribute('data-lucide', 'volume-2');
@@ -912,6 +921,7 @@ function playPageAyahAtIndex(index) {
 
   currentPreviewAudio = new Audio(audioUrl);
   currentPreviewAudio.dataset.index = index;
+  currentPreviewAudio.dataset.page = currentPreviewPage;
 
   currentPreviewAudio.onended = () => {
     if (currentPlayingAyahIndex + 1 < currentPageAyahsData.length) {
@@ -977,7 +987,7 @@ async function togglePageAudio() {
     return;
   }
 
-  if (!isPageAudioPlaying && currentPreviewAudio && currentPreviewAudio.paused && currentPageAyahsData) {
+  if (!isPageAudioPlaying && currentPreviewAudio && currentPreviewAudio.paused && currentPageAyahsData && currentPreviewAudio.dataset.page == currentPreviewPage) {
     try {
       await currentPreviewAudio.play();
       isPageAudioPlaying = true;
@@ -996,6 +1006,8 @@ function stopPageAudio() {
   }
   isPageAudioPlaying = false;
   isPageAudioLoading = false;
+  currentPageAyahsData = null;
+  currentPlayingAyahIndex = 0;
   updatePageAudioUIState(false, false, 0);
 }
 
@@ -1009,7 +1021,10 @@ function skipPageAyah(delta) {
 
 function changePageReciter(reciterId) {
   selectedPageReciter = reciterId;
-  try { localStorage.setItem('quran_preview_reciter', reciterId); } catch (e) { }
+  try {
+    localStorage.setItem('quran_preview_reciter', reciterId);
+    localStorage.setItem('quran_preview_reciter_v2', reciterId);
+  } catch (e) { }
   const reciter = PAGE_RECITERS.find(r => r.id === reciterId);
   if (typeof showToast === 'function') {
     showToast(`تم تعيين القارئ: ${reciter ? reciter.name : reciterId}`);
@@ -1017,13 +1032,16 @@ function changePageReciter(reciterId) {
   if (isPageAudioPlaying) {
     startPlayingCurrentPreviewPage(currentPlayingAyahIndex);
   } else {
-    currentPageAyahsData = null;
     stopPageAudio();
   }
 }
 
 function openPagePreview(pageNum) {
-  currentPreviewPage = Math.min(604, Math.max(1, parseInt(pageNum) || 1));
+  const targetPage = Math.min(604, Math.max(1, parseInt(pageNum) || 1));
+  if (targetPage !== currentPreviewPage || !currentPageAyahsData) {
+    stopPageAudio();
+  }
+  currentPreviewPage = targetPage;
   const modal = document.getElementById('pagePreviewModal');
   if (!modal) return;
   initPageReciterSelect();
@@ -1041,12 +1059,11 @@ function navigatePreviewPage(delta) {
   const newPage = currentPreviewPage + delta;
   if (newPage >= 1 && newPage <= 604) {
     const wasPlaying = isPageAudioPlaying;
+    stopPageAudio();
     currentPreviewPage = newPage;
     updatePagePreviewUI();
     if (wasPlaying) {
       startPlayingCurrentPreviewPage(0);
-    } else {
-      stopPageAudio();
     }
   }
 }
