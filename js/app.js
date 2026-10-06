@@ -17,11 +17,11 @@ let deferredPrompt = null;
 })();
 
 function isAppInstalled() {
+  if (deferredPrompt) return false;
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone === true
     || (document.referrer && document.referrer.includes('android-app://'));
-  const storedInstalled = localStorage.getItem('quran_app_installed') === 'true';
-  return isStandalone || storedInstalled;
+  return isStandalone;
 }
 
 function updateInstallUI() {
@@ -278,7 +278,6 @@ async function triggerInstallFlow() {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
-        localStorage.setItem('quran_app_installed', 'true');
         updateInstallUI();
         showToast("تم طلب تثبيت التطبيق بنجاح!");
       }
@@ -296,12 +295,12 @@ async function triggerInstallFlow() {
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
+  try { localStorage.removeItem('quran_app_installed'); } catch (e) { }
   updateInstallUI();
 });
 
 window.addEventListener('appinstalled', () => {
   deferredPrompt = null;
-  localStorage.setItem('quran_app_installed', 'true');
   updateInstallUI();
   showToast("تم تثبيت التطبيق بنجاح على شاشتك الرئيسية!");
 });
