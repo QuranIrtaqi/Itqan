@@ -1263,53 +1263,61 @@
     </div>
   </div>
 
-  <!-- Interactive Tutorial Walkthrough Modal -->
-  <div id="tutorialModal"
-    class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
-    <div
-      class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-lg rounded-3xl shadow-2xl p-5 sm:p-6 space-y-4 font-sans text-right relative overflow-hidden flex flex-col max-h-[90vh]">
+  <!-- Coach Marks / Spotlight & Popover Guided Tour -->
+  <div id="coachMarksOverlay" class="fixed inset-0 z-[9990] hidden transition-opacity duration-300 font-sans">
+    <!-- Clickable backdrop to prevent accidental clicks on background elements -->
+    <div id="coachMarksBackdrop" class="fixed inset-0 z-[9991]"></div>
 
-      <!-- Modal Header -->
-      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 shrink-0">
-        <div class="flex items-center gap-2.5">
-          <div
-            class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-700 to-emerald-900 text-gold-300 flex items-center justify-center shadow-sm">
-            <i data-lucide="compass" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <h3 class="font-black text-slate-900 dark:text-white text-sm sm:text-base">الجولة التعريفية ودليل الواجهة</h3>
-            <span id="tutorialStepIndicator" class="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">الخطوة 1 من 5</span>
-          </div>
+    <!-- Spotlight cutout with glowing border and surrounding screen dimming -->
+    <div id="coachMarksSpotlight"
+      class="fixed rounded-2xl pointer-events-none transition-all duration-300 ease-out z-[9992]"
+      style="box-shadow: 0 0 0 9999px rgba(3, 7, 18, 0.78), 0 0 0 3px #f59e0b, 0 0 25px rgba(245, 158, 11, 0.5);">
+    </div>
+
+    <!-- Floating Popover / Tooltip Card -->
+    <div id="coachMarksPopover"
+      class="fixed z-[9999] transition-all duration-300 ease-out max-w-sm sm:max-w-md w-[calc(100vw-32px)] sm:w-[380px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl rounded-2xl p-4 sm:p-5 font-sans text-right space-y-3.5">
+
+      <!-- Popover Header -->
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
+        <div class="flex items-center gap-2">
+          <span id="coachMarksBadge"
+            class="text-[10.5px] px-2.5 py-0.5 rounded-full font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-400/30">
+            الخطوة 1 من 6
+          </span>
         </div>
-
-        <!-- Skip button at header -->
-        <button id="btnTutorialSkipHeader"
-          class="text-xs font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-2.5 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+        <button id="btnCoachMarksSkip" type="button"
+          class="text-xs font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-2 py-0.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">
           تخطي الجولة ✕
         </button>
       </div>
 
-      <!-- Step Content Area (Rendered Dynamically) -->
-      <div id="tutorialStepBody" class="flex-1 overflow-y-auto space-y-3">
-        <!-- Injected via renderTutorialStep() -->
+      <!-- Popover Body -->
+      <div class="space-y-2">
+        <h4 id="coachMarksTitle" class="font-black text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
+          <!-- Injected dynamically -->
+        </h4>
+        <p id="coachMarksText" class="text-xs sm:text-[13px] text-slate-600 dark:text-slate-300 leading-relaxed">
+          <!-- Injected dynamically -->
+        </p>
       </div>
 
-      <!-- Modal Footer -->
-      <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800 shrink-0 gap-2">
-        <div id="tutorialDotsContainer" class="flex items-center gap-1.5">
-          <!-- Step indicator dots -->
+      <!-- Popover Footer -->
+      <div class="flex items-center justify-between pt-2.5 border-t border-slate-100 dark:border-slate-800 gap-2">
+        <div id="coachMarksDots" class="flex items-center gap-1.5">
+          <!-- Step indicator dots injected dynamically -->
         </div>
 
         <div class="flex items-center gap-2">
-          <button id="btnTutorialPrev" type="button"
+          <button id="btnCoachMarksPrev" type="button"
             class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold transition active:scale-95 flex items-center gap-1">
-            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
             <span>السابق</span>
           </button>
-          <button id="btnTutorialNext" type="button"
-            class="px-4 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition active:scale-95 flex items-center gap-1">
+          <button id="btnCoachMarksNext" type="button"
+            class="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition active:scale-95 flex items-center gap-1">
             <span>التالي</span>
-            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
           </button>
         </div>
       </div>

@@ -55,84 +55,75 @@ function updateInstallUI() {
 }
 
 // ==========================================
-// INTERACTIVE UI TUTORIAL & WALKTHROUGH
+// COACH MARKS / SPOTLIGHT & POPOVERS TOUR
 // ==========================================
-const TUTORIAL_STEPS = [
+const COACH_MARKS_STEPS = [
   {
-    title: "الشريط العلوي والأدوات الأساسية",
-    icon: "sliders",
-    badge: "التحكم والإعدادات",
-    desc: "كل ما تحتاجه للتحكم في حسابك ومظهر التطبيق بنقرة واحدة:",
-    items: [
-      { icon: "brain", title: "تمكين", text: "انتقال سريع لمنظومة اختبار الحفظ الذكية لتثبيت الآيات والسور." },
-      { icon: "smartphone", title: "تثبيت التطبيق", text: "تثبيت التطبيق كـ (PWA) على هاتفك ليعمل بدون إنترنت كأي تطبيق أصلي." },
-      { icon: "award", title: "بطاقة الإنجاز", text: "عرض شهادة إنجازك الموثقة باسمك ونسبة حفظك ومشاركتها كصورة." },
-      { icon: "database", title: "النسخ الاحتياطي", text: "تصدير نسخة كاملة من تقدمك واسترجاعها بأمان على أي جهاز آخر." },
-      { icon: "moon", title: "تبديل النمط", text: "التبديل الفوري بين الوضعين الليلي والنهاري المريحين للبصر." }
-    ]
+    targetSelector: '#btnHeaderTamkeen',
+    fallbackSelector: 'header .flex.items-center',
+    badge: 'الخطوة 1 من 6',
+    icon: 'brain',
+    title: 'أدوات الشريط العلوي واختبار تمكين',
+    text: 'من هنا يمكنك الانتقال الفوري لاختبارات تمكين الذكية، وتثبيت التطبيق، وتصدير بطاقة إنجازك، وحفظ نسخة احتياطية من تقدمك بأمان.'
   },
   {
-    title: "لوحة التقدم الكلي وشعلة الالتزام",
-    icon: "sparkle",
-    badge: "الإحصائيات والتحفيز",
-    desc: "لوحة ذكية تعرض رحلتك القرآنية بالأرقام والأوسمة:",
-    items: [
-      { icon: "percent", title: "إجمالي الإنجاز", text: "متابعة صفحاتك المحفوظة من أصل 604 صفحة ونسبة الختم الكلية." },
-      { icon: "flame", title: "شعلة الأيام المتتالية (Streak)", text: "تتبع استمرارك اليومي في الحفظ والمراجعة لفتح 8 أوسمة نبوية تشجيعية." },
-      { icon: "shield-check", title: "أيام التعويض الذكية (Recovery)", text: "تبدأ برصيد 1 يوم تعويض، وتكسب يوماً إضافياً كل أسبوع تلتزم فيه 7 أيام، لحماية سلسلتك إذا انشغلت يوماً." },
-      { icon: "trending-up", title: "الهدف الأسبوعي", text: "تحديد معدل حفظك الأسبوعي ومتابعة تقدمك يوماً بيوم." }
-    ]
+    targetSelector: '.lg\\:col-span-8',
+    fallbackSelector: '#statProgressBar',
+    badge: 'الخطوة 2 من 6',
+    icon: 'percent',
+    title: 'لوحة إنجاز الحفظ ومسار الختم',
+    text: 'تعرض لك هذه اللوحة تقدمك الإجمالي في حفظ المصحف الشريف (604 صفحة) بالنسبة المئوية وشريط المسار وعدد السور والأجزاء المكتملة.'
   },
   {
-    title: "شبكة السور والصفحات ونطاق التحديد",
-    icon: "layout-grid",
-    badge: "التسجيل السريع",
-    desc: "طرق سهلة ومرنة لتحديد ما حفظته وتلاوة المصحف:",
-    items: [
-      { icon: "layers", title: "عرض السور والصفحات", text: "التبديل بسهولة بين قائمة السور الـ 114 وشبكة المصحف (604 صفحة)." },
-      { icon: "check", title: "تحديد الحفظ بنقرة", text: "انقر على رقم أي صفحة أو بطاقة سورة لتمييزها كمحفوظة وتحديث إحصائياتك فوراً." },
-      { icon: "hash", title: "أداة نطاق الصفحات", text: "حدد أو ألغِ حفظ صفحات متتالية دفعة واحدة (مثلاً من 1 إلى 20) لتوفير الوقت." },
-      { icon: "eye", title: "معاينة المصحف الشريف", text: "اضغط أيقونة العين لتصفح صفحات مصحف المدينة عالي الدقة وتبديل الحفظ أثناء القراءة." }
-    ]
+    targetSelector: '#plannerCard',
+    fallbackSelector: '#statRemainingNotice',
+    badge: 'الخطوة 3 من 6',
+    icon: 'flame',
+    title: 'شعلة الالتزام وأيام التعويض الذكية',
+    text: 'تابع التزامك اليومي لتفتح أوسمة نبوية تشجيعية. لديك رصيد 1 يوم تعويض مبدئي وتكسب يوماً إضافياً كل أسبوع لحماية سلسلتك إذا انشغلت يوماً!'
   },
   {
-    title: "منظومة «تمكين» لاختبار الحفظ",
-    icon: "brain",
-    badge: "الاختبار الذكي",
-    desc: "محرك تفاعلي لا نهائي يجلب الآيات بالرسم العثماني مباشرة:",
-    items: [
-      { icon: "rotate-ccw", title: "اختبار الآية التالية", text: "تُعرض لك آية كريمة وعليك استحضار وتحديد الآية التي تليها." },
-      { icon: "book-open", title: "اختبار تحديد السورة", text: "تُعرض لك آية وعليك معرفة السورة مع حجب اسم السورة لعدم حرق الحل." },
-      { icon: "eye", title: "التسميع غيباً أولاً", text: "تُخفى الخيارات بضبابية لطيفة لتستحضر الآية في صدرك أولاً قبل الضغط لكشف الخيارات." },
-      { icon: "sliders", title: "نطاق الاختبار وتصفير النتائج", text: "يمكنك حصر الاختبار في سورك المحفوظة فقط أو كامل المصحف، وتصفير النتائج متى شئت." }
-    ]
+    targetSelector: '#tabModeSurah',
+    fallbackSelector: '.tab-btn',
+    badge: 'الخطوة 4 من 6',
+    icon: 'layers',
+    title: 'خيارات العرض والبحث الفوري',
+    text: 'تنقل بمرونة بين عرض السور (114 سورة) أو شبكة الصفحات (604 صفحة) أو الأجزاء، مع شريط بحث فوري وفلاتر لتصفية المحفوظ وغير المحفوظ.'
   },
   {
-    title: "المراجعة المتباعدة وحفظ البيانات",
-    icon: "refresh-cw",
-    badge: "الإتقان والأمان",
-    desc: "تثبيت الحفظ في الصدور ومنع التفلت بأعلى معايير الخصوصية:",
-    items: [
-      { icon: "refresh-cw", title: "تقييم المراجعة (SRS)", text: "قيّم حفظك بعد مراجعة أي سورة (ممتاز 28 يوم | متوسط 14 يوم | يحتاج تثبيت 4 أيام) ليجدول التطبيق مواعيد المراجعة تلقائياً." },
-      { icon: "shield", title: "أمانك وخصوصيتك 100%", text: "بياناتك محفوظة محلياً في ذاكرة جهازك فقط ولا ترسل إلى أي خادم خارجي." },
-      { icon: "database", title: "النسخ الاحتياطي الدوري", text: "احرص على تنزيل نسخة احتياطية من زر قاعدة البيانات لحفظ تقدمك عند تغيير الهاتف." }
-    ]
+    targetSelector: '#surahGridContainer',
+    fallbackSelector: '#viewSurahs',
+    badge: 'الخطوة 5 من 6',
+    icon: 'check-circle-2',
+    title: 'تسجيل الحفظ وتقييم المراجعة',
+    text: 'انقر على أي سورة أو صفحة لتسجيل حفظها فوراً، وقيّم مراجعتك (ممتاز 28 يوم | متوسط 14 يوم | يحتاج تثبيت 4 أيام) لجدولة المراجعة الذكية ومنع التفلت.'
+  },
+  {
+    targetSelector: '#btnHeroTamkeen',
+    fallbackSelector: '#btnTamkeenMode_all',
+    badge: 'الخطوة 6 من 6',
+    icon: 'sparkle',
+    title: 'محرك «تمكين» لاختبار وتثبيت الحفظ',
+    text: 'اضغط هنا لبدء اختبارات لا نهائية للآيات بالرسم العثماني؛ مع إمكانية التسميع غيباً أولاً وإخفاء الخيارات حتى تستحضر الآية في صدرك!'
   }
 ];
 
-let currentTutorialStep = 0;
+let currentCoachStep = 0;
+let coachMarksActive = false;
 
-function openTutorial(stepIndex = 0) {
-  currentTutorialStep = Math.max(0, Math.min(stepIndex, TUTORIAL_STEPS.length - 1));
-  const modal = document.getElementById('tutorialModal');
-  if (!modal) return;
-  renderTutorialStep();
-  modal.classList.remove('hidden');
+function startCoachMarksTour(stepIndex = 0) {
+  coachMarksActive = true;
+  currentCoachStep = Math.max(0, Math.min(stepIndex, COACH_MARKS_STEPS.length - 1));
+  const overlay = document.getElementById('coachMarksOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('hidden');
+  renderCoachStep();
 }
 
-function closeTutorial(markSeen = true) {
-  const modal = document.getElementById('tutorialModal');
-  if (modal) modal.classList.add('hidden');
+function stopCoachMarksTour(markSeen = true) {
+  coachMarksActive = false;
+  const overlay = document.getElementById('coachMarksOverlay');
+  if (overlay) overlay.classList.add('hidden');
   if (markSeen) {
     localStorage.setItem('itqan_tutorial_seen', 'true');
     const reminder = document.getElementById('newUserTutorialReminder');
@@ -140,75 +131,129 @@ function closeTutorial(markSeen = true) {
   }
 }
 
-function renderTutorialStep() {
-  const step = TUTORIAL_STEPS[currentTutorialStep];
-  const container = document.getElementById('tutorialStepBody');
-  const stepIndicator = document.getElementById('tutorialStepIndicator');
-  const btnPrev = document.getElementById('btnTutorialPrev');
-  const btnNext = document.getElementById('btnTutorialNext');
-  const dotsContainer = document.getElementById('tutorialDotsContainer');
-
-  if (stepIndicator) {
-    stepIndicator.textContent = `الخطوة ${formatStdNum(currentTutorialStep + 1)} من ${formatStdNum(TUTORIAL_STEPS.length)}`;
+function getVisibleTarget(step) {
+  let el = document.querySelector(step.targetSelector);
+  if (!el || el.offsetParent === null) {
+    if (step.fallbackSelector) el = document.querySelector(step.fallbackSelector);
   }
+  return el;
+}
+
+function renderCoachStep() {
+  if (!coachMarksActive) return;
+  const step = COACH_MARKS_STEPS[currentCoachStep];
+  const target = getVisibleTarget(step);
+  const spotlight = document.getElementById('coachMarksSpotlight');
+  const popover = document.getElementById('coachMarksPopover');
+  const titleEl = document.getElementById('coachMarksTitle');
+  const textEl = document.getElementById('coachMarksText');
+  const badgeEl = document.getElementById('coachMarksBadge');
+  const btnPrev = document.getElementById('btnCoachMarksPrev');
+  const btnNext = document.getElementById('btnCoachMarksNext');
+  const dotsContainer = document.getElementById('coachMarksDots');
+
+  if (badgeEl) badgeEl.textContent = step.badge;
+  if (titleEl) {
+    titleEl.innerHTML = `<i data-lucide="${step.icon}" class="w-4 h-4 text-gold-500 shrink-0"></i><span>${step.title}</span>`;
+  }
+  if (textEl) textEl.textContent = step.text;
 
   if (dotsContainer) {
-    dotsContainer.innerHTML = TUTORIAL_STEPS.map((_, i) => `
-      <button type="button" onclick="openTutorial(${i})" class="h-2 rounded-full transition-all ${
-        i === currentTutorialStep ? 'w-6 bg-gold-500' : 'w-2 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400'
+    dotsContainer.innerHTML = COACH_MARKS_STEPS.map((_, i) => `
+      <button type="button" onclick="startCoachMarksTour(${i})" class="h-2 rounded-full transition-all ${
+        i === currentCoachStep ? 'w-5 bg-gold-500' : 'w-2 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400'
       }" title="الخطوة ${i + 1}"></button>
     `).join('');
   }
 
   if (btnPrev) {
-    btnPrev.style.display = currentTutorialStep === 0 ? 'none' : 'inline-flex';
+    btnPrev.style.display = currentCoachStep === 0 ? 'none' : 'inline-flex';
   }
 
   if (btnNext) {
-    if (currentTutorialStep === TUTORIAL_STEPS.length - 1) {
-      btnNext.innerHTML = `<span>إنهاء والبدء الآن ✨</span>`;
-      btnNext.className = "px-4 py-1.5 rounded-xl bg-gradient-to-r from-gold-500 to-amber-500 hover:from-gold-600 hover:to-amber-600 text-slate-950 font-bold text-xs shadow-md transition active:scale-95 flex items-center gap-1.5";
+    if (currentCoachStep === COACH_MARKS_STEPS.length - 1) {
+      btnNext.innerHTML = `<span>إنهاء الجولة ✨</span>`;
+      btnNext.className = "px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-gold-500 to-amber-500 hover:from-gold-600 hover:to-amber-600 text-slate-950 font-bold text-xs shadow-md transition active:scale-95 flex items-center gap-1";
     } else {
-      btnNext.innerHTML = `<span>التالي</span><i data-lucide="chevron-left" class="w-4 h-4"></i>`;
-      btnNext.className = "px-4 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition active:scale-95 flex items-center gap-1";
+      btnNext.innerHTML = `<span>التالي</span><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>`;
+      btnNext.className = "px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition active:scale-95 flex items-center gap-1";
     }
   }
 
-  if (container) {
-    container.innerHTML = `
-      <div class="space-y-3.5">
-        <div class="flex items-center gap-3 pb-1 border-b border-slate-100 dark:border-slate-800">
-          <div class="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
-            <i data-lucide="${step.icon}" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h3 class="font-black text-slate-900 dark:text-white text-sm sm:text-base">${step.title}</h3>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 font-bold">${step.badge}</span>
-            </div>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">${step.desc}</p>
-          </div>
-        </div>
+  if (window.lucide) lucide.createIcons();
 
-        <div class="space-y-2 max-h-[46vh] sm:max-h-[50vh] overflow-y-auto pr-1">
-          ${step.items.map(item => `
-            <div class="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 flex items-start gap-2.5">
-              <div class="w-7 h-7 rounded-xl bg-white dark:bg-slate-700 text-emerald-700 dark:text-gold-400 flex items-center justify-center shrink-0 shadow-xs border border-slate-200/60 dark:border-slate-600/60 mt-0.5">
-                <i data-lucide="${item.icon}" class="w-3.5 h-3.5"></i>
-              </div>
-              <div class="space-y-0.5 min-w-0">
-                <h4 class="font-bold text-slate-800 dark:text-slate-100 text-xs">${item.title}</h4>
-                <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">${item.text}</p>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `;
+  if (target) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => {
+      positionSpotlightAndPopover(target, spotlight, popover);
+    }, 180);
+  } else {
+    centerSpotlightAndPopover(spotlight, popover);
+  }
+}
+
+function positionSpotlightAndPopover(target, spotlight, popover) {
+  if (!spotlight || !popover || !target) return;
+  const r = target.getBoundingClientRect();
+  const pad = 8;
+  const spotTop = Math.max(0, r.top - pad);
+  const spotLeft = Math.max(0, r.left - pad);
+  const spotWidth = Math.min(window.innerWidth, r.width + pad * 2);
+  const spotHeight = r.height + pad * 2;
+
+  spotlight.style.top = `${spotTop}px`;
+  spotlight.style.left = `${spotLeft}px`;
+  spotlight.style.width = `${spotWidth}px`;
+  spotlight.style.height = `${spotHeight}px`;
+
+  const popWidth = Math.min(popover.offsetWidth || 360, window.innerWidth - 24);
+  const popHeight = popover.offsetHeight || 190;
+
+  let top;
+  if (spotTop + spotHeight + popHeight + 20 < window.innerHeight) {
+    top = spotTop + spotHeight + 12;
+  } else if (spotTop - popHeight - 16 > 0) {
+    top = spotTop - popHeight - 12;
+  } else {
+    top = Math.max(12, (window.innerHeight - popHeight) / 2);
   }
 
-  if (window.lucide) lucide.createIcons();
+  let left = spotLeft + (spotWidth - popWidth) / 2;
+  left = Math.max(12, Math.min(left, window.innerWidth - popWidth - 12));
+
+  popover.style.top = `${top}px`;
+  popover.style.left = `${left}px`;
 }
+
+function centerSpotlightAndPopover(spotlight, popover) {
+  if (spotlight) {
+    spotlight.style.top = '40%';
+    spotlight.style.left = '50%';
+    spotlight.style.width = '0px';
+    spotlight.style.height = '0px';
+  }
+  if (popover) {
+    const popWidth = Math.min(360, window.innerWidth - 24);
+    const popHeight = 190;
+    popover.style.top = `${(window.innerHeight - popHeight) / 2}px`;
+    popover.style.left = `${(window.innerWidth - popWidth) / 2}px`;
+  }
+}
+
+window.addEventListener('resize', () => {
+  if (coachMarksActive) renderCoachStep();
+});
+window.addEventListener('scroll', () => {
+  if (coachMarksActive) {
+    const step = COACH_MARKS_STEPS[currentCoachStep];
+    const target = getVisibleTarget(step);
+    const spotlight = document.getElementById('coachMarksSpotlight');
+    const popover = document.getElementById('coachMarksPopover');
+    if (target && spotlight && popover) {
+      positionSpotlightAndPopover(target, spotlight, popover);
+    }
+  }
+}, { passive: true });
 
 function checkNewUserTutorial() {
   const seen = localStorage.getItem('itqan_tutorial_seen') === 'true';
@@ -222,8 +267,10 @@ function checkNewUserTutorial() {
     }
   }
 }
-window.openTutorial = openTutorial;
-window.closeTutorial = closeTutorial;
+window.startCoachMarksTour = startCoachMarksTour;
+window.stopCoachMarksTour = stopCoachMarksTour;
+window.openTutorial = startCoachMarksTour;
+window.closeTutorial = stopCoachMarksTour;
 
 async function triggerInstallFlow() {
   if (deferredPrompt) {
@@ -1494,17 +1541,17 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnCloseAbout && aboutModal) btnCloseAbout.addEventListener('click', () => aboutModal.classList.add('hidden'));
   if (btnDismissAbout && aboutModal) btnDismissAbout.addEventListener('click', () => aboutModal.classList.add('hidden'));
 
-  // Tutorial event listeners
+  // Coach Marks Spotlight & Popover event listeners
   const btnStartTutorialFromBanner = document.getElementById('btnStartTutorialFromBanner');
   const btnDismissTutorialBanner = document.getElementById('btnDismissTutorialBanner');
   const btnLaunchTutorialFromAbout = document.getElementById('btnLaunchTutorialFromAbout');
-  const btnTutorialSkipHeader = document.getElementById('btnTutorialSkipHeader');
-  const btnTutorialPrev = document.getElementById('btnTutorialPrev');
-  const btnTutorialNext = document.getElementById('btnTutorialNext');
-  const tutorialModal = document.getElementById('tutorialModal');
+  const btnCoachMarksSkip = document.getElementById('btnCoachMarksSkip');
+  const btnCoachMarksPrev = document.getElementById('btnCoachMarksPrev');
+  const btnCoachMarksNext = document.getElementById('btnCoachMarksNext');
+  const coachMarksBackdrop = document.getElementById('coachMarksBackdrop');
 
   if (btnStartTutorialFromBanner) {
-    btnStartTutorialFromBanner.addEventListener('click', () => openTutorial(0));
+    btnStartTutorialFromBanner.addEventListener('click', () => startCoachMarksTour(0));
   }
   if (btnDismissTutorialBanner) {
     btnDismissTutorialBanner.addEventListener('click', () => {
@@ -1516,27 +1563,30 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnLaunchTutorialFromAbout) {
     btnLaunchTutorialFromAbout.addEventListener('click', () => {
       if (aboutModal) aboutModal.classList.add('hidden');
-      openTutorial(0);
+      startCoachMarksTour(0);
     });
   }
-  if (btnTutorialSkipHeader) {
-    btnTutorialSkipHeader.addEventListener('click', () => closeTutorial(true));
+  if (btnCoachMarksSkip) {
+    btnCoachMarksSkip.addEventListener('click', () => stopCoachMarksTour(true));
   }
-  if (btnTutorialPrev) {
-    btnTutorialPrev.addEventListener('click', () => {
-      if (currentTutorialStep > 0) {
-        currentTutorialStep--;
-        renderTutorialStep();
+  if (coachMarksBackdrop) {
+    coachMarksBackdrop.addEventListener('click', () => stopCoachMarksTour(false));
+  }
+  if (btnCoachMarksPrev) {
+    btnCoachMarksPrev.addEventListener('click', () => {
+      if (currentCoachStep > 0) {
+        currentCoachStep--;
+        renderCoachStep();
       }
     });
   }
-  if (btnTutorialNext) {
-    btnTutorialNext.addEventListener('click', () => {
-      if (currentTutorialStep < TUTORIAL_STEPS.length - 1) {
-        currentTutorialStep++;
-        renderTutorialStep();
+  if (btnCoachMarksNext) {
+    btnCoachMarksNext.addEventListener('click', () => {
+      if (currentCoachStep < COACH_MARKS_STEPS.length - 1) {
+        currentCoachStep++;
+        renderCoachStep();
       } else {
-        closeTutorial(true);
+        stopCoachMarksTour(true);
         showToast("جولة موفقة! نسأل الله لك التوفيق والبركة في حفظ كتابه الكريم ✨");
       }
     });
@@ -1551,7 +1601,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === achievementModal) achievementModal.classList.add('hidden');
     if (e.target === installModal) installModal.classList.add('hidden');
     if (e.target === aboutModal) aboutModal.classList.add('hidden');
-    if (e.target === tutorialModal) closeTutorial(false);
     if (e.target === resetTamkeenModal) closeResetTamkeenModal();
     const previewModal = document.getElementById('pagePreviewModal');
     if (previewModal && e.target === previewModal) previewModal.classList.add('hidden');
