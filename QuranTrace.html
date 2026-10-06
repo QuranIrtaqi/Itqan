@@ -1339,6 +1339,60 @@
         </div>
       </div>
 
+      <!-- Audio Player Toolbar for Page Recitation -->
+      <div id="pageAudioBar"
+        class="px-3 sm:px-4 py-2 bg-gradient-to-r from-emerald-50/90 via-slate-50 to-amber-50/80 dark:from-slate-900 dark:via-slate-850 dark:to-slate-900 border-b border-emerald-900/10 dark:border-emerald-500/15 flex flex-wrap items-center justify-between gap-2 text-xs shrink-0 font-sans">
+        <div class="flex items-center gap-2 flex-wrap">
+          <button id="btnPageAudioToggle" onclick="togglePageAudio()" type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition active:scale-95"
+            title="الاستماع لتلاوة الصفحة">
+            <i id="pageAudioPlayIcon" data-lucide="volume-2" class="w-4 h-4 text-gold-300"></i>
+            <span id="pageAudioPlayText">استمع لتلاوة الصفحة</span>
+            <span id="pageAudioWaves" class="hidden audio-playing-indicator">
+              <span></span><span></span><span></span><span></span>
+            </span>
+          </button>
+
+          <div id="pageAudioAyahStatus"
+            class="hidden items-center gap-1 text-[11px] text-emerald-800 dark:text-emerald-300 font-bold bg-emerald-100/80 dark:bg-emerald-950/70 px-2.5 py-1 rounded-xl border border-emerald-300/60 dark:border-emerald-800/60 shadow-xs">
+            <i data-lucide="music" class="w-3 h-3 text-gold-500"></i>
+            <span id="pageAudioAyahText">الآية 1</span>
+          </div>
+
+          <div id="pageAudioNavControls" class="hidden items-center gap-1">
+            <button onclick="skipPageAyah(-1)" type="button" title="الآية السابقة"
+              class="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
+              <i data-lucide="skip-forward" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="skipPageAyah(1)" type="button" title="الآية التالية"
+              class="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
+              <i data-lucide="skip-back" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="stopPageAudio()" type="button" title="إيقاف التلاوة"
+              class="p-1 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-950 text-rose-600 dark:text-rose-400 transition">
+              <i data-lucide="square" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <label for="pageReciterSelect"
+            class="text-[11px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">القارئ:</label>
+          <select id="pageReciterSelect" onchange="changePageReciter(this.value)"
+            class="py-1 px-2.5 rounded-xl text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:ring-1 focus:ring-emerald-600 shadow-xs cursor-pointer">
+            <option value="ar.alafasy">مشاري راشد العفاسي</option>
+            <option value="ar.minshawi">محمد صديق المنشاوي (مرتل)</option>
+            <option value="ar.husary">محمود خليل الحصري</option>
+            <option value="ar.abdulbasitmurattal">عبد الباسط عبد الصمد (مرتل)</option>
+            <option value="ar.mahermuaiqly">ماهر المعيقلي</option>
+            <option value="ar.saoodshuraym">سعود الشريم</option>
+            <option value="ar.hudhaify">علي عبد الرحمن الحذيفي</option>
+            <option value="ar.ahmedajamy">أحمد بن علي العجمي</option>
+            <option value="ar.aymanswoid">أيمن سويد</option>
+          </select>
+        </div>
+      </div>
+
       <!-- Image Display Area -->
       <div
         class="flex-1 overflow-y-auto p-2 sm:p-4 flex items-center justify-center bg-slate-100/80 dark:bg-slate-950 min-h-[340px] relative">

@@ -557,105 +557,6 @@ function getTamkeenEligibleQuestions() {
   return unasked.length > 0 ? unasked : (pool.length > 0 ? pool : TAMKEEN_STATIC_FALLBACKS);
 }
 
-const TAMKEEN_RECITERS = [
-  { id: 'ar.husary', name: 'الشيخ محمود خليل الحصري (مرتل)' },
-  { id: 'ar.minshawi', name: 'الشيخ محمد صديق المنشاوي' },
-  { id: 'ar.hudhaify', name: 'الشيخ علي الحذيفي (إمام المسجد النبوي)' },
-  { id: 'ar.alafasy', name: 'الشيخ مشاري راشد العفاسي' }
-];
-
-let selectedReciter = 'ar.husary';
-try {
-  const savedReciter = localStorage.getItem('quran_tracker_reciter');
-  if (savedReciter && TAMKEEN_RECITERS.some(r => r.id === savedReciter)) {
-    selectedReciter = savedReciter;
-  }
-} catch (e) { }
-
-function setTamkeenReciter(reciterId) {
-  selectedReciter = reciterId;
-  try { localStorage.setItem('quran_tracker_reciter', reciterId); } catch (e) { }
-  stopTamkeenAudio();
-  const reciterObj = TAMKEEN_RECITERS.find(r => r.id === reciterId);
-  if (typeof showToast === 'function') {
-    showToast(`تم تعيين القارئ: ${reciterObj ? reciterObj.name : reciterId}`);
-  }
-}
-
-function getGlobalAyahNumber(surahId, ayahNumInSurah) {
-  let count = 0;
-  for (let i = 1; i < surahId; i++) {
-    const s = SURAHS.find(item => item.id === i);
-    if (s) count += s.ayahs;
-  }
-  return count + (parseInt(ayahNumInSurah) || 1);
-}
-
-let currentTamkeenAudio = null;
-let isTamkeenAudioPlaying = false;
-
-function stopTamkeenAudio() {
-  if (currentTamkeenAudio) {
-    try { currentTamkeenAudio.pause(); } catch (e) { }
-    currentTamkeenAudio = null;
-    isTamkeenAudioPlaying = false;
-  }
-  const icon = document.getElementById('tamkeenAudioIcon');
-  const text = document.getElementById('tamkeenAudioText');
-  const waves = document.getElementById('tamkeenAudioWaves');
-  if (icon) icon.setAttribute('data-lucide', 'volume-2');
-  if (text) text.textContent = 'استمع للتلاوة';
-  if (waves) waves.classList.add('hidden');
-  if (window.lucide) lucide.createIcons();
-}
-
-function toggleTamkeenAudio() {
-  const q = tamkeenState.currentQuestion;
-  if (!q) return;
-
-  const icon = document.getElementById('tamkeenAudioIcon');
-  const text = document.getElementById('tamkeenAudioText');
-  const waves = document.getElementById('tamkeenAudioWaves');
-
-  if (currentTamkeenAudio && !currentTamkeenAudio.paused) {
-    stopTamkeenAudio();
-    return;
-  }
-
-  const globalAyahNum = q.globalAyahNum || getGlobalAyahNumber(q.surahId, q.ayahNum);
-  const audioUrl = `https://cdn.islamic.network/quran/audio/128/${selectedReciter}/${globalAyahNum}.mp3`;
-
-  if (!currentTamkeenAudio || currentTamkeenAudio.dataset.url !== audioUrl) {
-    if (currentTamkeenAudio) {
-      try { currentTamkeenAudio.pause(); } catch (e) { }
-    }
-    currentTamkeenAudio = new Audio(audioUrl);
-    currentTamkeenAudio.dataset.url = audioUrl;
-
-    currentTamkeenAudio.onended = () => {
-      stopTamkeenAudio();
-    };
-
-    currentTamkeenAudio.onerror = () => {
-      stopTamkeenAudio();
-      if (typeof showToast === 'function') showToast('تعذر تحميل تلاوة الآية حالياً');
-    };
-  }
-
-  if (text) text.textContent = 'جاري التلاوة...';
-  if (waves) waves.classList.remove('hidden');
-
-  currentTamkeenAudio.play().then(() => {
-    isTamkeenAudioPlaying = true;
-    if (icon) icon.setAttribute('data-lucide', 'pause');
-    if (text) text.textContent = 'إيقاف التلاوة';
-    if (window.lucide) lucide.createIcons();
-  }).catch(err => {
-    console.warn("Audio playback note:", err);
-    stopTamkeenAudio();
-  });
-}
-
 async function startTamkeenSpecificSurah(surahId) {
   // Lock exam strictly to this specific Surah
   tamkeenState.singleSurahId = surahId;
@@ -668,7 +569,6 @@ async function startTamkeenSpecificSurah(surahId) {
 }
 
 async function nextTamkeenQuestion() {
-  stopTamkeenAudio();
   renderTamkeenLoadingState();
   initTamkeenScopeDropdowns();
   updateTamkeenScopeInputsVisibility();
@@ -917,23 +817,6 @@ function renderTamkeenQuiz() {
         <p class="font-quran text-lg sm:text-2xl md:text-3xl leading-[2.2] sm:leading-loose text-slate-800 dark:text-slate-100 select-text">
           «${displayedVerse}»
         </p>
-
-        <div class="mt-3 pt-2.5 border-t border-gold-300/40 dark:border-emerald-800/40 flex flex-wrap items-center justify-center gap-2">
-          <button id="btnTamkeenAudioPlay" onclick="toggleTamkeenAudio()" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-xs transition active:scale-95" title="الاستماع لتلاوة الآية الكريمة">
-            <i id="tamkeenAudioIcon" data-lucide="volume-2" class="w-4 h-4 text-gold-300"></i>
-            <span id="tamkeenAudioText">استمع للتلاوة</span>
-            <span id="tamkeenAudioWaves" class="hidden audio-playing-indicator">
-              <span></span><span></span><span></span><span></span>
-            </span>
-          </button>
-
-          <div class="flex items-center gap-1.5 text-xs">
-            <label for="tamkeenReciterSelect" class="text-slate-500 dark:text-slate-400 font-bold text-[11px] whitespace-nowrap">القارئ:</label>
-            <select id="tamkeenReciterSelect" onchange="setTamkeenReciter(this.value)" class="py-1 px-2.5 rounded-xl text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:ring-1 focus:ring-emerald-600 shadow-xs cursor-pointer">
-              ${TAMKEEN_RECITERS.map(r => `<option value="${r.id}" ${r.id === selectedReciter ? 'selected' : ''}>${r.name}</option>`).join('')}
-            </select>
-          </div>
-        </div>
       </div>
     </div>
 

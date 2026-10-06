@@ -766,19 +766,273 @@ function applyPageRange(isMemorized) {
 }
 
 // ==========================================
-// PAGE PREVIEW MODAL & SWIPE GESTURES
+// PAGE PREVIEW MODAL, AUDIO PLAYER & SWIPE GESTURES
 // ==========================================
 let currentPreviewPage = 1;
+
+const PAGE_RECITERS = [
+  { id: 'ar.alafasy', name: 'مشاري راشد العفاسي' },
+  { id: 'ar.minshawi', name: 'محمد صديق المنشاوي (مرتل)' },
+  { id: 'ar.husary', name: 'محمود خليل الحصري' },
+  { id: 'ar.abdulbasitmurattal', name: 'عبد الباسط عبد الصمد (مرتل)' },
+  { id: 'ar.mahermuaiqly', name: 'ماهر المعيقلي' },
+  { id: 'ar.saoodshuraym', name: 'سعود الشريم' },
+  { id: 'ar.hudhaify', name: 'علي عبد الرحمن الحذيفي' },
+  { id: 'ar.ahmedajamy', name: 'أحمد بن علي العجمي' },
+  { id: 'ar.aymanswoid', name: 'أيمن سويد' }
+];
+
+let selectedPageReciter = 'ar.alafasy';
+try {
+  const savedReciter = localStorage.getItem('quran_preview_reciter');
+  if (savedReciter && PAGE_RECITERS.some(r => r.id === savedReciter)) {
+    selectedPageReciter = savedReciter;
+  }
+} catch (e) { }
+
+let currentPreviewAudio = null;
+let isPageAudioPlaying = false;
+let isPageAudioLoading = false;
+let currentPageAyahsData = null;
+let currentPlayingAyahIndex = 0;
+let pageAudioCache = {};
+
+function initPageReciterSelect() {
+  const select = document.getElementById('pageReciterSelect');
+  if (!select) return;
+  select.innerHTML = PAGE_RECITERS.map(r => `
+    <option value="${r.id}" ${r.id === selectedPageReciter ? 'selected' : ''}>${r.name}</option>
+  `).join('');
+}
+
+function updatePageAudioUIState(isPlaying, isLoading = false, ayahIndex = 0) {
+  const icon = document.getElementById('pageAudioPlayIcon');
+  const text = document.getElementById('pageAudioPlayText');
+  const waves = document.getElementById('pageAudioWaves');
+  const statusPill = document.getElementById('pageAudioAyahStatus');
+  const ayahText = document.getElementById('pageAudioAyahText');
+  const navControls = document.getElementById('pageAudioNavControls');
+
+  if (isLoading) {
+    if (text) text.textContent = 'جاري التحميل...';
+    if (icon) icon.setAttribute('data-lucide', 'loader-2');
+    if (waves) waves.classList.add('hidden');
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+
+  if (isPlaying) {
+    if (icon) icon.setAttribute('data-lucide', 'pause');
+    if (text) text.textContent = 'إيقاف مؤقت';
+    if (waves) waves.classList.remove('hidden');
+    if (statusPill) {
+      statusPill.classList.remove('hidden');
+      statusPill.classList.add('flex');
+    }
+    if (navControls) {
+      navControls.classList.remove('hidden');
+      navControls.classList.add('flex');
+    }
+
+    if (ayahText && currentPageAyahsData && currentPageAyahsData[ayahIndex]) {
+      const curAyah = currentPageAyahsData[ayahIndex];
+      const sName = curAyah.surah && curAyah.surah.name ? curAyah.surah.name.replace(/^سُورَةُ\s*/, '') : '';
+      ayahText.textContent = `الآية ${formatStdNum(ayahIndex + 1)} من ${formatStdNum(currentPageAyahsData.length)}${sName ? ' • ' + sName : ''}`;
+    }
+  } else {
+    if (currentPreviewAudio && currentPreviewAudio.paused && currentPageAyahsData) {
+      if (icon) icon.setAttribute('data-lucide', 'play');
+      if (text) text.textContent = 'استئناف التلاوة';
+      if (waves) waves.classList.add('hidden');
+      if (statusPill) {
+        statusPill.classList.remove('hidden');
+        statusPill.classList.add('flex');
+      }
+      if (navControls) {
+        navControls.classList.remove('hidden');
+        navControls.classList.add('flex');
+      }
+    } else {
+      if (icon) icon.setAttribute('data-lucide', 'volume-2');
+      if (text) text.textContent = 'استمع لتلاوة الصفحة';
+      if (waves) waves.classList.add('hidden');
+      if (statusPill) {
+        statusPill.classList.add('hidden');
+        statusPill.classList.remove('flex');
+      }
+      if (navControls) {
+        navControls.classList.add('hidden');
+        navControls.classList.remove('flex');
+      }
+    }
+  }
+  if (window.lucide) lucide.createIcons();
+}
+
+async function getPageAyahsAudio(pageNum, reciterId) {
+  const cacheKey = `quran_page_audio_${pageNum}_${reciterId}`;
+  if (pageAudioCache[cacheKey]) return pageAudioCache[cacheKey];
+
+  try {
+    const local = localStorage.getItem(cacheKey);
+    if (local) {
+      const parsed = JSON.parse(local);
+      if (parsed && Array.isArray(parsed.ayahs) && parsed.ayahs.length > 0) {
+        pageAudioCache[cacheKey] = parsed.ayahs;
+        return parsed.ayahs;
+      }
+    }
+  } catch (e) { }
+
+  const resp = await fetch(`https://api.alquran.cloud/v1/page/${pageNum}/${reciterId}`);
+  if (!resp.ok) throw new Error("فشل جلب تلاوة الصفحة");
+  const json = await resp.json();
+  if (json && json.data && Array.isArray(json.data.ayahs)) {
+    pageAudioCache[cacheKey] = json.data.ayahs;
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify({ ayahs: json.data.ayahs }));
+    } catch (e) { }
+    return json.data.ayahs;
+  }
+  throw new Error("استجابة غير صالحة");
+}
+
+function playPageAyahAtIndex(index) {
+  if (!currentPageAyahsData || index < 0 || index >= currentPageAyahsData.length) {
+    stopPageAudio();
+    return;
+  }
+  currentPlayingAyahIndex = index;
+  const ayah = currentPageAyahsData[index];
+  const audioUrl = ayah.audio || `https://cdn.islamic.network/quran/audio/128/${selectedPageReciter}/${ayah.number}.mp3`;
+
+  if (currentPreviewAudio) {
+    try { currentPreviewAudio.pause(); } catch (e) { }
+  }
+
+  currentPreviewAudio = new Audio(audioUrl);
+  currentPreviewAudio.dataset.index = index;
+
+  currentPreviewAudio.onended = () => {
+    if (currentPlayingAyahIndex + 1 < currentPageAyahsData.length) {
+      playPageAyahAtIndex(currentPlayingAyahIndex + 1);
+    } else {
+      stopPageAudio();
+      if (typeof showToast === 'function') {
+        showToast(`اكتملت تلاوة صفحة ${formatStdNum(currentPreviewPage)} بحمد الله.`);
+      }
+    }
+  };
+
+  currentPreviewAudio.onerror = (e) => {
+    console.warn("Audio playback note:", e);
+    if (currentPlayingAyahIndex + 1 < currentPageAyahsData.length) {
+      playPageAyahAtIndex(currentPlayingAyahIndex + 1);
+    } else {
+      stopPageAudio();
+      if (typeof showToast === 'function') showToast("تعذر تشغيل الصوت للآية الحالية");
+    }
+  };
+
+  currentPreviewAudio.play().then(() => {
+    isPageAudioPlaying = true;
+    updatePageAudioUIState(true, false, index);
+  }).catch(err => {
+    console.warn("Audio playback note:", err);
+    stopPageAudio();
+  });
+}
+
+async function startPlayingCurrentPreviewPage(fromIndex = 0) {
+  if (currentPreviewAudio) {
+    try { currentPreviewAudio.pause(); } catch (e) { }
+    currentPreviewAudio = null;
+  }
+  isPageAudioPlaying = false;
+  isPageAudioLoading = true;
+  updatePageAudioUIState(false, true, 0);
+
+  try {
+    const ayahs = await getPageAyahsAudio(currentPreviewPage, selectedPageReciter);
+    currentPageAyahsData = ayahs;
+    isPageAudioLoading = false;
+    playPageAyahAtIndex(fromIndex);
+  } catch (err) {
+    console.error("Failed to load page audio:", err);
+    isPageAudioLoading = false;
+    stopPageAudio();
+    if (typeof showToast === 'function') {
+      showToast("تعذر تحميل تلاوة الصفحة، تأكد من الاتصال بالإنترنت.");
+    }
+  }
+}
+
+async function togglePageAudio() {
+  if (isPageAudioLoading) return;
+
+  if (isPageAudioPlaying && currentPreviewAudio) {
+    try { currentPreviewAudio.pause(); } catch (e) { }
+    isPageAudioPlaying = false;
+    updatePageAudioUIState(false, false, currentPlayingAyahIndex);
+    return;
+  }
+
+  if (!isPageAudioPlaying && currentPreviewAudio && currentPreviewAudio.paused && currentPageAyahsData) {
+    try {
+      await currentPreviewAudio.play();
+      isPageAudioPlaying = true;
+      updatePageAudioUIState(true, false, currentPlayingAyahIndex);
+      return;
+    } catch (e) { }
+  }
+
+  await startPlayingCurrentPreviewPage(0);
+}
+
+function stopPageAudio() {
+  if (currentPreviewAudio) {
+    try { currentPreviewAudio.pause(); } catch (e) { }
+    currentPreviewAudio = null;
+  }
+  isPageAudioPlaying = false;
+  isPageAudioLoading = false;
+  updatePageAudioUIState(false, false, 0);
+}
+
+function skipPageAyah(delta) {
+  if (!currentPageAyahsData || !currentPageAyahsData.length) return;
+  const newIndex = currentPlayingAyahIndex + delta;
+  if (newIndex >= 0 && newIndex < currentPageAyahsData.length) {
+    playPageAyahAtIndex(newIndex);
+  }
+}
+
+function changePageReciter(reciterId) {
+  selectedPageReciter = reciterId;
+  try { localStorage.setItem('quran_preview_reciter', reciterId); } catch (e) { }
+  const reciter = PAGE_RECITERS.find(r => r.id === reciterId);
+  if (typeof showToast === 'function') {
+    showToast(`تم تعيين القارئ: ${reciter ? reciter.name : reciterId}`);
+  }
+  if (isPageAudioPlaying) {
+    startPlayingCurrentPreviewPage(currentPlayingAyahIndex);
+  } else {
+    currentPageAyahsData = null;
+    stopPageAudio();
+  }
+}
 
 function openPagePreview(pageNum) {
   currentPreviewPage = Math.min(604, Math.max(1, parseInt(pageNum) || 1));
   const modal = document.getElementById('pagePreviewModal');
   if (!modal) return;
+  initPageReciterSelect();
   updatePagePreviewUI();
   modal.classList.remove('hidden');
 }
 
 function closePagePreview() {
+  stopPageAudio();
   const modal = document.getElementById('pagePreviewModal');
   if (modal) modal.classList.add('hidden');
 }
@@ -786,8 +1040,14 @@ function closePagePreview() {
 function navigatePreviewPage(delta) {
   const newPage = currentPreviewPage + delta;
   if (newPage >= 1 && newPage <= 604) {
+    const wasPlaying = isPageAudioPlaying;
     currentPreviewPage = newPage;
     updatePagePreviewUI();
+    if (wasPlaying) {
+      startPlayingCurrentPreviewPage(0);
+    } else {
+      stopPageAudio();
+    }
   }
 }
 
@@ -2515,6 +2775,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial check and periodic polling for daily reminder
   checkDailyReminder();
   setInterval(checkDailyReminder, 60000);
+  initPageReciterSelect();
 
   const resetTamkeenModal = document.getElementById('resetTamkeenConfirmModal');
 
@@ -2527,7 +2788,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === mistakesModal) closeMistakesModal();
     if (e.target === remindersModal) closeRemindersModal();
     const previewModal = document.getElementById('pagePreviewModal');
-    if (previewModal && e.target === previewModal) previewModal.classList.add('hidden');
+    if (previewModal && e.target === previewModal) closePagePreview();
   });
 });
 
