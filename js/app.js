@@ -1091,6 +1091,8 @@ function openPagePreview(pageNum) {
   initPageReciterSelect();
   updatePagePreviewUI();
   modal.classList.remove('hidden');
+  const scrollContainer = document.getElementById('previewScrollContainer');
+  if (scrollContainer) scrollContainer.scrollTop = 0;
 }
 
 function closePagePreview() {
@@ -1185,6 +1187,8 @@ function updatePagePreviewUI() {
     img.dataset.tryBackup = "false";
     img.src = `https://cdn.jsdelivr.net/gh/GovarJabbar/Quran-PNG@master/${paddedPage}.png`;
   }
+  const sc = document.getElementById('previewScrollContainer');
+  if (sc) sc.scrollTop = 0;
 }
 
 function handlePreviewImageError(img) {

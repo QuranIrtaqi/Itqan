@@ -1383,10 +1383,10 @@
 
       <!-- Audio Player Toolbar for Page Recitation -->
       <div id="pageAudioBar"
-        class="px-3 sm:px-4 py-2 bg-gradient-to-r from-emerald-50/90 via-slate-50 to-amber-50/80 dark:from-slate-900 dark:via-slate-850 dark:to-slate-900 border-b border-emerald-900/10 dark:border-emerald-500/15 flex flex-wrap items-center justify-between gap-2 text-xs shrink-0 font-sans">
+        class="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-emerald-50/90 via-slate-50 to-amber-50/80 dark:from-slate-900 dark:via-slate-850 dark:to-slate-900 border-b border-emerald-900/10 dark:border-emerald-500/15 flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 text-xs shrink-0 font-sans">
         <div class="flex items-center gap-2 flex-wrap">
           <button id="btnPageAudioToggle" onclick="togglePageAudio()" type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition active:scale-95"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition active:scale-95"
             title="الاستماع لتلاوة الصفحة">
             <i id="pageAudioPlayIcon" data-lucide="volume-2" class="w-4 h-4 text-gold-300"></i>
             <span id="pageAudioPlayText">استمع لتلاوة الصفحة</span>
@@ -1421,7 +1421,7 @@
           <label for="pageReciterSelect"
             class="text-[11px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">القارئ:</label>
           <select id="pageReciterSelect" onchange="changePageReciter(this.value)"
-            class="py-1 px-2.5 rounded-xl text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:ring-1 focus:ring-emerald-600 shadow-xs cursor-pointer">
+            class="py-0.5 sm:py-1 px-2 sm:px-2.5 rounded-xl text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:ring-1 focus:ring-emerald-600 shadow-xs cursor-pointer">
             <option value="ar.husary" selected>محمود خليل الحصري</option>
             <option value="ar.alafasy">مشاري راشد العفاسي</option>
             <option value="ar.minshawi">محمد صديق المنشاوي (مرتل)</option>
@@ -1435,8 +1435,8 @@
       </div>
 
       <!-- Image Display Area -->
-      <div
-        class="flex-1 overflow-y-auto p-2 sm:p-4 flex items-center justify-center bg-slate-100/80 dark:bg-slate-950 min-h-[340px] relative">
+      <div id="previewScrollContainer"
+        class="flex-1 overflow-y-auto p-1.5 sm:p-4 flex flex-col items-center justify-start bg-slate-100/80 dark:bg-slate-950 min-h-[300px] relative">
         <div id="previewLoadingSpinner"
           class="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-slate-900/80 z-10">
           <div class="w-9 h-9 border-3 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
@@ -1444,10 +1444,10 @@
 
         <!-- Authentic Mushaf Paper Wrapper (White background ensures black Arabic font is always crisp and visible in both light & dark modes) -->
         <div
-          class="bg-white p-2 sm:p-3 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center max-w-full">
+          class="my-auto bg-white p-1 sm:p-3 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center max-w-full">
           <img id="previewPageImage" src="" alt="صفحة المصحف"
-            class="max-w-full max-h-[67vh] object-contain rounded-lg bg-white"
-            onload="document.getElementById('previewLoadingSpinner').classList.add('hidden')"
+            class="max-w-full max-h-[66vh] object-contain rounded-lg bg-white block"
+            onload="document.getElementById('previewLoadingSpinner').classList.add('hidden'); const sc = document.getElementById('previewScrollContainer'); if (sc) sc.scrollTop = 0;"
             onerror="handlePreviewImageError(this)">
         </div>
 
