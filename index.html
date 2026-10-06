@@ -1381,27 +1381,28 @@
         </div>
       </div>
 
-      <!-- Audio Player Toolbar for Page Recitation -->
+      <!-- Audio Player Toolbar for Page Recitation (Right: Audio Controls | Left: Reciter Selector) -->
       <div id="pageAudioBar"
-        class="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-emerald-50/90 via-slate-50 to-amber-50/80 dark:from-slate-900 dark:via-slate-850 dark:to-slate-900 border-b border-emerald-900/10 dark:border-emerald-500/15 flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 text-xs shrink-0 font-sans">
-        <div class="flex items-center gap-2 flex-wrap">
+        class="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-emerald-50/90 via-slate-50 to-amber-50/80 dark:from-slate-900 dark:via-slate-850 dark:to-slate-900 border-b border-emerald-900/10 dark:border-emerald-500/15 flex items-center justify-between gap-1.5 sm:gap-2 text-xs shrink-0 font-sans">
+        <!-- Right side (in RTL): Play Audio & Nav Controls -->
+        <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
           <button id="btnPageAudioToggle" onclick="togglePageAudio()" type="button"
-            class="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition active:scale-95"
+            class="inline-flex items-center gap-1 px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition active:scale-95 shrink-0"
             title="الاستماع لتلاوة الصفحة">
-            <i id="pageAudioPlayIcon" data-lucide="volume-2" class="w-4 h-4 text-gold-300"></i>
-            <span id="pageAudioPlayText">استمع لتلاوة الصفحة</span>
+            <i id="pageAudioPlayIcon" data-lucide="volume-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gold-300"></i>
+            <span id="pageAudioPlayText" class="whitespace-nowrap">استمع للتلاوة</span>
             <span id="pageAudioWaves" class="hidden audio-playing-indicator">
               <span></span><span></span><span></span><span></span>
             </span>
           </button>
 
           <div id="pageAudioAyahStatus"
-            class="hidden items-center gap-1 text-[11px] text-emerald-800 dark:text-emerald-300 font-bold bg-emerald-100/80 dark:bg-emerald-950/70 px-2.5 py-1 rounded-xl border border-emerald-300/60 dark:border-emerald-800/60 shadow-xs">
-            <i data-lucide="music" class="w-3 h-3 text-gold-500"></i>
-            <span id="pageAudioAyahText">الآية 1</span>
+            class="hidden items-center gap-1 text-[10.5px] sm:text-[11px] text-emerald-800 dark:text-emerald-300 font-bold bg-emerald-100/80 dark:bg-emerald-950/70 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl border border-emerald-300/60 dark:border-emerald-800/60 shadow-xs truncate">
+            <i data-lucide="music" class="w-3 h-3 text-gold-500 shrink-0"></i>
+            <span id="pageAudioAyahText" class="truncate">الآية 1</span>
           </div>
 
-          <div id="pageAudioNavControls" class="hidden items-center gap-1">
+          <div id="pageAudioNavControls" class="hidden items-center gap-0.5 sm:gap-1 shrink-0">
             <button onclick="skipPageAyah(-1)" type="button" title="الآية السابقة"
               class="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
               <i data-lucide="skip-forward" class="w-3.5 h-3.5"></i>
@@ -1417,11 +1418,12 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-1.5">
+        <!-- Left side (in RTL): Reciter Selector -->
+        <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
           <label for="pageReciterSelect"
-            class="text-[11px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">القارئ:</label>
+            class="text-[11px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap hidden min-[380px]:inline">القارئ:</label>
           <select id="pageReciterSelect" onchange="changePageReciter(this.value)"
-            class="py-0.5 sm:py-1 px-2 sm:px-2.5 rounded-xl text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:ring-1 focus:ring-emerald-600 shadow-xs cursor-pointer">
+            class="py-1 px-2 sm:px-2.5 rounded-xl text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:ring-1 focus:ring-emerald-600 shadow-xs cursor-pointer max-w-[135px] min-[360px]:max-w-[155px] sm:max-w-none truncate">
             <option value="ar.husary" selected>محمود خليل الحصري</option>
             <option value="ar.alafasy">مشاري راشد العفاسي</option>
             <option value="ar.minshawi">محمد صديق المنشاوي (مرتل)</option>

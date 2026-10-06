@@ -907,7 +907,7 @@ function updatePageAudioUIState(isPlaying, isLoading = false, ayahIndex = 0) {
       }
     } else {
       if (icon) icon.setAttribute('data-lucide', 'volume-2');
-      if (text) text.textContent = 'استمع لتلاوة الصفحة';
+      if (text) text.textContent = 'استمع للتلاوة';
       if (waves) waves.classList.add('hidden');
       if (statusPill) {
         statusPill.classList.add('hidden');
