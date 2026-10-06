@@ -28,22 +28,174 @@ header.sticky {
   padding-bottom: 0.25rem;
 }
 
+/* ========================================================
+   1. ISLAMIC GEOMETRIC VECTOR PATTERN (Authentic Arabesque)
+   ======================================================== */
 .bg-islamic-pattern {
-  background-image: radial-gradient(rgba(217, 119, 6, 0.08) 1px, transparent 0);
-  background-size: 20px 20px;
+  background-color: #f8fafc;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l5 12 12-5-5 12 12 5-12 5 5 12-12-5-5 12-5-12-12 5 5-12-12-5 12-5-5-12 12 5zM0 30l5 12 12-5-5 12 12 5-12 5 5 12-12-5-5 12-5-12-12 5 5-12-12-5 12-5-5-12 12 5zM60 30l5 12 12-5-5 12 12 5-12 5 5 12-12-5-5 12-5-12-12 5 5-12-12-5 12-5-5-12 12 5z' fill='%23064e3b' fill-opacity='0.025' fill-rule='evenodd'/%3E%3C/svg%3E");
+  background-size: 60px 60px;
 }
 
 .dark .bg-islamic-pattern {
-  background-image: radial-gradient(rgba(245, 158, 11, 0.12) 1px, transparent 0);
-  background-size: 20px 20px;
+  background-color: #020617;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l5 12 12-5-5 12 12 5-12 5 5 12-12-5-5 12-5-12-12 5 5-12-12-5 12-5-5-12 12 5zM0 30l5 12 12-5-5 12 12 5-12 5 5 12-12-5-5 12-5-12-12 5 5-12-12-5 12-5-5-12 12 5zM60 30l5 12 12-5-5 12 12 5-12 5 5 12-12-5-5 12-5-12-12 5 5-12-12-5 12-5-5-12 12 5z' fill='%23fbbf24' fill-opacity='0.035' fill-rule='evenodd'/%3E%3C/svg%3E");
+  background-size: 60px 60px;
 }
 
+/* ========================================================
+   SEPIA / WARM PARCHMENT THEME (مصحفي دافئ - راحة العين)
+   ======================================================== */
+html.sepia-mode .bg-islamic-pattern {
+  background-color: #fbf7ee !important;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l5 12 12-5-5 12 12 5-12 5 5 12-12-5-5 12-5-12-12 5 5-12-12-5 12-5-5-12 12 5z' fill='%2392400e' fill-opacity='0.035' fill-rule='evenodd'/%3E%3C/svg%3E") !important;
+}
+
+html.sepia-mode body {
+  background-color: #fbf7ee !important;
+  color: #3b2a1a !important;
+}
+
+html.sepia-mode header {
+  background-color: rgba(251, 247, 238, 0.94) !important;
+  border-bottom-color: #e8ddc7 !important;
+}
+
+html.sepia-mode .bg-white {
+  background-color: #f5eedc !important;
+  border-color: #e7dac2 !important;
+  color: #382c1e !important;
+}
+
+html.sepia-mode .bg-slate-50 {
+  background-color: #eee4ce !important;
+  border-color: #decfae !important;
+}
+
+html.sepia-mode .text-slate-900,
+html.sepia-mode .text-slate-800 {
+  color: #2c1e12 !important;
+}
+
+html.sepia-mode .text-slate-700,
+html.sepia-mode .text-slate-600 {
+  color: #4a3828 !important;
+}
+
+html.sepia-mode .text-slate-500,
+html.sepia-mode .text-slate-400 {
+  color: #79624b !important;
+}
+
+html.sepia-mode #mobileBottomNav {
+  background-color: rgba(251, 247, 238, 0.96) !important;
+  border-top-color: #e5d8be !important;
+}
+
+/* ========================================================
+   2. SURAH & PAGE GRID ENHANCEMENTS
+   ======================================================== */
 .page-box {
-  transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .page-box:active {
   transform: scale(0.92);
+}
+
+.page-box:hover {
+  transform: translateY(-1px);
+}
+
+/* Sticky Juz Jumper Bar */
+.sticky-juz-nav {
+  position: sticky;
+  top: 56px;
+  z-index: 25;
+  backdrop-filter: blur(8px);
+}
+
+/* Active Juz Button Highlight */
+.juz-jumper-active {
+  background-color: #047857 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(4, 120, 87, 0.3);
+}
+
+/* In-Progress Surah Card Accent */
+.surah-card-in-progress {
+  border-color: #f59e0b !important;
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.5) 0%, rgba(255, 251, 235, 0.9) 100%);
+}
+
+.dark .surah-card-in-progress {
+  border-color: #b45309 !important;
+  background: linear-gradient(135deg, rgba(120, 53, 15, 0.25) 0%, rgba(15, 23, 42, 0.9) 100%);
+}
+
+/* ========================================================
+   3. TAMKEEN AUDIO RECITATION & SOUND WAVE ANIMATION
+   ======================================================== */
+.audio-playing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 14px;
+}
+
+.audio-playing-indicator span {
+  display: inline-block;
+  width: 3px;
+  background-color: #10b981;
+  border-radius: 9999px;
+  animation: audioWave 1s ease-in-out infinite alternate;
+}
+
+.audio-playing-indicator span:nth-child(1) { height: 6px; animation-delay: 0.1s; }
+.audio-playing-indicator span:nth-child(2) { height: 14px; animation-delay: 0.3s; }
+.audio-playing-indicator span:nth-child(3) { height: 9px; animation-delay: 0.2s; }
+.audio-playing-indicator span:nth-child(4) { height: 12px; animation-delay: 0.4s; }
+
+@keyframes audioWave {
+  0% { transform: scaleY(0.4); }
+  100% { transform: scaleY(1.2); }
+}
+
+/* ========================================================
+   6. MOBILE BOTTOM SHEETS & PWA EXPERIENCE
+   ======================================================== */
+@media (max-width: 639px) {
+  .mobile-bottom-sheet {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .mobile-bottom-sheet > div {
+    max-height: 88vh !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    width: 100% !important;
+    animation: bottomSheetSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+@keyframes bottomSheetSlideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.drag-handle-pill {
+  width: 40px;
+  height: 4px;
+  background-color: rgba(148, 163, 184, 0.6);
+  border-radius: 9999px;
+  margin: 6px auto 10px auto;
 }
 
 /* Mobile Bottom Navigation active indicator */
@@ -55,6 +207,7 @@ header.sticky {
   transform: scale(0.92);
 }
 
+/* Scrollbar polish */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

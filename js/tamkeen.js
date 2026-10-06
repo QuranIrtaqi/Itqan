@@ -259,6 +259,7 @@ async function generateDynamicTamkeenQuestion(mode, scope) {
       surahId,
       surahName: meta.name,
       ayahNum: idx + 1,
+      globalAyahNum: (surahData.ayahs[idx] && surahData.ayahs[idx].number) || getGlobalAyahNumber(surahId, idx + 1),
       prompt: `ما هي الآية الكريمة التي تلي هذه الآية مباشرة في سورة «${meta.name}»؟`,
       verse: qVerse,
       correct,
@@ -287,6 +288,7 @@ async function generateDynamicTamkeenQuestion(mode, scope) {
     surahId,
     surahName: meta.name,
     ayahNum: idx + 1,
+    globalAyahNum: (surahData.ayahs[idx] && surahData.ayahs[idx].number) || getGlobalAyahNumber(surahId, idx + 1),
     prompt: `في أي سورة كريمة وردت هذه الآية المباركة؟`,
     verse: verseText,
     correct,
@@ -397,7 +399,143 @@ function getTamkeenEligibleQuestions() {
   return unasked.length > 0 ? unasked : (pool.length > 0 ? pool : TAMKEEN_STATIC_FALLBACKS);
 }
 
+function getGlobalAyahNumber(surahId, ayahNumInSurah) {
+  let count = 0;
+  for (let i = 1; i < surahId; i++) {
+    const s = SURAHS.find(item => item.id === i);
+    if (s) count += s.ayahs;
+  }
+  return count + (parseInt(ayahNumInSurah) || 1);
+}
+
+let currentTamkeenAudio = null;
+let isTamkeenAudioPlaying = false;
+
+function stopTamkeenAudio() {
+  if (currentTamkeenAudio) {
+    try { currentTamkeenAudio.pause(); } catch (e) { }
+    currentTamkeenAudio = null;
+    isTamkeenAudioPlaying = false;
+  }
+  const icon = document.getElementById('tamkeenAudioIcon');
+  const text = document.getElementById('tamkeenAudioText');
+  const waves = document.getElementById('tamkeenAudioWaves');
+  if (icon) icon.setAttribute('data-lucide', 'volume-2');
+  if (text) text.textContent = 'استمع للتلاوة';
+  if (waves) waves.classList.add('hidden');
+  if (window.lucide) lucide.createIcons();
+}
+
+function toggleTamkeenAudio() {
+  const q = tamkeenState.currentQuestion;
+  if (!q) return;
+
+  const icon = document.getElementById('tamkeenAudioIcon');
+  const text = document.getElementById('tamkeenAudioText');
+  const waves = document.getElementById('tamkeenAudioWaves');
+
+  if (currentTamkeenAudio && !currentTamkeenAudio.paused) {
+    stopTamkeenAudio();
+    return;
+  }
+
+  const globalAyahNum = q.globalAyahNum || getGlobalAyahNumber(q.surahId, q.ayahNum);
+  const audioUrl = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${globalAyahNum}.mp3`;
+
+  if (!currentTamkeenAudio || currentTamkeenAudio.dataset.url !== audioUrl) {
+    if (currentTamkeenAudio) {
+      try { currentTamkeenAudio.pause(); } catch (e) { }
+    }
+    currentTamkeenAudio = new Audio(audioUrl);
+    currentTamkeenAudio.dataset.url = audioUrl;
+
+    currentTamkeenAudio.onended = () => {
+      stopTamkeenAudio();
+    };
+
+    currentTamkeenAudio.onerror = () => {
+      stopTamkeenAudio();
+      if (typeof showToast === 'function') showToast('تعذر تحميل تلاوة الآية حالياً');
+    };
+  }
+
+  if (text) text.textContent = 'جاري التلاوة...';
+  if (waves) waves.classList.remove('hidden');
+
+  currentTamkeenAudio.play().then(() => {
+    isTamkeenAudioPlaying = true;
+    if (icon) icon.setAttribute('data-lucide', 'pause');
+    if (text) text.textContent = 'إيقاف التلاوة';
+    if (window.lucide) lucide.createIcons();
+  }).catch(err => {
+    console.warn("Audio playback note:", err);
+    stopTamkeenAudio();
+  });
+}
+
+async function startTamkeenSpecificSurah(surahId) {
+  renderTamkeenLoadingState();
+  stopTamkeenAudio();
+  try {
+    const surahData = await fetchSurahFromApi(surahId);
+    const meta = SURAHS.find(s => s.id === surahId) || { id: surahId, name: surahData.name, ayahs: surahData.ayahs.length, juz: 1 };
+    
+    if (surahData.ayahs && surahData.ayahs.length > 1) {
+      const idx = Math.floor(Math.random() * (surahData.ayahs.length - 1));
+      const qVerse = cleanAyahText(surahData.ayahs[idx].text, surahId, idx + 1);
+      const correct = cleanAyahText(surahData.ayahs[idx + 1].text, surahId, idx + 2);
+      
+      const distractors = [];
+      for (let a = 0; a < 25 && distractors.length < 3; a++) {
+        const randIdx = Math.floor(Math.random() * surahData.ayahs.length);
+        if (randIdx !== idx && randIdx !== idx + 1) {
+          const dText = cleanAyahText(surahData.ayahs[randIdx].text, surahId, randIdx + 1);
+          if (dText && dText !== correct && !distractors.includes(dText)) {
+            distractors.push(dText);
+          }
+        }
+      }
+      while (distractors.length < 3) {
+        distractors.push("إِنَّ اللَّهَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ");
+      }
+      
+      const q = {
+        mode: 'next_ayah',
+        surahId,
+        surahName: meta.name,
+        ayahNum: idx + 1,
+        globalAyahNum: (surahData.ayahs[idx] && surahData.ayahs[idx].number) || getGlobalAyahNumber(surahId, idx + 1),
+        prompt: `ما هي الآية الكريمة التي تلي هذه الآية مباشرة في سورة «${meta.name}»؟`,
+        verse: qVerse,
+        correct,
+        options: [correct, ...distractors.slice(0, 3)],
+        rule: `سورة ${meta.name} • الآية (${idx + 2}) تلي الآية (${idx + 1}): «${correct}».`,
+        source: 'api'
+      };
+      
+      const shuffledOptions = q.options.slice().sort(() => Math.random() - 0.5);
+      tamkeenState.currentQuestion = {
+        ...q,
+        shuffledOptions
+      };
+      recordTamkeenQuestionSignature(q);
+    } else {
+      await nextTamkeenQuestion();
+      return;
+    }
+  } catch (err) {
+    console.warn("Specific surah question fallback:", err);
+    await nextTamkeenQuestion();
+    return;
+  }
+  tamkeenState.isAnswered = false;
+  tamkeenState.selectedOptionIndex = null;
+  tamkeenState.isBlurred = true;
+  renderTamkeenQuiz();
+}
+
 async function nextTamkeenQuestion() {
+  stopTamkeenAudio();
   renderTamkeenLoadingState();
   try {
     const q = await generateDynamicTamkeenQuestion(tamkeenState.activeMode, tamkeenState.scope);
@@ -442,8 +580,19 @@ function handleTamkeenChoice(idx) {
     if (tamkeenState.stats.streak > tamkeenState.stats.bestStreak) {
       tamkeenState.stats.bestStreak = tamkeenState.stats.streak;
     }
+    if (typeof triggerHaptic === 'function') triggerHaptic('success');
+
+    // Celebratory Milestones
+    const streak = tamkeenState.stats.streak;
+    if (streak === 5 || streak === 10 || streak === 15 || streak === 20 || (streak > 20 && streak % 10 === 0)) {
+      if (typeof launchConfetti === 'function') launchConfetti();
+      if (typeof showToast === 'function') {
+        showToast(`🎉 ما شاء الله! إتقان متتابع: ${formatStdNum(streak)} إجابات صحيحة دون خطأ!`);
+      }
+    }
   } else {
     tamkeenState.stats.streak = 0;
+    if (typeof triggerHaptic === 'function') triggerHaptic('error');
     if (typeof addMistakeToNotebook === 'function') {
       addMistakeToNotebook(q, chosenText);
     }
@@ -616,6 +765,16 @@ function renderTamkeenQuiz() {
         <p class="font-quran text-lg sm:text-2xl md:text-3xl leading-[2.2] sm:leading-loose text-slate-800 dark:text-slate-100 select-text">
           «${displayedVerse}»
         </p>
+
+        <div class="mt-3 pt-2.5 border-t border-gold-300/40 dark:border-emerald-800/40 flex items-center justify-center gap-2">
+          <button id="btnTamkeenAudioPlay" onclick="toggleTamkeenAudio()" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 hover:bg-white dark:bg-slate-800/90 dark:hover:bg-slate-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold shadow-xs border border-emerald-300/60 dark:border-emerald-700/60 transition active:scale-95" title="الاستماع لتلاوة الآية بصوت الشيخ مشاري العفاسي">
+            <i id="tamkeenAudioIcon" data-lucide="volume-2" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
+            <span id="tamkeenAudioText">استمع للتلاوة</span>
+            <span id="tamkeenAudioWaves" class="hidden audio-playing-indicator">
+              <span></span><span></span><span></span><span></span>
+            </span>
+          </button>
+        </div>
       </div>
     </div>
 

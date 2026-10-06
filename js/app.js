@@ -346,6 +346,11 @@ function renderSurahs() {
 
     let pct = 0;
     let progressLabel = '';
+    let pagesCount = 0;
+
+    for (let p = s.startPage; p <= s.endPage; p++) {
+      if (state.memorizedPages[p]) pagesCount++;
+    }
 
     if (totalPages === 1) {
       if (isDone) {
@@ -360,25 +365,33 @@ function renderSurahs() {
         pct = 100;
         progressLabel = `100% (${formatStdNum(totalPages)}/${formatStdNum(totalPages)} ص)`;
       } else {
-        let pagesCount = 0;
-        for (let p = s.startPage; p <= s.endPage; p++) {
-          if (state.memorizedPages[p]) pagesCount++;
-        }
         pct = Math.round((pagesCount / totalPages) * 100);
         progressLabel = `${pct}% (${formatStdNum(pagesCount)}/${formatStdNum(totalPages)} ص)`;
       }
     }
 
+    const hasStarted = !isDone && (pagesCount > 0 || (state.ayahs && state.ayahs[s.id] > 0));
+
+    let cardBgClass = "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-800 shadow-sm";
+    let badgeStateHtml = `<span class="text-[10px] px-2 py-0.5 rounded-full ${s.type === 'مكية' ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300' : 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300'} font-semibold font-sans">${s.type}</span>`;
+    let progressBarClass = "bg-emerald-600";
+
+    if (isDone) {
+      cardBgClass = "bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-400/80 dark:border-emerald-700 shadow-sm shadow-emerald-700/10";
+      badgeStateHtml = `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-300/80 dark:border-emerald-800 flex items-center gap-1"><span>✓</span><span>مكتملة</span></span>`;
+    } else if (hasStarted) {
+      cardBgClass = "surah-card-in-progress shadow-sm shadow-amber-900/10";
+      badgeStateHtml = `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-bold border border-amber-300/80 dark:border-amber-800 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span><span>قيد الحفظ (${formatStdNum(pct)}%)</span></span>`;
+      progressBarClass = "bg-gradient-to-l from-amber-500 to-amber-600";
+    }
+
     return `
-      <div onclick="toggleSurah(${s.id})" class="cursor-pointer group relative p-3.5 rounded-2xl border transition-all duration-200 select-none active:scale-[0.99] touch-manipulation ${isDone
-        ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-400/80 dark:border-emerald-700 shadow-sm shadow-emerald-700/10'
-        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-800 shadow-sm'
-      }">
+      <div onclick="toggleSurah(${s.id})" class="cursor-pointer group relative p-3.5 rounded-2xl border transition-all duration-200 select-none active:scale-[0.99] touch-manipulation ${cardBgClass}">
         <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs font-sans ${isDone
         ? 'bg-emerald-700 text-white shadow-md shadow-emerald-700/30'
-        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-950 group-hover:text-emerald-800 transition'
+        : (hasStarted ? 'bg-amber-500 text-white shadow-md shadow-amber-600/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-950 group-hover:text-emerald-800 transition')
       }">
               ${formatStdNum(s.id)}
             </div>
@@ -387,9 +400,7 @@ function renderSurahs() {
                 <h4 class="font-bold text-slate-900 dark:text-white text-base group-hover:text-emerald-700 dark:group-hover:text-emerald-300 font-quran transition">
                   سُورَةُ ${s.name}
                 </h4>
-                <span class="text-[10px] px-2 py-0.5 rounded-full ${s.type === 'مكية' ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300' : 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300'} font-semibold font-sans">
-                  ${s.type}
-                </span>
+                ${badgeStateHtml}
               </div>
               <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5 font-sans">
                 ${formatStdNum(s.ayahs)} آية • ص ${formatStdNum(s.startPage)} إلى ${formatStdNum(s.endPage)} • الجزء ${formatStdNum(s.juz)}
@@ -405,12 +416,23 @@ function renderSurahs() {
           </div>
         </div>
 
-        <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between font-sans">
-          <div class="flex items-center gap-2 flex-1 ml-2">
+        <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between font-sans gap-2 flex-wrap">
+          <div class="flex items-center gap-2 flex-1 min-w-[120px]">
             <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-              <div class="h-full bg-emerald-600 rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+              <div class="h-full ${progressBarClass} rounded-full transition-all duration-300" style="width: ${pct}%"></div>
             </div>
             <span class="text-[10px] text-slate-500 font-medium whitespace-nowrap">${progressLabel}</span>
+          </div>
+
+          <div class="flex items-center gap-1 shrink-0">
+            <button type="button" onclick="event.stopPropagation(); triggerHaptic('light'); openPagePreview(${s.startPage})" title="تصفح وقراءة السورة في المصحف" class="px-2 py-1 rounded-lg text-[10.5px] font-bold bg-slate-100 hover:bg-emerald-50 dark:bg-slate-800 dark:hover:bg-emerald-950/50 text-slate-700 hover:text-emerald-800 dark:text-slate-300 dark:hover:text-emerald-300 border border-slate-200 dark:border-slate-700 transition active:scale-95 flex items-center gap-1">
+              <i data-lucide="book-open" class="w-3 h-3 text-emerald-600"></i>
+              <span>المصحف</span>
+            </button>
+            <button type="button" onclick="event.stopPropagation(); triggerHaptic('light'); startTamkeenForSurah(${s.id})" title="اختبار فوري في تمكين لهذه السورة" class="px-2 py-1 rounded-lg text-[10.5px] font-bold bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-300/80 dark:border-amber-800 transition active:scale-95 flex items-center gap-1">
+              <i data-lucide="brain" class="w-3 h-3 text-amber-600"></i>
+              <span>اختبرني</span>
+            </button>
           </div>
         </div>
         ${isDone ? '' : `
@@ -424,6 +446,14 @@ function renderSurahs() {
     `;
   }).join('');
   lucide.createIcons();
+}
+
+function startTamkeenForSurah(surahId) {
+  triggerHaptic('light');
+  switchMode('tamkeen', true);
+  if (typeof startTamkeenSpecificSurah === 'function') {
+    startTamkeenSpecificSurah(surahId);
+  }
 }
 
 function renderPages() {
@@ -529,13 +559,19 @@ function renderJuzJumpers() {
   const container = document.getElementById('juzJumpersContainer');
   if (!container) return;
   container.innerHTML = AJZA.map(j => `
-    <button onclick="jumpToPage(${j.start})" class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-700 hover:text-white text-slate-700 dark:text-slate-300 transition text-xs whitespace-nowrap font-bold font-sans">
+    <button id="juz-btn-${j.juz}" onclick="jumpToPage(${j.start}, ${j.juz})" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-700 hover:text-white text-slate-700 dark:text-slate-300 transition text-xs whitespace-nowrap font-bold font-sans active:scale-95">
       ج${formatStdNum(j.juz)}
     </button>
   `).join('');
 }
 
-function jumpToPage(page) {
+function jumpToPage(page, juzNum) {
+  if (typeof triggerHaptic === 'function') triggerHaptic('light');
+  if (juzNum) {
+    document.querySelectorAll('#juzJumpersContainer button').forEach(b => b.classList.remove('juz-jumper-active'));
+    const btn = document.getElementById(`juz-btn-${juzNum}`);
+    if (btn) btn.classList.add('juz-jumper-active');
+  }
   const el = document.getElementById(`page-cell-${page}`);
   if (el) {
     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1642,12 +1678,33 @@ function launchMistakeRetest(mistakeId) {
   showToast(`جاري اختبار تثبيت الآية (${formatStdNum(m.ayahNum)}) من سورة ${m.surahName} 🎯`);
 }
 
+function updateMobileNavBadges() {
+  const surahBtn = document.getElementById('mobileTabSurah');
+  if (!surahBtn) return;
+  let badge = document.getElementById('mobileDueReviewBadge');
+  const { totalDueCount } = (typeof getDueReviewSurahs === 'function') ? getDueReviewSurahs() : { totalDueCount: 0 };
+  if (totalDueCount > 0) {
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.id = 'mobileDueReviewBadge';
+      badge.className = 'absolute top-1 right-2 px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[9px] font-bold font-mono leading-none shadow-xs';
+      surahBtn.classList.add('relative');
+      surahBtn.appendChild(badge);
+    }
+    badge.textContent = formatStdNum(totalDueCount);
+    badge.classList.remove('hidden');
+  } else if (badge) {
+    badge.classList.add('hidden');
+  }
+}
+
 function renderAll() {
   updateMetrics();
   renderPlanner();
   renderDailyWard();
   updateMistakesBadge();
   updateReminderUI();
+  updateMobileNavBadges();
   if (state.activeView === 'surah') renderSurahs();
   else if (state.activeView === 'page') renderPages();
   else if (state.activeView === 'tamkeen') renderTamkeenQuiz();
@@ -1658,6 +1715,7 @@ function renderAll() {
 // NAVIGATION & MODE SWITCHER
 // ==========================================
 function switchMode(mode, shouldScroll = true) {
+  if (typeof triggerHaptic === 'function') triggerHaptic('light');
   state.activeView = mode;
   const tabSurah = document.getElementById('tabModeSurah');
   const tabPage = document.getElementById('tabModePage');
@@ -2191,18 +2249,48 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const themeBtn = document.getElementById('btnThemeToggle');
-  let savedTheme = null;
-  try { savedTheme = localStorage.getItem('quran_tracker_theme'); } catch (e) { }
-  if (savedTheme === 'dark') {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
+  let currentTheme = 'light';
+  try {
+    currentTheme = localStorage.getItem('quran_tracker_theme') || 'light';
+  } catch (e) { }
+
+  function applyAppTheme(theme) {
+    document.documentElement.classList.remove('dark', 'sepia-mode');
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else if (theme === 'sepia') {
+      document.documentElement.classList.add('sepia-mode');
+    }
+    currentTheme = theme;
+    try { localStorage.setItem('quran_tracker_theme', theme); } catch (e) { }
+
+    if (themeBtn) {
+      if (theme === 'dark') {
+        themeBtn.title = 'النمط الحالي: ليلي داكن (انقر للتبديل للنهاري)';
+        themeBtn.innerHTML = '<i data-lucide="sun" class="w-4 h-4 text-gold-400"></i>';
+      } else if (theme === 'sepia') {
+        themeBtn.title = 'النمط الحالي: مصحفي دافئ 📜 (انقر للتبديل للداكن)';
+        themeBtn.innerHTML = '<i data-lucide="moon" class="w-4 h-4 text-amber-700"></i>';
+      } else {
+        themeBtn.title = 'النمط الحالي: نهاري فاتح ☀️ (انقر للتبديل للمصحفي الدافئ)';
+        themeBtn.innerHTML = '<i data-lucide="palette" class="w-4 h-4 text-emerald-700"></i>';
+      }
+      if (window.lucide) lucide.createIcons();
+    }
   }
+
+  applyAppTheme(currentTheme);
 
   if (themeBtn) {
     themeBtn.addEventListener('click', () => {
-      const isDark = document.documentElement.classList.toggle('dark');
-      try { localStorage.setItem('quran_tracker_theme', isDark ? 'dark' : 'light'); } catch (e) { }
+      if (typeof triggerHaptic === 'function') triggerHaptic('light');
+      let nextTheme = 'light';
+      if (currentTheme === 'light') nextTheme = 'sepia';
+      else if (currentTheme === 'sepia') nextTheme = 'dark';
+      else nextTheme = 'light';
+      applyAppTheme(nextTheme);
+      const themeNames = { light: 'النهاري الفاتح ☀️', sepia: 'المصحفي الدافئ 📜', dark: 'الليلي الداكن 🌙' };
+      if (typeof showToast === 'function') showToast(`تم التبديل إلى نمط ${themeNames[nextTheme]}`);
     });
   }
 

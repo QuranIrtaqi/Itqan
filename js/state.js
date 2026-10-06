@@ -6,6 +6,17 @@
 const STORAGE_KEY = "quran_hifz_tracker_state_v5";
 const REVIEW_DAYS = 14;
 
+function triggerHaptic(type = 'light') {
+  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+    try {
+      if (type === 'light') navigator.vibrate(12);
+      else if (type === 'medium') navigator.vibrate(28);
+      else if (type === 'success') navigator.vibrate([15, 60, 25]);
+      else if (type === 'error') navigator.vibrate([40, 40, 40]);
+    } catch (e) { }
+  }
+}
+
 let state = {
   memorizedPages: {},
   memorizedSurahs: {},
@@ -313,6 +324,7 @@ function launchConfetti() {
 
 function toggleSurah(surahId) {
   const isNowDone = !state.memorizedSurahs[surahId];
+  triggerHaptic(isNowDone ? 'medium' : 'light');
   delete state.ayahs[surahId];
   if (isNowDone) {
     state.memorizedSurahs[surahId] = true;
@@ -357,6 +369,7 @@ function setAyahs(surahId, v) {
 
 function togglePage(pageNum) {
   const isNowDone = !state.memorizedPages[pageNum];
+  triggerHaptic(isNowDone ? 'medium' : 'light');
   if (isNowDone) {
     state.memorizedPages[pageNum] = true;
   } else {
