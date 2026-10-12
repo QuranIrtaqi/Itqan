@@ -1555,7 +1555,6 @@ function renderPlanner() {
           <div>
             <div class="flex items-center gap-1.5">
               <span class="text-xs sm:text-sm font-black text-amber-900 dark:text-amber-200">${badgeTitle}</span>
-              <span class="text-[10px] px-2 py-0.2 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold">وسام شريف</span>
             </div>
             <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">سلسلة ثبات يومي: <b class="text-amber-600 dark:text-amber-400 font-bold text-xs sm:text-sm">${formatStdNum(streak)}</b> يوم متتالي 🔥</p>
           </div>
