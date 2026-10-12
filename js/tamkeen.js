@@ -30,7 +30,9 @@ let tamkeenState = {
   scopePageEnd: 604,
   scopeJuzStart: 1,
   scopeJuzEnd: 30,
-  singleSurahId: null, // when testing in a specific surah, exam stays strictly within this surah
+  singleSurahId: null, // when testing in a specific surah
+  singlePageNum: null, // when testing in a specific page
+  singleJuzNum: null,  // when testing in a specific juz
   currentQuestion: null,
   isAnswered: false,
   selectedOptionIndex: null,
@@ -75,13 +77,15 @@ function updateTamkeenScopeInputsVisibility() {
   if (juzInputs) juzInputs.classList.toggle('hidden', tamkeenState.scope !== 'juz_range');
 
   const scopeSelect = document.getElementById('tamkeenScopeSelect');
-  if (scopeSelect && scopeSelect.value !== tamkeenState.scope && !tamkeenState.singleSurahId) {
+  if (scopeSelect && scopeSelect.value !== tamkeenState.scope && !tamkeenState.singleSurahId && !tamkeenState.singlePageNum && !tamkeenState.singleJuzNum) {
     scopeSelect.value = tamkeenState.scope;
   }
 }
 
 function setTamkeenScope(scope) {
-  tamkeenState.singleSurahId = null; // Exit single surah mode if user switches scope
+  tamkeenState.singleSurahId = null; // Exit single target mode if user switches scope
+  tamkeenState.singlePageNum = null;
+  tamkeenState.singleJuzNum = null;
   tamkeenState.scope = scope;
   initTamkeenScopeDropdowns();
   updateTamkeenScopeInputsVisibility();
@@ -115,18 +119,22 @@ function applyTamkeenRangeChange() {
   nextTamkeenQuestion();
 }
 
-function clearTamkeenSingleSurah() {
+function clearTamkeenSingleTarget() {
   tamkeenState.singleSurahId = null;
+  tamkeenState.singlePageNum = null;
+  tamkeenState.singleJuzNum = null;
   const scopeSelect = document.getElementById('tamkeenScopeSelect');
   if (scopeSelect) {
     scopeSelect.value = tamkeenState.scope;
   }
   updateTamkeenScopeInputsVisibility();
   if (typeof showToast === 'function') {
-    showToast('تم الخروج من اختبار السورة المحددة والعودة للنطاق العام');
+    showToast('تم الخروج من الاختبار المخصص والعودة للنطاق العام');
   }
   nextTamkeenQuestion();
 }
+window.clearTamkeenSingleSurah = clearTamkeenSingleTarget;
+window.clearTamkeenSingleTarget = clearTamkeenSingleTarget;
 
 function loadTamkeenStats() {
   try {
@@ -278,67 +286,94 @@ async function fetchSurahFromApi(surahId) {
 async function generateDynamicTamkeenQuestion(mode, scope) {
   let effectiveMode = mode;
   if (mode === 'all') {
-    const candidateModes = ['next_ayah', 'surah_id'];
-    effectiveMode = candidateModes[Math.floor(Math.random() * candidateModes.length)];
-  }
-
-  // 1. If user initiated exam for a single specific Surah
-  if (tamkeenState.singleSurahId) {
-    const surahId = tamkeenState.singleSurahId;
-    const surahData = await fetchSurahFromApi(surahId);
-    const meta = SURAHS.find(s => s.id === surahId) || { id: surahId, name: surahData.name, ayahs: surahData.ayahs.length, juz: 1 };
-
-    // In single surah exam, test strictly within this surah (next_ayah)
-    if (surahData.ayahs && surahData.ayahs.length >= 2) {
-      let idx = 0;
-      let attempts = 0;
-      do {
-        idx = Math.floor(Math.random() * (surahData.ayahs.length - 1));
-        attempts++;
-      } while (attempts < 15 && TAMKEEN_RECENT_QUESTIONS.includes(`next_ayah_${surahId}_${idx + 1}`));
-
-      const qVerse = cleanAyahText(surahData.ayahs[idx].text, surahId, idx + 1);
-      const correct = cleanAyahText(surahData.ayahs[idx + 1].text, surahId, idx + 2);
-
-      const distractors = [];
-      if (idx + 2 < surahData.ayahs.length) {
-        distractors.push(cleanAyahText(surahData.ayahs[idx + 2].text, surahId, idx + 3));
-      }
-      for (let a = 0; a < 25 && distractors.length < 3; a++) {
-        const randIdx = Math.floor(Math.random() * surahData.ayahs.length);
-        if (randIdx !== idx && randIdx !== idx + 1) {
-          const dText = cleanAyahText(surahData.ayahs[randIdx].text, surahId, randIdx + 1);
-          if (dText && dText !== correct && !distractors.includes(dText)) {
-            distractors.push(dText);
-          }
-        }
-      }
-      while (distractors.length < 3) {
-        distractors.push("إِنَّ اللَّهَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ");
-      }
-
-      return {
-        mode: 'next_ayah',
-        surahId,
-        surahName: meta.name,
-        ayahNum: idx + 1,
-        globalAyahNum: (surahData.ayahs[idx] && surahData.ayahs[idx].number) || getGlobalAyahNumber(surahId, idx + 1),
-        prompt: `ما هي الآية الكريمة التي تلي هذه الآية مباشرة في سورة «${meta.name}»؟`,
-        verse: qVerse,
-        correct,
-        options: [correct, ...distractors.slice(0, 3)],
-        rule: `سورة ${meta.name} • الآية (${idx + 2}) تلي الآية (${idx + 1}): «${correct}».`,
-        source: 'api'
-      };
+    // If testing a single specific surah or page, next_ayah mode provides the best retention test
+    if (tamkeenState.singleSurahId || tamkeenState.singlePageNum) {
+      effectiveMode = 'next_ayah';
+    } else {
+      const candidateModes = ['next_ayah', 'surah_id'];
+      effectiveMode = candidateModes[Math.floor(Math.random() * candidateModes.length)];
     }
   }
 
-  // 2. Filter candidates based on chosen scope
+  // Define scope/target constraints
+  const isSinglePage = Boolean(tamkeenState.singlePageNum);
+  const targetPageNum = tamkeenState.singlePageNum ? Math.max(1, Math.min(604, Number(tamkeenState.singlePageNum))) : null;
+
+  const isSingleJuz = Boolean(tamkeenState.singleJuzNum);
+  const targetJuzNum = tamkeenState.singleJuzNum ? Math.max(1, Math.min(30, Number(tamkeenState.singleJuzNum))) : null;
+  const targetJuzObj = targetJuzNum ? (AJZA.find(j => j.juz === targetJuzNum) || AJZA[0]) : null;
+
+  const isSingleSurah = Boolean(tamkeenState.singleSurahId);
+  const targetSurahId = tamkeenState.singleSurahId ? Number(tamkeenState.singleSurahId) : null;
+
+  const pRange1 = Math.min(tamkeenState.scopePageStart || 1, tamkeenState.scopePageEnd || 604);
+  const pRange2 = Math.max(tamkeenState.scopePageStart || 1, tamkeenState.scopePageEnd || 604);
+
+  const jRange1 = Math.min(tamkeenState.scopeJuzStart || 1, tamkeenState.scopeJuzEnd || 30);
+  const jRange2 = Math.max(tamkeenState.scopeJuzStart || 1, tamkeenState.scopeJuzEnd || 30);
+  const jRangeStartObj = AJZA.find(j => j.juz === jRange1) || AJZA[0];
+  const jRangeEndObj = AJZA.find(j => j.juz === jRange2) || AJZA[AJZA.length - 1];
+
+  const memPagesList = Object.keys(state.memorizedPages || {}).map(Number).filter(p => p >= 1 && p <= 604 && state.memorizedPages[p]);
+
+  // Helper: check if a specific ayah meets the active test scope
+  function isAyahInScope(ayah, ayahIdx, totalAyahsInSurah, surahId) {
+    const aPage = Number(ayah.page) || (SURAHS.find(s => s.id === surahId)?.startPage) || 1;
+    const aJuz = Number(ayah.juz) || getJuzForPage(aPage);
+
+    if (effectiveMode === 'next_ayah' && ayahIdx >= totalAyahsInSurah - 1) {
+      return false; // next_ayah requires a succeeding ayah in the same surah
+    }
+
+    if (isSinglePage) {
+      return aPage === targetPageNum;
+    }
+    if (isSingleJuz) {
+      return aJuz === targetJuzNum || (aPage >= targetJuzObj.start && aPage <= targetJuzObj.end);
+    }
+    if (isSingleSurah) {
+      return surahId === targetSurahId;
+    }
+
+    if (scope === 'memorized_pages') {
+      return Boolean(state.memorizedPages && state.memorizedPages[aPage]);
+    }
+    if (scope === 'page_range') {
+      return aPage >= pRange1 && aPage <= pRange2;
+    }
+    if (scope === 'juz_range') {
+      return (aJuz >= jRange1 && aJuz <= jRange2) || (aPage >= jRangeStartObj.start && aPage <= jRangeEndObj.end);
+    }
+    if (scope === 'memorized') {
+      return Boolean(state.memorizedSurahs && state.memorizedSurahs[surahId]);
+    }
+    if (scope === 'surah_range') {
+      const s1 = Math.min(tamkeenState.scopeSurahStart || 1, tamkeenState.scopeSurahEnd || 114);
+      const s2 = Math.max(tamkeenState.scopeSurahStart || 1, tamkeenState.scopeSurahEnd || 114);
+      return surahId >= s1 && surahId <= s2;
+    }
+    return true; // 'all' scope
+  }
+
+  // 1. Determine eligible Surah candidate IDs
   let candidateIds = [];
-  if (scope === 'memorized') {
-    candidateIds = Object.keys(state.memorizedSurahs || {}).map(Number).filter(id => id >= 1 && id <= 114);
+  if (isSinglePage) {
+    candidateIds = SURAHS.filter(s => targetPageNum >= s.startPage && targetPageNum <= s.endPage).map(s => s.id);
+  } else if (isSingleJuz) {
+    candidateIds = SURAHS.filter(s => s.endPage >= targetJuzObj.start && s.startPage <= targetJuzObj.end).map(s => s.id);
+  } else if (isSingleSurah) {
+    candidateIds = [targetSurahId];
+  } else if (scope === 'memorized_pages') {
+    if (memPagesList.length === 0) {
+      if (typeof showToast === 'function') showToast("لم تُحدد بعد صفحات محفوظة، تم التوليد من القرآن كاملاً!");
+      candidateIds = SURAHS.map(s => s.id);
+    } else {
+      candidateIds = SURAHS.filter(s => memPagesList.some(p => p >= s.startPage && p <= s.endPage)).map(s => s.id);
+    }
+  } else if (scope === 'memorized') {
+    candidateIds = Object.keys(state.memorizedSurahs || {}).map(Number).filter(id => id >= 1 && id <= 114 && state.memorizedSurahs[id]);
     if (candidateIds.length === 0) {
-      if (typeof showToast === 'function') showToast("لم تُحدد بعد سوراً محفوظة، تم التوليد من القرآن كاملاً!");
+      if (typeof showToast === 'function') showToast("لم تُحدد بعد سوراً مكتملة الحفظ، تم التوليد من القرآن كاملاً!");
       candidateIds = SURAHS.map(s => s.id);
     }
   } else if (scope === 'surah_range') {
@@ -346,15 +381,9 @@ async function generateDynamicTamkeenQuestion(mode, scope) {
     const s2 = Math.max(tamkeenState.scopeSurahStart || 1, tamkeenState.scopeSurahEnd || 114);
     candidateIds = SURAHS.filter(s => s.id >= s1 && s.id <= s2).map(s => s.id);
   } else if (scope === 'page_range') {
-    const p1 = Math.min(tamkeenState.scopePageStart || 1, tamkeenState.scopePageEnd || 604);
-    const p2 = Math.max(tamkeenState.scopePageStart || 1, tamkeenState.scopePageEnd || 604);
-    candidateIds = SURAHS.filter(s => s.endPage >= p1 && s.startPage <= p2).map(s => s.id);
+    candidateIds = SURAHS.filter(s => s.endPage >= pRange1 && s.startPage <= pRange2).map(s => s.id);
   } else if (scope === 'juz_range') {
-    const j1 = Math.min(tamkeenState.scopeJuzStart || 1, tamkeenState.scopeJuzEnd || 30);
-    const j2 = Math.max(tamkeenState.scopeJuzStart || 1, tamkeenState.scopeJuzEnd || 30);
-    const jStartObj = AJZA.find(j => j.juz === j1) || AJZA[0];
-    const jEndObj = AJZA.find(j => j.juz === j2) || AJZA[AJZA.length - 1];
-    candidateIds = SURAHS.filter(s => s.endPage >= jStartObj.start && s.startPage <= jEndObj.end).map(s => s.id);
+    candidateIds = SURAHS.filter(s => s.endPage >= jRangeStartObj.start && s.startPage <= jRangeEndObj.end).map(s => s.id);
   } else {
     candidateIds = SURAHS.map(s => s.id);
   }
@@ -363,43 +392,76 @@ async function generateDynamicTamkeenQuestion(mode, scope) {
     candidateIds = SURAHS.map(s => s.id);
   }
 
-  // Avoid recently queried surahs if we have multiple candidates
-  let freshSurahs = candidateIds.filter(id => !TAMKEEN_RECENT_SURAHS.includes(id));
-  if (freshSurahs.length === 0) {
-    freshSurahs = candidateIds;
-  }
-  const surahId = freshSurahs[Math.floor(Math.random() * freshSurahs.length)];
-  const surahData = await fetchSurahFromApi(surahId);
-  const meta = SURAHS.find(s => s.id === surahId) || { id: surahId, name: surahData.name, ayahs: surahData.ayahs.length, juz: 1 };
+  // Shuffle candidate surahs prioritizing those not queried recently
+  let freshCandidates = candidateIds.filter(id => !TAMKEEN_RECENT_SURAHS.includes(id));
+  if (freshCandidates.length === 0) freshCandidates = candidateIds.slice();
+  freshCandidates.sort(() => Math.random() - 0.5);
 
-  // 1. Next Ayah Prompt
-  if (effectiveMode === 'next_ayah') {
-    if (surahData.ayahs.length < 2) {
-      return generateDynamicTamkeenQuestion('next_ayah', scope);
+  let chosenSurahId = null;
+  let chosenSurahData = null;
+  let chosenEligibleIndices = [];
+
+  // Iterate over candidates to find one with matching ayahs
+  for (const sId of freshCandidates) {
+    try {
+      const sData = await fetchSurahFromApi(sId);
+      if (!sData || !sData.ayahs || sData.ayahs.length === 0) continue;
+
+      const indices = [];
+      for (let i = 0; i < sData.ayahs.length; i++) {
+        if (isAyahInScope(sData.ayahs[i], i, sData.ayahs.length, sId)) {
+          indices.push(i);
+        }
+      }
+
+      if (indices.length > 0) {
+        chosenSurahId = sId;
+        chosenSurahData = sData;
+        chosenEligibleIndices = indices;
+        break;
+      }
+    } catch (e) {
+      console.warn("Candidate check error:", e);
     }
-    let idx = 0;
-    let attempts = 0;
-    do {
-      idx = Math.floor(Math.random() * (surahData.ayahs.length - 1));
-      attempts++;
-    } while (attempts < 15 && TAMKEEN_RECENT_QUESTIONS.includes(`next_ayah_${surahId}_${idx + 1}`));
+  }
 
-    const qVerse = cleanAyahText(surahData.ayahs[idx].text, surahId, idx + 1);
-    const correct = cleanAyahText(surahData.ayahs[idx + 1].text, surahId, idx + 2);
+  // Fallback to first candidate if none matched strictly
+  if (!chosenSurahData || chosenEligibleIndices.length === 0) {
+    chosenSurahId = candidateIds[0];
+    chosenSurahData = await fetchSurahFromApi(chosenSurahId);
+    chosenEligibleIndices = Array.from({ length: Math.max(1, chosenSurahData.ayahs.length - (effectiveMode === 'next_ayah' ? 1 : 0)) }, (_, i) => i);
+  }
+
+  const meta = SURAHS.find(s => s.id === chosenSurahId) || { id: chosenSurahId, name: chosenSurahData.name, ayahs: chosenSurahData.ayahs.length, juz: 1 };
+
+  // Select an ayah from eligible indices, avoiding recent repeats
+  let freshIndices = chosenEligibleIndices.filter(idx => !TAMKEEN_RECENT_QUESTIONS.includes(`${effectiveMode}_${chosenSurahId}_${idx + 1}`));
+  if (freshIndices.length === 0) freshIndices = chosenEligibleIndices;
+  const idx = freshIndices[Math.floor(Math.random() * freshIndices.length)];
+
+  const selectedAyahObj = chosenSurahData.ayahs[idx] || {};
+  const ayahPage = Number(selectedAyahObj.page) || meta.startPage || 1;
+  const ayahJuz = Number(selectedAyahObj.juz) || getJuzForPage(ayahPage);
+
+  // 1. Mode: Next Ayah Prompt
+  if (effectiveMode === 'next_ayah') {
+    const qVerse = cleanAyahText(chosenSurahData.ayahs[idx].text, chosenSurahId, idx + 1);
+    const correct = cleanAyahText(chosenSurahData.ayahs[idx + 1].text, chosenSurahId, idx + 2);
 
     const distractors = [];
-    if (idx + 2 < surahData.ayahs.length) {
-      distractors.push(cleanAyahText(surahData.ayahs[idx + 2].text, surahId, idx + 3));
+    if (idx + 2 < chosenSurahData.ayahs.length) {
+      distractors.push(cleanAyahText(chosenSurahData.ayahs[idx + 2].text, chosenSurahId, idx + 3));
     }
-    for (let a = 0; a < 20 && distractors.length < 3; a++) {
-      const randIdx = Math.floor(Math.random() * surahData.ayahs.length);
+    for (let a = 0; a < 25 && distractors.length < 3; a++) {
+      const randIdx = Math.floor(Math.random() * chosenSurahData.ayahs.length);
       if (randIdx !== idx && randIdx !== idx + 1) {
-        const dText = cleanAyahText(surahData.ayahs[randIdx].text, surahId, randIdx + 1);
+        const dText = cleanAyahText(chosenSurahData.ayahs[randIdx].text, chosenSurahId, randIdx + 1);
         if (dText && dText !== correct && !distractors.includes(dText)) {
           distractors.push(dText);
         }
       }
     }
+
     const fallbackTexts = [
       "إِنَّ اللَّهَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",
       "وَاتَّقُوا اللَّهَ إِنَّ اللَّهَ شَدِيدُ الْعِقَابِ",
@@ -414,44 +476,41 @@ async function generateDynamicTamkeenQuestion(mode, scope) {
 
     return {
       mode: 'next_ayah',
-      surahId,
+      surahId: chosenSurahId,
       surahName: meta.name,
       ayahNum: idx + 1,
-      globalAyahNum: (surahData.ayahs[idx] && surahData.ayahs[idx].number) || getGlobalAyahNumber(surahId, idx + 1),
-      prompt: `ما هي الآية الكريمة التي تلي هذه الآية مباشرة في سورة «${meta.name}»؟`,
+      globalAyahNum: (chosenSurahData.ayahs[idx] && chosenSurahData.ayahs[idx].number) || getGlobalAyahNumber(chosenSurahId, idx + 1),
+      page: ayahPage,
+      juz: ayahJuz,
+      prompt: `ما هي الآية الكريمة التي تلي هذه الآية مباشرة في سورة «${meta.name}» (صفحة ${formatStdNum(ayahPage)})؟`,
       verse: qVerse,
       correct,
       options: [correct, ...distractors.slice(0, 3)],
-      rule: `سورة ${meta.name} • الآية (${idx + 2}) تلي الآية (${idx + 1}): «${correct}».`,
+      rule: `سورة ${meta.name} • الآية (${idx + 2}) تلي الآية (${idx + 1}) • صفحة (${formatStdNum(ayahPage)}) • جزء (${formatStdNum(ayahJuz)}): «${correct}».`,
       source: 'api'
     };
   }
 
-  // 2. Surah Identification
-  let idx = 0;
-  let attempts = 0;
-  do {
-    idx = Math.floor(Math.random() * surahData.ayahs.length);
-    attempts++;
-  } while (attempts < 15 && TAMKEEN_RECENT_QUESTIONS.includes(`surah_id_${surahId}_${idx + 1}`));
-
-  const verseText = cleanAyahText(surahData.ayahs[idx].text, surahId, idx + 1);
+  // 2. Mode: Surah Identification
+  const verseText = cleanAyahText(chosenSurahData.ayahs[idx].text, chosenSurahId, idx + 1);
   const correct = `سورة ${meta.name}`;
 
-  const otherSurahs = SURAHS.filter(s => s.id !== surahId).sort(() => Math.random() - 0.5).slice(0, 3);
+  const otherSurahs = SURAHS.filter(s => s.id !== chosenSurahId).sort(() => Math.random() - 0.5).slice(0, 3);
   const distractors = otherSurahs.map(s => `سورة ${s.name}`);
 
   return {
     mode: 'surah_id',
-    surahId,
+    surahId: chosenSurahId,
     surahName: meta.name,
     ayahNum: idx + 1,
-    globalAyahNum: (surahData.ayahs[idx] && surahData.ayahs[idx].number) || getGlobalAyahNumber(surahId, idx + 1),
-    prompt: `في أي سورة كريمة وردت هذه الآية المباركة؟`,
+    globalAyahNum: (chosenSurahData.ayahs[idx] && chosenSurahData.ayahs[idx].number) || getGlobalAyahNumber(chosenSurahId, idx + 1),
+    page: ayahPage,
+    juz: ayahJuz,
+    prompt: `في أي سورة كريمة وردت هذه الآية المباركة (صفحة ${formatStdNum(ayahPage)})؟`,
     verse: verseText,
     correct,
     options: [correct, ...distractors],
-    rule: `وردت هذه الآية الكريمة في سورة ${meta.name}، الآية رقم (${idx + 1})، الجزء (${formatStdNum(meta.juz)}).`,
+    rule: `وردت هذه الآية الكريمة في سورة ${meta.name}، الآية رقم (${idx + 1})، صفحة (${formatStdNum(ayahPage)})، الجزء (${formatStdNum(ayahJuz)}).`,
     source: 'api'
   };
 }
@@ -558,8 +617,9 @@ function getTamkeenEligibleQuestions() {
 }
 
 async function startTamkeenSpecificSurah(surahId) {
-  // Lock exam strictly to this specific Surah
   tamkeenState.singleSurahId = surahId;
+  tamkeenState.singlePageNum = null;
+  tamkeenState.singleJuzNum = null;
   const targetSurah = SURAHS.find(s => s.id === surahId);
   if (typeof showToast === 'function' && targetSurah) {
     showToast(`تم بدء اختبار تمكين مخصص لسورة «${targetSurah.name}»`);
@@ -567,6 +627,31 @@ async function startTamkeenSpecificSurah(surahId) {
   updateTamkeenScopeInputsVisibility();
   await nextTamkeenQuestion();
 }
+
+async function startTamkeenSpecificPage(pageNum) {
+  tamkeenState.singlePageNum = Math.max(1, Math.min(604, Number(pageNum) || 1));
+  tamkeenState.singleSurahId = null;
+  tamkeenState.singleJuzNum = null;
+  if (typeof showToast === 'function') {
+    showToast(`تم بدء اختبار تمكين مخصص لصفحة «${formatStdNum(tamkeenState.singlePageNum)}»`);
+  }
+  updateTamkeenScopeInputsVisibility();
+  await nextTamkeenQuestion();
+}
+
+async function startTamkeenSpecificJuz(juzNum) {
+  tamkeenState.singleJuzNum = Math.max(1, Math.min(30, Number(juzNum) || 1));
+  tamkeenState.singleSurahId = null;
+  tamkeenState.singlePageNum = null;
+  if (typeof showToast === 'function') {
+    showToast(`تم بدء اختبار تمكين مخصص للجزء «${formatStdNum(tamkeenState.singleJuzNum)}»`);
+  }
+  updateTamkeenScopeInputsVisibility();
+  await nextTamkeenQuestion();
+}
+window.startTamkeenSpecificSurah = startTamkeenSpecificSurah;
+window.startTamkeenSpecificPage = startTamkeenSpecificPage;
+window.startTamkeenSpecificJuz = startTamkeenSpecificJuz;
 
 async function nextTamkeenQuestion() {
   renderTamkeenLoadingState();
@@ -756,16 +841,45 @@ function renderTamkeenQuiz() {
     }
   }
 
-  let singleSurahBannerHtml = '';
+  let singleTargetBannerHtml = '';
   if (tamkeenState.singleSurahId) {
     const singleSurahMeta = SURAHS.find(s => s.id === tamkeenState.singleSurahId);
-    singleSurahBannerHtml = `
+    singleTargetBannerHtml = `
       <div class="p-2 sm:p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-between gap-2 text-xs text-amber-900 dark:text-amber-200">
         <span class="flex items-center gap-1.5 font-bold">
           <i data-lucide="target" class="w-4 h-4 text-amber-600 dark:text-amber-400"></i>
           اختبار مخصص وحصري لسورة «${singleSurahMeta ? singleSurahMeta.name : ''}»
         </span>
-        <button onclick="clearTamkeenSingleSurah()" class="px-2 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 font-bold text-[11px] transition active:scale-95">
+        <button onclick="clearTamkeenSingleTarget()" class="px-2 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 font-bold text-[11px] transition active:scale-95">
+          إنهاء والعودة للنطاق العام ✕
+        </button>
+      </div>
+    `;
+  } else if (tamkeenState.singlePageNum) {
+    const pNum = tamkeenState.singlePageNum;
+    const pSurahs = getSurahsForPage(pNum);
+    const pJuz = getJuzForPage(pNum);
+    singleTargetBannerHtml = `
+      <div class="p-2 sm:p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-between gap-2 text-xs text-amber-900 dark:text-amber-200">
+        <span class="flex items-center gap-1.5 font-bold">
+          <i data-lucide="target" class="w-4 h-4 text-amber-600 dark:text-amber-400"></i>
+          اختبار مخصص وحصري لصفحة «${formatStdNum(pNum)}» (${pSurahs} • جزء ${formatStdNum(pJuz)})
+        </span>
+        <button onclick="clearTamkeenSingleTarget()" class="px-2 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 font-bold text-[11px] transition active:scale-95">
+          إنهاء والعودة للنطاق العام ✕
+        </button>
+      </div>
+    `;
+  } else if (tamkeenState.singleJuzNum) {
+    const jNum = tamkeenState.singleJuzNum;
+    const jObj = AJZA.find(j => j.juz === jNum);
+    singleTargetBannerHtml = `
+      <div class="p-2 sm:p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-between gap-2 text-xs text-amber-900 dark:text-amber-200">
+        <span class="flex items-center gap-1.5 font-bold">
+          <i data-lucide="target" class="w-4 h-4 text-amber-600 dark:text-amber-400"></i>
+          اختبار مخصص وحصري للجزء «${formatStdNum(jNum)}» (${jObj ? jObj.name : ''})
+        </span>
+        <button onclick="clearTamkeenSingleTarget()" class="px-2 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 font-bold text-[11px] transition active:scale-95">
           إنهاء والعودة للنطاق العام ✕
         </button>
       </div>
@@ -773,14 +887,16 @@ function renderTamkeenQuiz() {
   }
 
   card.innerHTML = `
-    ${singleSurahBannerHtml}
+    ${singleTargetBannerHtml}
     <div class="flex items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
       <div class="flex items-center gap-2 flex-wrap">
         <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${modeColors[q.mode]}">
           ${modeNames[q.mode]}
         </span>
         <span class="text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-xl">
-          ${q.mode === 'surah_id' && !tamkeenState.isAnswered ? `آية رقم (${formatStdNum(q.ayahNum)}) • اسم السورة مطلوب` : `سورة ${q.surahName} • آية ${formatStdNum(q.ayahNum)}`}
+          ${q.mode === 'surah_id' && !tamkeenState.isAnswered 
+            ? `آية رقم (${formatStdNum(q.ayahNum)}) • ص ${formatStdNum(q.page || 1)} • اسم السورة مطلوب` 
+            : `سورة ${q.surahName} • آية ${formatStdNum(q.ayahNum)} • ص ${formatStdNum(q.page || 1)} • ج ${formatStdNum(q.juz || 1)}`}
         </span>
         ${q.source === 'api' ? `
           <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 flex items-center gap-1">

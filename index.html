@@ -483,16 +483,27 @@
             اضغط على رقم الصفحة للتبديل بين (محفوظ / غير محفوظ).
           </p>
         </div>
-        <div class="flex items-center gap-3 text-xs font-semibold">
-          <div class="flex items-center gap-1.5">
-            <span class="w-3.5 h-3.5 rounded-md bg-emerald-700 inline-block shadow-sm"></span>
-            <span class="text-slate-700 dark:text-slate-300">محفوظ</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span
-              class="w-3.5 h-3.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 inline-block"></span>
-            <span class="text-slate-700 dark:text-slate-300">غير محفوظ</span>
-          </div>
+        <div id="pagesFilterButtons" class="flex items-center gap-1 sm:gap-1.5 text-xs font-semibold flex-wrap">
+          <button type="button" onclick="setPagesFilter('all')" id="btnPagesFilterAll"
+            class="px-2.5 py-1 rounded-xl text-xs font-bold transition active:scale-95 flex items-center gap-1.5 bg-slate-800 text-white dark:bg-white dark:text-slate-900 shadow-xs"
+            title="عرض جميع الصفحات (604)">
+            <span>الكل</span>
+            <span id="pagesCountAll" class="text-[10px] opacity-75 font-mono">(604)</span>
+          </button>
+          <button type="button" onclick="setPagesFilter('memorized')" id="btnPagesFilterMemorized"
+            class="px-2.5 py-1 rounded-xl text-xs font-bold transition active:scale-95 flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 border border-slate-200 dark:border-slate-700"
+            title="عرض وتحديد الصفحات المحفوظة فقط">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block"></span>
+            <span>المحفوظ</span>
+            <span id="pagesCountMemorized" class="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono">(0)</span>
+          </button>
+          <button type="button" onclick="setPagesFilter('unmemorized')" id="btnPagesFilterUnmemorized"
+            class="px-2.5 py-1 rounded-xl text-xs font-bold transition active:scale-95 flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
+            title="عرض الصفحات غير المحفوظة لتحديد حفظها">
+            <span class="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block"></span>
+            <span>غير المحفوظ</span>
+            <span id="pagesCountUnmemorized" class="text-[10px] opacity-75 font-mono">(604)</span>
+          </button>
         </div>
       </div>
 
@@ -524,6 +535,11 @@
           <button type="button" onclick="applyPageRange(false)"
             class="py-2 sm:py-1.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/60 dark:hover:text-rose-400 text-slate-700 dark:text-slate-300 font-bold transition active:scale-95 text-center">
             إلغاء النطاق
+          </button>
+          <button type="button" onclick="startTamkeenForCurrentPageRange()"
+            class="py-2 sm:py-1.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold transition shadow-sm active:scale-95 text-center flex items-center justify-center gap-1.5">
+            <i data-lucide="brain" class="w-3.5 h-3.5"></i>
+            <span>اختبرني في النطاق</span>
           </button>
         </div>
       </div>
@@ -637,7 +653,8 @@
               <select id="tamkeenScopeSelect" onchange="setTamkeenScope(this.value)"
                 class="py-1 px-3 rounded-xl text-xs bg-emerald-900 border border-emerald-700 text-white font-medium focus:outline-none focus:ring-1 focus:ring-gold-400 cursor-pointer shadow-sm">
                 <option value="all">جميع سور القرآن الكريم</option>
-                <option value="memorized">السور التي حفظتها فقط</option>
+                <option value="memorized_pages">الصفحات التي حفظتها فقط</option>
+                <option value="memorized">السور المكتملة حفظاً فقط</option>
                 <option value="surah_range">نطاق سور محدد (من سورة إلى سورة)</option>
                 <option value="page_range">نطاق صفحات محدد (من صفحة إلى صفحة)</option>
                 <option value="juz_range">نطاق أجزاء محدد (من جزء إلى جزء)</option>
@@ -949,6 +966,55 @@
           </div>
         </div>
 
+        <!-- New Updates & Bug Fixes Highlight Card -->
+        <div
+          class="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-emerald-900/10 via-teal-900/10 to-amber-900/10 border-2 border-emerald-500/30 dark:border-emerald-500/20 space-y-2.5">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <span class="font-black text-xs sm:text-sm text-emerald-900 dark:text-emerald-300 flex items-center gap-2">
+              <span class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+              </span>
+              أحدث التحديثات والتحسينات (تحديث المنظومة):
+            </span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-500/30">
+              إصدار محسّن ✨
+            </span>
+          </div>
+
+          <div class="space-y-2 text-[11px] sm:text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+            <!-- Bug Fix 1: Pages Selection & Filtering -->
+            <div class="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 space-y-1">
+              <strong class="text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1.5">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
+                ١. تصفية وتحديد الصفحات المحفوظة وغير المحفوظة بسلاسة (إصلاح وتطوير):
+              </strong>
+              <p class="text-slate-600 dark:text-slate-400">
+                • <strong>حل مشكلة التحديد والتصفية:</strong> تم إلغاء قيود النقر السابقة نهائياً؛ يمكنك الآن النقر بحرية على أي صفحة في الشبكة لتبديل حالة حفظها فوراً دون أي تجميد.
+              </p>
+              <p class="text-slate-600 dark:text-slate-400">
+                • <strong>أزرار تصفية تفاعلية سريعة:</strong> إضافة أزرار بأعلى شبكة الصفحات مع عدادات فورية: <code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-bold text-slate-800 dark:text-slate-200">الكل (604)</code> و<code class="px-1 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 font-bold text-emerald-800 dark:text-emerald-300">المحفوظ</code> و<code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-bold text-slate-700 dark:text-slate-300">غير المحفوظ</code>، مع إخفاء الأجزاء الفارغة تلقائياً عند التصفية لسهولة التصفح.
+              </p>
+            </div>
+
+            <!-- Bug Fix 2: Tamkeen Strict Page & Juz Scoping -->
+            <div class="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 space-y-1">
+              <strong class="text-amber-800 dark:text-amber-300 font-bold flex items-center gap-1.5">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-amber-600"></i>
+                ٢. تمكين: اختبار دقيق ومحصور في الصفحة أو الجزء المختار حصراً (إصلاح وتطوير):
+              </strong>
+              <p class="text-slate-600 dark:text-slate-400">
+                • <strong>حصر نطاق الأسئلة بدقة:</strong> تم حل مشكلة شمول الاختبار لكامل السورة عند اختيار صفحة معينة أو جزء معين؛ أصبحت الآيات تُولد <strong>فقط وحصرياً من الآيات التابعة للصفحة أو الجزء المحدد</strong> بالرقم والحدود الدقيقة.
+              </p>
+              <p class="text-slate-600 dark:text-slate-400">
+                • <strong>نطاق الصفحات المحفوظة:</strong> خيار جديد في تمكين: <code class="px-1 py-0.5 rounded bg-amber-100 dark:bg-amber-950 font-bold text-amber-800 dark:text-amber-300">الصفحات التي حفظتها فقط</code> لاختبار صفحاتك المحفوظة دون الحاجة لختم السورة كاملة.
+              </p>
+              <p class="text-slate-600 dark:text-slate-400">
+                • <strong>أزرار الاختبار الفوري (اختبرني 🧠):</strong> إضافة أزرار مباشرة للاختبار في زاوية كل صفحة، وداخل نافذة معاينة المصحف، وفي بطاقات الأجزاء، وأداة نطاق الصفحات للانتقال السريع لاختبار الصفحة أو الجزء بضغطة واحدة.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- Interactive UI Tutorial Launcher Card -->
         <div
           class="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-emerald-800 via-emerald-850 to-teal-900 text-white shadow-md border border-emerald-600/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1000,7 +1066,7 @@
               </span>
             </div>
             <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              محرك اختبار تفاعلي لا نهائي يجلب الآيات بالرسم العثماني مباشرة:
+              محرك اختبار تفاعلي لا نهائي يجلب الآيات بالرسم العثماني مباشرة، مع دعم كامل للاختبار الحصري بالصفحة المحددة، أو الجزء، أو السورة، أو الصفحات المحفوظة:
             </p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">
               <div
@@ -1009,7 +1075,7 @@
                 <div>
                   <strong class="text-slate-800 dark:text-slate-200 block">الآية التالية:</strong>
                   <span class="text-slate-500 dark:text-slate-400">تُعرض آية ويُطلب منك تحديد واستحضار الآية التالية لها
-                    مباشرة.</span>
+                    مباشرة ضمن نطاقك المختار.</span>
                 </div>
               </div>
               <div
@@ -1043,8 +1109,7 @@
                 شبكة الصفحات وتحديد النطاق
               </span>
               <p class="text-[11px] text-slate-500 dark:text-slate-400">
-                انقر على أي صفحة لتحديدها كمحفوظة، أو استخدم أداة "نطاق الصفحات" لتحديد أو إلغاء صفحات متتالية دفعة
-                واحدة من صفحة X إلى Y مع مزامنة الأجزاء والسور.
+                انقر على أي صفحة لتحديدها كمحفوظة، أو استخدم أزرار التصفية السريعة (الكل، المحفوظ، غير المحفوظ)، أو أداة "نطاق الصفحات" لتحديد أو إلغاء صفحات متتالية دفعة واحدة مع إمكانية الاختبار الفوري لكل صفحة.
               </p>
             </div>
 
@@ -1369,6 +1434,12 @@
         </div>
 
         <div class="flex items-center gap-1.5 shrink-0">
+          <button id="btnPreviewTamkeen" onclick="startTamkeenForPage(currentPreviewPage)"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-300/80 dark:border-amber-800 active:scale-95"
+            title="بدء اختبار تمكين مخصص لهذه الصفحة">
+            <i data-lucide="brain" class="w-3.5 h-3.5 text-amber-600"></i>
+            <span>اختبرني</span>
+          </button>
           <button id="btnPreviewToggleStatus" onclick="togglePreviewPageStatus()"
             class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm">
             <i data-lucide="check" class="w-3.5 h-3.5"></i>

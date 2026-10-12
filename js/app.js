@@ -117,8 +117,8 @@ const COACH_MARKS_STEPS = [
     fallbackSelector: '#tabModePage',
     badge: 'الخطوة 7 من 10',
     icon: 'layout-grid',
-    title: 'شبكة الصفحات وتحديد النطاق دفعة واحدة',
-    text: 'استعرض صفحات المصحف الـ 604، وحدد حفظ أي صفحة بنقرة، أو استخدم أداة «نطاق الصفحات» لحفظ أو إلغاء مجموعة صفحات متتابعة دفعة واحدة (من ص X إلى ص Y) مع المزامنة التلقائية للسور والأجزاء.',
+    title: 'شبكة الصفحات والتصفية وتحديد النطاق',
+    text: 'استعرض صفحات المصحف الـ 604، وحدد حفظ أي صفحة بنقرة بحرية تامة، واستخدم أزرار التصفية السريعة (الكل، المحفوظ، غير المحفوظ)، أو أداة «نطاق الصفحات»، مع إمكانية الاختبار الفوري لكل صفحة بنقرة زر (🧠).',
     switchView: 'page'
   },
   {
@@ -136,7 +136,7 @@ const COACH_MARKS_STEPS = [
     badge: 'الخطوة 9 من 10',
     icon: 'brain',
     title: 'منظومة «تَمْكِين» لاختبار وتثبيت الحفظ',
-    text: 'محرك اختبارات تفاعلي لا نهائي للآيات بالرسم العثماني؛ يدعم اختبارات الآية التالية وتحديد السورة مع ميزة حجب الخيارات للتسميع غيباً أولاً في صدرك، ومنع تكرار الأسئلة، ولوحة إحصائيات متقدمة.',
+    text: 'محرك اختبارات تفاعلي لا نهائي للآيات بالرسم العثماني؛ يدعم اختبارات الآية التالية وتحديد السورة مع حصر الاختبار بدقة في الصفحة أو الجزء المختار أو الصفحات المحفوظة، وميزة حجب الخيارات للتسميع غيباً أولاً.',
     switchView: 'tamkeen'
   },
   {
@@ -501,11 +501,113 @@ function startTamkeenForSurah(surahId) {
   }
 }
 
+function startTamkeenForPage(pageNum) {
+  triggerHaptic('light');
+  if (typeof closePagePreview === 'function') closePagePreview();
+  switchMode('tamkeen', true);
+  if (typeof startTamkeenSpecificPage === 'function') {
+    startTamkeenSpecificPage(pageNum);
+  }
+}
+
+function startTamkeenForJuz(juzNum) {
+  triggerHaptic('light');
+  switchMode('tamkeen', true);
+  if (typeof startTamkeenSpecificJuz === 'function') {
+    startTamkeenSpecificJuz(juzNum);
+  }
+}
+
+function startTamkeenForCurrentPageRange() {
+  const startInput = document.getElementById('rangeStartPage');
+  const endInput = document.getElementById('rangeEndPage');
+  if (!startInput || !endInput) return;
+  const start = Math.max(1, Math.min(604, parseInt(startInput.value) || 1));
+  const end = Math.max(1, Math.min(604, parseInt(endInput.value) || 604));
+  const p1 = Math.min(start, end);
+  const p2 = Math.max(start, end);
+  triggerHaptic('light');
+  switchMode('tamkeen', true);
+  if (typeof tamkeenState !== 'undefined') {
+    tamkeenState.singleSurahId = null;
+    tamkeenState.singlePageNum = null;
+    tamkeenState.singleJuzNum = null;
+    tamkeenState.scope = 'page_range';
+    tamkeenState.scopePageStart = p1;
+    tamkeenState.scopePageEnd = p2;
+    const pStart = document.getElementById('tamkeenPageStart');
+    const pEnd = document.getElementById('tamkeenPageEnd');
+    if (pStart) pStart.value = p1;
+    if (pEnd) pEnd.value = p2;
+    const scopeSelect = document.getElementById('tamkeenScopeSelect');
+    if (scopeSelect) scopeSelect.value = 'page_range';
+    if (typeof updateTamkeenScopeInputsVisibility === 'function') updateTamkeenScopeInputsVisibility();
+    if (typeof nextTamkeenQuestion === 'function') nextTamkeenQuestion();
+  }
+}
+
+function setPagesFilter(filter) {
+  if (typeof triggerHaptic === 'function') triggerHaptic('light');
+  state.currentFilter = filter;
+  const select = document.getElementById('filterStatusSelect');
+  if (select) select.value = filter;
+  renderPages();
+}
+
+function updatePagesFilterUI() {
+  const memorizedCount = Object.keys(state.memorizedPages || {}).length;
+  const unmemorizedCount = 604 - memorizedCount;
+
+  const countAll = document.getElementById('pagesCountAll');
+  const countMem = document.getElementById('pagesCountMemorized');
+  const countUnmem = document.getElementById('pagesCountUnmemorized');
+  if (countAll) countAll.textContent = `(604)`;
+  if (countMem) countMem.textContent = `(${formatStdNum(memorizedCount)})`;
+  if (countUnmem) countUnmem.textContent = `(${formatStdNum(unmemorizedCount)})`;
+
+  const btnAll = document.getElementById('btnPagesFilterAll');
+  const btnMem = document.getElementById('btnPagesFilterMemorized');
+  const btnUnmem = document.getElementById('btnPagesFilterUnmemorized');
+
+  const filter = state.currentFilter || 'all';
+
+  if (btnAll) {
+    if (filter === 'all') {
+      btnAll.className = "px-2.5 py-1 rounded-xl text-xs font-bold transition active:scale-95 flex items-center gap-1.5 bg-slate-800 text-white dark:bg-white dark:text-slate-900 shadow-xs";
+    } else {
+      btnAll.className = "px-2.5 py-1 rounded-xl text-xs font-bold transition active:scale-95 flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700";
+    }
+  }
+
+  if (btnMem) {
+    if (filter === 'memorized') {
+      btnMem.className = "px-2.5 py-1 rounded-xl text-xs font-bold transition active:scale-95 flex items-center gap-1.5 bg-emerald-700 text-white shadow-xs";
+    } else {
+      btnMem.className = "px-2.5 py-1 rounded-xl text-xs font-bold transition active:scale-95 flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 border border-slate-200 dark:border-slate-700";
+    }
+  }
+
+  if (btnUnmem) {
+    if (filter === 'unmemorized') {
+      btnUnmem.className = "px-2.5 py-1 rounded-xl text-xs font-bold transition active:scale-95 flex items-center gap-1.5 bg-amber-600 text-white shadow-xs";
+    } else {
+      btnUnmem.className = "px-2.5 py-1 rounded-xl text-xs font-bold transition active:scale-95 flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700";
+    }
+  }
+}
+
+window.startTamkeenForPage = startTamkeenForPage;
+window.startTamkeenForJuz = startTamkeenForJuz;
+window.startTamkeenForCurrentPageRange = startTamkeenForCurrentPageRange;
+window.setPagesFilter = setPagesFilter;
+window.updatePagesFilterUI = updatePagesFilterUI;
+
 function renderPages() {
   const container = document.getElementById('pageGridContainer');
   if (!container) return;
   const query = normAr(state.searchQuery);
   const filter = state.currentFilter;
+  updatePagesFilterUI();
 
   let totalVisiblePages = 0;
   let html = '';
@@ -536,13 +638,14 @@ function renderPages() {
       if (filter === 'memorized' && !isDone) matches = false;
       if (filter === 'unmemorized' && isDone) matches = false;
 
-      if (matches) {
-        juzVisibleCount++;
-        totalVisiblePages++;
-      }
+      // Filtered view strictly displays matching pages
+      if (!matches) continue;
 
-      // Add Hizb 2 separator divider before the second half of the Juz
-      if (p === midPointPage) {
+      juzVisibleCount++;
+      totalVisiblePages++;
+
+      // Add Hizb 2 separator divider before the second half of the Juz in full view
+      if (filter === 'all' && !query && p === midPointPage) {
         juzPagesHtml += `
           <div class="col-span-full my-2.5 py-1 px-3 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-between text-[11px] font-bold text-emerald-800 dark:text-emerald-300">
             <span class="flex items-center gap-1.5">
@@ -554,19 +657,20 @@ function renderPages() {
         `;
       }
 
-      const opacityClass = matches ? 'opacity-100' : 'opacity-20 pointer-events-none';
-
       juzPagesHtml += `
         <div 
           id="page-cell-${p}"
           onclick="togglePage(${p})" 
-          title="صفحة ${formatStdNum(p)} | جزء ${formatStdNum(juz)} | سورة ${surahNames}"
-          class="page-box cursor-pointer relative group h-11 sm:h-12 rounded-xl text-xs font-bold flex flex-col items-center justify-center transition-all shadow-sm active:scale-95 touch-manipulation select-none ${opacityClass} ${isDone
+          title="صفحة ${formatStdNum(p)} | جزء ${formatStdNum(juz)} | سورة ${surahNames} (${isDone ? 'تم الحفظ' : 'غير محفوظ'})"
+          class="page-box cursor-pointer relative group h-11 sm:h-12 rounded-xl text-xs font-bold flex flex-col items-center justify-center transition-all shadow-sm active:scale-95 touch-manipulation select-none ${isDone
           ? 'bg-emerald-700 text-white shadow-emerald-800/30'
           : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-100 hover:text-emerald-900 dark:hover:bg-emerald-950 dark:hover:text-emerald-200 border border-slate-200/90 dark:border-slate-700'
         }">
           <button type="button" onclick="event.stopPropagation(); openPagePreview(${p})" title="معاينة الصفحة في المصحف" class="absolute -top-0.5 -left-0.5 w-6 h-6 flex items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:text-emerald-700 dark:hover:text-gold-300 opacity-75 sm:opacity-0 group-hover:opacity-100 transition active:scale-90">
             <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+          </button>
+          <button type="button" onclick="event.stopPropagation(); startTamkeenForPage(${p})" title="اختبار فوري في تمكين لهذه الصفحة" class="absolute -top-0.5 -right-0.5 w-6 h-6 flex items-center justify-center rounded-lg text-amber-500 hover:text-amber-600 opacity-75 sm:opacity-0 group-hover:opacity-100 transition active:scale-90">
+            <i data-lucide="brain" class="w-3.5 h-3.5"></i>
           </button>
           <span>${formatStdNum(p)}</span>
           <span class="text-[8px] font-normal opacity-70">ج${formatStdNum(juz)}</span>
@@ -574,8 +678,8 @@ function renderPages() {
       `;
     }
 
-    // Skip displaying the Juz card entirely if there is an active search and no pages matched
-    if (query && juzVisibleCount === 0) return;
+    // Skip displaying this Juz if no matching pages exist
+    if (juzVisibleCount === 0) return;
 
     const juzPct = Math.round((juzDoneCount / totalInJuz) * 100);
     const isJuzComplete = juzDoneCount === totalInJuz;
@@ -604,6 +708,10 @@ function renderPages() {
               ${formatStdNum(juzDoneCount)}/${formatStdNum(totalInJuz)} (${juzPct}%)
             </span>
             <div class="flex items-center gap-1">
+              <button onclick="startTamkeenForJuz(${j.juz})" title="اختبار تمكين في هذا الجزء" class="px-2 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900 text-[11px] font-bold transition active:scale-95 flex items-center gap-1">
+                <i data-lucide="brain" class="w-3 h-3 text-amber-600"></i>
+                <span>اختبرني</span>
+              </button>
               <button onclick="markWholeJuz(${j.juz}, true)" title="حفظ الجزء بالكامل" class="px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900 text-[11px] font-bold transition active:scale-95">
                 حفظ الكل
               </button>
@@ -624,10 +732,13 @@ function renderPages() {
 
   if (!html) {
     html = `
-      <div class="text-center py-12 bg-white/70 dark:bg-slate-900/70 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-6 space-y-2">
+      <div class="text-center py-12 bg-white/70 dark:bg-slate-900/70 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-6 space-y-3">
         <i data-lucide="search-x" class="w-10 h-10 text-slate-400 mx-auto"></i>
-        <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300">لا توجد صفحات مطابقة</h4>
-        <p class="text-xs text-slate-500">جرب البحث برقم صفحة آخر أو إلغاء التصفية الحالية</p>
+        <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300">${filter === 'memorized' ? 'لم تقم بتحديد أي صفحات محفوظة بعد' : 'لا توجد صفحات مطابقة'}</h4>
+        <p class="text-xs text-slate-500">${filter === 'memorized' ? 'اضغط على زر (الكل) لتتمكن من الضغط على أي صفحة لتحديد حفظها.' : 'جرب البحث برقم صفحة آخر أو إلغاء التصفية الحالية'}</p>
+        <button type="button" onclick="setPagesFilter('all')" class="mt-2 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-sm transition active:scale-95">
+          عرض جميع الصفحات (604)
+        </button>
       </div>
     `;
   }
@@ -676,6 +787,10 @@ function renderJuz() {
         <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
           <span class="text-slate-400 text-[10px] font-sans">الصفحات: ${formatStdNum(j.start)} - ${formatStdNum(j.end)}</span>
           <div class="flex items-center gap-1.5">
+            <button onclick="startTamkeenForJuz(${j.juz})" title="اختبار تمكين في هذا الجزء" class="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-300 hover:bg-amber-100 font-bold transition text-xs flex items-center gap-1">
+              <i data-lucide="brain" class="w-3 h-3 text-amber-600"></i>
+              <span>اختبرني</span>
+            </button>
             <button onclick="markWholeJuz(${j.juz}, true)" class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 font-bold transition text-xs">
               حفظ الكل
             </button>
