@@ -1012,6 +1012,23 @@
                 • <strong>أزرار الاختبار الفوري (اختبرني 🧠):</strong> إضافة أزرار مباشرة للاختبار في زاوية كل صفحة، وداخل نافذة معاينة المصحف، وفي بطاقات الأجزاء، وأداة نطاق الصفحات للانتقال السريع لاختبار الصفحة أو الجزء بضغطة واحدة.
               </p>
             </div>
+
+            <!-- Bug Fix 3: Protection against Accidental Surah Completion & Smart Page Preservation -->
+            <div class="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 space-y-1">
+              <strong class="text-teal-800 dark:text-teal-300 font-bold flex items-center gap-1.5">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-teal-600"></i>
+                ٣. حماية الحفظ ومنع التحديد العرضي للسور واستعادة الصفحات تلقائياً:
+              </strong>
+              <p class="text-slate-600 dark:text-slate-400">
+                • <strong>فصل زر الإتمام عن تصفح السورة:</strong> أصبح النقر على بطاقة السورة يفتح تصفحها في المصحف بأمان تام دون تغيير حالتها، بينما تم تخصيص زر التحقق (✓) المستقل حصراً لإتمام السورة لتفادي أي ضغطة غير مقصودة أثناء التمرير.
+              </p>
+              <p class="text-slate-600 dark:text-slate-400">
+                • <strong>الحفاظ الذكي على الصفحات المحفوظة سابقاً:</strong> عند إلغاء إتمام سورة، يسترجع التطبيق تلقائياً صفحاتك وآياتك التي كنت قد حفظتها مسبقاً بدقة متناهية دون أن تفقد أي صفحة كنت قد حددتها قبل إتمام السورة.
+              </p>
+              <p class="text-slate-600 dark:text-slate-400">
+                • <strong>خاصية التراجع الفوري (تراجع ↩️):</strong> ظهور زر تراجع مباشر عند إتمام أي سورة للرجوع السريع بضغطة واحدة في حال الضغط بالخطأ.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -1406,9 +1423,12 @@
   </div>
 
   <div id="toastNotification"
-    class="fixed bottom-20 md:bottom-5 left-4 sm:left-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2 px-4 py-2.5 rounded-2xl shadow-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold border border-slate-700 dark:border-slate-200 font-sans">
-    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 dark:text-emerald-600"></i>
-    <span id="toastMessage">تم الحفظ بنجاح</span>
+    class="fixed bottom-20 md:bottom-5 left-4 sm:left-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2.5 px-4 py-2.5 rounded-2xl shadow-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold border border-slate-700 dark:border-slate-200 font-sans">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 dark:text-emerald-600 shrink-0"></i>
+    <span id="toastMessage" class="flex-1">تم الحفظ بنجاح</span>
+    <button id="toastActionBtn" type="button" class="hidden px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition active:scale-95 shrink-0 pointer-events-auto">
+      تراجع ↩️
+    </button>
   </div>
 
   <!-- Page Preview Modal -->

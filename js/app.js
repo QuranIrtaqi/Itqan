@@ -431,17 +431,17 @@ function renderSurahs() {
     }
 
     return `
-      <div onclick="toggleSurah(${s.id})" class="cursor-pointer group relative p-3.5 rounded-2xl border transition-all duration-200 select-none active:scale-[0.99] touch-manipulation ${cardBgClass}">
+      <div onclick="openPagePreview(${s.startPage})" class="cursor-pointer group relative p-3.5 rounded-2xl border transition-all duration-200 select-none active:scale-[0.99] touch-manipulation ${cardBgClass}" title="اضغط لتصفح السورة في المصحف">
         <div class="flex items-center justify-between gap-3">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs font-sans ${isDone
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs font-sans shrink-0 ${isDone
         ? 'bg-emerald-700 text-white shadow-md shadow-emerald-700/30'
         : (hasStarted ? 'bg-amber-500 text-white shadow-md shadow-amber-600/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-950 group-hover:text-emerald-800 transition')
       }">
               ${formatStdNum(s.id)}
             </div>
-            <div>
-              <div class="flex items-center gap-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
                 <h4 class="font-bold text-slate-900 dark:text-white text-base group-hover:text-emerald-700 dark:group-hover:text-emerald-300 font-quran transition">
                   سُورَةُ ${s.name}
                 </h4>
@@ -453,12 +453,16 @@ function renderSurahs() {
             </div>
           </div>
 
-          <div class="w-6 h-6 rounded-lg flex items-center justify-center transition-all ${isDone
-        ? 'bg-emerald-700 text-white shadow-sm shadow-emerald-900/20'
-        : 'border border-slate-300 dark:border-slate-700 text-transparent'
-      }">
-            <i data-lucide="check" class="w-3.5 h-3.5 stroke-[3]"></i>
-          </div>
+          <button type="button"
+            onclick="event.stopPropagation(); toggleSurah(${s.id})"
+            class="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 shrink-0 ${isDone
+              ? 'bg-emerald-700 hover:bg-emerald-800 text-white shadow-md shadow-emerald-700/30 active:scale-90 ring-2 ring-emerald-500/30'
+              : 'border-2 border-slate-300 dark:border-slate-700 hover:border-emerald-600 dark:hover:border-emerald-400 text-slate-300 dark:text-slate-600 hover:text-emerald-700 dark:hover:text-emerald-400 bg-white/70 dark:bg-slate-800/70 active:scale-90'
+            }"
+            title="${isDone ? 'إلغاء إتمام السورة (استعادة الصفحات السابقة)' : 'تحديد السورة كمكتملة الحفظ'}"
+            aria-label="${isDone ? 'إلغاء إتمام السورة' : 'تحديد السورة كمكتملة الحفظ'}">
+            <i data-lucide="check" class="w-4 h-4 stroke-[3] ${isDone ? '' : 'opacity-0 group-hover:opacity-40 transition-opacity'}"></i>
+          </button>
         </div>
 
         <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between font-sans gap-2 flex-wrap">
@@ -2653,6 +2657,7 @@ document.addEventListener('DOMContentLoaded', () => {
     jsonTextarea.value = JSON.stringify({
       memorizedPages: state.memorizedPages,
       memorizedSurahs: state.memorizedSurahs,
+      surahSnapshots: state.surahSnapshots || {},
       reviews: state.reviews,
       log: state.log,
       goal: state.goal,
@@ -2698,6 +2703,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
         memorizedPages: state.memorizedPages,
         memorizedSurahs: state.memorizedSurahs,
+        surahSnapshots: state.surahSnapshots || {},
         reviews: state.reviews,
         log: state.log,
         goal: state.goal,
@@ -2736,6 +2742,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (parsed && (parsed.memorizedPages || parsed.memorizedSurahs)) {
             state.memorizedPages = parsed.memorizedPages || {};
             state.memorizedSurahs = parsed.memorizedSurahs || {};
+            state.surahSnapshots = parsed.surahSnapshots || {};
             state.reviews = parsed.reviews || {};
             state.log = parsed.log || {};
             state.goal = parseInt(parsed.goal) || 0;

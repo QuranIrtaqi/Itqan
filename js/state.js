@@ -20,6 +20,7 @@ function triggerHaptic(type = 'light') {
 let state = {
   memorizedPages: {},
   memorizedSurahs: {},
+  surahSnapshots: {},
   reviews: {},
   log: {},
   goal: 0,
@@ -67,6 +68,7 @@ function loadState() {
       const parsed = JSON.parse(stored);
       state.memorizedPages = parsed.memorizedPages || {};
       state.memorizedSurahs = parsed.memorizedSurahs || {};
+      state.surahSnapshots = parsed.surahSnapshots || {};
       state.reviews = parsed.reviews || {};
       state.log = parsed.log || {};
       state.goal = parseInt(parsed.goal) || 0;
@@ -125,6 +127,7 @@ function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       memorizedPages: state.memorizedPages,
       memorizedSurahs: state.memorizedSurahs,
+      surahSnapshots: state.surahSnapshots || {},
       reviews: state.reviews,
       log: state.log,
       goal: state.goal,
@@ -238,18 +241,57 @@ function clearMistakesNotebook() {
 }
 
 let toastTimer = null;
-function showToast(msg) {
+let toastActionHandler = null;
+
+function showToast(msg, options = null) {
   const toast = document.getElementById('toastNotification');
   const text = document.getElementById('toastMessage');
+  const actionBtn = document.getElementById('toastActionBtn');
   if (!toast || !text) return;
+
   text.textContent = msg;
+
+  if (options && options.actionText && typeof options.onAction === 'function') {
+    toastActionHandler = options.onAction;
+    if (actionBtn) {
+      actionBtn.textContent = options.actionText;
+      actionBtn.onclick = (e) => {
+        if (e) e.stopPropagation();
+        if (typeof toastActionHandler === 'function') {
+          const fn = toastActionHandler;
+          toastActionHandler = null;
+          fn();
+        }
+        hideToast();
+      };
+      actionBtn.classList.remove('hidden');
+    }
+    toast.classList.remove('pointer-events-none');
+    toast.classList.add('pointer-events-auto');
+  } else {
+    toastActionHandler = null;
+    if (actionBtn) actionBtn.classList.add('hidden');
+    toast.classList.remove('pointer-events-auto');
+    toast.classList.add('pointer-events-none');
+  }
+
   toast.classList.remove('translate-y-24', 'opacity-0');
   toast.classList.add('translate-y-0', 'opacity-100');
+
   clearTimeout(toastTimer);
+  const duration = (options && options.duration) ? options.duration : 2800;
   toastTimer = setTimeout(() => {
-    toast.classList.remove('translate-y-0', 'opacity-100');
-    toast.classList.add('translate-y-24', 'opacity-0');
-  }, 2600);
+    hideToast();
+  }, duration);
+}
+
+function hideToast() {
+  const toast = document.getElementById('toastNotification');
+  if (!toast) return;
+  toast.classList.remove('translate-y-0', 'opacity-100');
+  toast.classList.add('translate-y-24', 'opacity-0');
+  toast.classList.remove('pointer-events-auto');
+  toast.classList.add('pointer-events-none');
 }
 
 function launchConfetti() {
@@ -322,34 +364,105 @@ function launchConfetti() {
   animId = requestAnimationFrame(update);
 }
 
-function toggleSurah(surahId) {
+function toggleSurah(surahId, options = {}) {
+  const s = SURAHS.find(x => x.id === surahId);
+  if (!s) return;
   const isNowDone = !state.memorizedSurahs[surahId];
   triggerHaptic(isNowDone ? 'medium' : 'light');
-  delete state.ayahs[surahId];
+
   if (isNowDone) {
+    // 1. Snapshot existing progress (memorized pages & ayahs) before completing
+    const priorPages = [];
+    for (let p = s.startPage; p <= s.endPage; p++) {
+      if (state.memorizedPages[p]) {
+        priorPages.push(p);
+      }
+    }
+    const priorAyahs = state.ayahs[surahId] || 0;
+    if (!state.surahSnapshots) state.surahSnapshots = {};
+    state.surahSnapshots[surahId] = {
+      pages: priorPages,
+      ayahs: priorAyahs,
+      timestamp: Date.now()
+    };
+
+    delete state.ayahs[surahId];
     state.memorizedSurahs[surahId] = true;
     state.reviews[surahId] = todayStr();
     launchConfetti();
-    const s = SURAHS.find(x => x.id === surahId);
-    showToast(`ما شاء الله! مبارك إتمام سورة ${s ? s.name : ''} 🎉`);
-  } else {
-    delete state.memorizedSurahs[surahId];
-  }
 
-  if (state.autoSync) {
-    const currentSurah = SURAHS.find(s => s.id === surahId);
-    if (currentSurah) {
-      for (let p = currentSurah.startPage; p <= currentSurah.endPage; p++) {
-        const surahsOnPage = SURAHS.filter(s => p >= s.startPage && p <= s.endPage);
-        if (isNowDone) {
-          const allDone = surahsOnPage.every(s => (s.id === surahId ? true : state.memorizedSurahs[s.id]));
-          if (allDone) {
-            state.memorizedPages[p] = true;
-          }
-        } else {
-          delete state.memorizedPages[p];
+    if (state.autoSync) {
+      for (let p = s.startPage; p <= s.endPage; p++) {
+        const surahsOnPage = SURAHS.filter(x => p >= x.startPage && p <= x.endPage);
+        const allDone = surahsOnPage.every(x => (x.id === surahId ? true : state.memorizedSurahs[x.id]));
+        if (allDone) {
+          state.memorizedPages[p] = true;
         }
       }
+    }
+
+    showToast(`ما شاء الله! مبارك إتمام سورة ${s.name} 🎉`, {
+      actionText: 'تراجع ↩️',
+      onAction: () => toggleSurah(surahId, { isUndo: true }),
+      duration: 5000
+    });
+  } else {
+    // 2. Unmarking the surah:
+    delete state.memorizedSurahs[surahId];
+
+    if (state.autoSync) {
+      const snapshot = state.surahSnapshots && state.surahSnapshots[surahId];
+      if (snapshot) {
+        // We have a prior snapshot: RESTORE previous pages and ayahs!
+        const prevPagesSet = new Set(snapshot.pages || []);
+        for (let p = s.startPage; p <= s.endPage; p++) {
+          if (prevPagesSet.has(p)) {
+            // Keep previously memorized page intact
+            state.memorizedPages[p] = true;
+          } else {
+            // Check if another completed surah is on this page
+            const otherSurahsOnPage = SURAHS.filter(x => x.id !== surahId && p >= x.startPage && p <= x.endPage);
+            const otherDone = otherSurahsOnPage.length > 0 && otherSurahsOnPage.every(x => state.memorizedSurahs[x.id]);
+            if (!otherDone) {
+              delete state.memorizedPages[p];
+            }
+          }
+        }
+        if (snapshot.ayahs && snapshot.ayahs > 0) {
+          state.ayahs[surahId] = snapshot.ayahs;
+        }
+        const restoredCount = (snapshot.pages || []).length;
+        delete state.surahSnapshots[surahId];
+
+        showToast(
+          restoredCount > 0
+            ? `تم إلغاء إتمام سورة ${s.name} واستعادة صفحاتك المحفوظة (${formatStdNum(restoredCount)} صفحة) بنجاح ✨`
+            : `تم إلغاء إتمام سورة ${s.name}`
+        );
+      } else {
+        // No snapshot recorded (e.g. legacy completion):
+        const totalPages = (s.endPage - s.startPage + 1);
+        let shouldClearPages = true;
+        if (totalPages > 1 && !options.silent && !options.isUndo) {
+          shouldClearPages = confirm(
+            `هل ترغب في إلغاء حفظ صفحات سورة ${s.name} (${formatStdNum(s.startPage)} - ${formatStdNum(s.endPage)}) أيضاً؟\n\n` +
+            `• اضغط (موافق) لحذف حفظ صفحات السورة.\n` +
+            `• اضغط (إلغاء الأمر) لإبقاء الصفحات وحذف علامة إتمام السورة فقط.`
+          );
+        }
+        if (shouldClearPages) {
+          for (let p = s.startPage; p <= s.endPage; p++) {
+            const otherSurahsOnPage = SURAHS.filter(x => x.id !== surahId && p >= x.startPage && p <= x.endPage);
+            const otherDone = otherSurahsOnPage.length > 0 && otherSurahsOnPage.every(x => state.memorizedSurahs[x.id]);
+            if (!otherDone) {
+              delete state.memorizedPages[p];
+            }
+          }
+        }
+        showToast(`تم إلغاء إتمام سورة ${s.name}`);
+      }
+    } else {
+      showToast(`تم إلغاء إتمام سورة ${s.name}`);
     }
   }
 
@@ -374,6 +487,14 @@ function togglePage(pageNum) {
     state.memorizedPages[pageNum] = true;
   } else {
     delete state.memorizedPages[pageNum];
+  }
+
+  if (state.surahSnapshots) {
+    SURAHS.forEach(s => {
+      if (pageNum >= s.startPage && pageNum <= s.endPage && state.surahSnapshots[s.id]) {
+        delete state.surahSnapshots[s.id];
+      }
+    });
   }
 
   if (state.autoSync) {
