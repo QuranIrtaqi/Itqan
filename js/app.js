@@ -3005,6 +3005,45 @@ document.addEventListener('DOMContentLoaded', () => {
   pushGuard();
 
   window.addEventListener('popstate', function () {
+    // 1. If Quran page preview modal is open, close it and return to app view
+    const previewModal = document.getElementById('pagePreviewModal');
+    if (previewModal && !previewModal.classList.contains('hidden')) {
+      if (typeof closePagePreview === 'function') {
+        closePagePreview();
+      } else {
+        previewModal.classList.add('hidden');
+      }
+      isGuarded = false;
+      pushGuard();
+      return;
+    }
+
+    // 2. If any other open modal is active, close it and stay in the app
+    const otherModals = [
+      document.getElementById('aboutAppModal'),
+      document.getElementById('mistakesNotebookModal'),
+      document.getElementById('backupModal'),
+      document.getElementById('remindersModal'),
+      document.getElementById('resetConfirmModal')
+    ];
+    const openModal = otherModals.find(m => m && !m.classList.contains('hidden'));
+    if (openModal) {
+      openModal.classList.add('hidden');
+      if (typeof stopRecitationAudio === 'function') stopRecitationAudio();
+      isGuarded = false;
+      pushGuard();
+      return;
+    }
+
+    // 3. If exitConfirmModal is already showing, dismiss it and stay
+    if (modal && !modal.classList.contains('hidden')) {
+      modal.classList.add('hidden');
+      isGuarded = false;
+      pushGuard();
+      return;
+    }
+
+    // 4. Otherwise, user is on the main screen and wants to exit
     if (isGuarded) {
       isGuarded = false;
       modal.classList.remove('hidden');
@@ -3015,6 +3054,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnStay) {
     btnStay.addEventListener('click', function () {
       modal.classList.add('hidden');
+      isGuarded = false;
       pushGuard();
     });
   }
@@ -3035,6 +3075,7 @@ document.addEventListener('DOMContentLoaded', () => {
   modal.addEventListener('click', function (e) {
     if (e.target === modal) {
       modal.classList.add('hidden');
+      isGuarded = false;
       pushGuard();
     }
   });

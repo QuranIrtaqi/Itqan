@@ -92,15 +92,13 @@
     <div
       class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-1.5 sm:py-2.5 flex items-center justify-between gap-1 sm:gap-2">
 
-      <div id="btnHeaderScrollTop"
-        onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
-        role="button"
-        tabindex="0"
+      <div id="btnHeaderScrollTop" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" role="button" tabindex="0"
         title="العودة لأعلى الصفحة"
         class="flex items-center gap-1.5 sm:gap-2.5 shrink-0 cursor-pointer select-none group transition-transform active:scale-95">
         <div
           class="w-7 h-7 min-[380px]:w-8 min-[380px]:h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700 flex items-center justify-center text-gold-400 shadow-md shadow-emerald-950/20 border border-gold-500/30 shrink-0 group-hover:scale-105 transition-transform">
-          <i data-lucide="book-open-check" class="w-3.5 h-3.5 min-[380px]:w-4 min-[380px]:h-4 sm:w-5 sm:h-5 stroke-[2.2]"></i>
+          <i data-lucide="book-open-check"
+            class="w-3.5 h-3.5 min-[380px]:w-4 min-[380px]:h-4 sm:w-5 sm:h-5 stroke-[2.2]"></i>
         </div>
         <div class="flex items-center gap-1.5">
           <h1
@@ -156,7 +154,8 @@
           class="relative p-1.5 sm:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition active:scale-95 flex items-center justify-center"
           title="منبه ورد الحفظ والمراجعة">
           <i data-lucide="bell" class="w-4 h-4"></i>
-          <span id="reminderActiveDot" class="hidden absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900"></span>
+          <span id="reminderActiveDot"
+            class="hidden absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900"></span>
         </button>
 
         <button id="btnThemeToggle"
@@ -187,7 +186,8 @@
                 <span>مرحباً بك في «إتقان»! هل ترغب في جولة سريعة للتعرف على التطبيق؟</span>
               </h3>
               <span
-                class="inline-block px-1.5 py-0.5 rounded text-[10px] bg-gold-400/20 text-gold-700 dark:text-gold-300 border border-gold-400/30 font-semibold">دليل الواجهة</span>
+                class="inline-block px-1.5 py-0.5 rounded text-[10px] bg-gold-400/20 text-gold-700 dark:text-gold-300 border border-gold-400/30 font-semibold">دليل
+                الواجهة</span>
             </div>
             <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 mt-0.5">
               شرح تفاعلي مبسط في دقيقة واحدة لجميع الأزرار والخيارات وميزات الحفظ والمراجعة لتبدأ بسهولة.
@@ -495,7 +495,8 @@
             title="عرض وتحديد الصفحات المحفوظة فقط">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block"></span>
             <span>المحفوظ</span>
-            <span id="pagesCountMemorized" class="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono">(0)</span>
+            <span id="pagesCountMemorized"
+              class="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono">(0)</span>
           </button>
           <button type="button" onclick="setPagesFilter('unmemorized')" id="btnPagesFilterUnmemorized"
             class="px-2.5 py-1 rounded-xl text-xs font-bold transition active:scale-95 flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
@@ -544,9 +545,11 @@
         </div>
       </div>
 
-      <div id="stickyJuzNavWrapper" class="sticky-juz-nav bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md">
+      <div id="stickyJuzNavWrapper"
+        class="sticky-juz-nav bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md">
         <div class="flex items-center gap-2 overflow-x-auto pb-0.5 text-xs no-scrollbar">
-          <span class="text-xs font-bold text-emerald-800 dark:text-emerald-400 whitespace-nowrap px-1 shrink-0 flex items-center gap-1">
+          <span
+            class="text-xs font-bold text-emerald-800 dark:text-emerald-400 whitespace-nowrap px-1 shrink-0 flex items-center gap-1">
             <i data-lucide="layers" class="w-3.5 h-3.5"></i>
             <span>الأجزاء:</span>
           </span>
@@ -662,28 +665,38 @@
             </div>
 
             <!-- Dynamic Range Selectors Sub-bars -->
-            <div id="tamkeenSurahRangeInputs" class="hidden flex items-center gap-2 flex-wrap bg-emerald-950/60 p-2 rounded-xl border border-emerald-700/60 text-xs text-emerald-100">
+            <div id="tamkeenSurahRangeInputs"
+              class="hidden flex items-center gap-2 flex-wrap bg-emerald-950/60 p-2 rounded-xl border border-emerald-700/60 text-xs text-emerald-100">
               <span class="font-bold text-gold-300">نطاق السور:</span>
               <label class="text-[11px] opacity-80">من:</label>
-              <select id="tamkeenSurahStart" onchange="applyTamkeenRangeChange()" class="py-0.5 px-2 rounded-lg bg-emerald-900 border border-emerald-700 text-white text-xs cursor-pointer"></select>
+              <select id="tamkeenSurahStart" onchange="applyTamkeenRangeChange()"
+                class="py-0.5 px-2 rounded-lg bg-emerald-900 border border-emerald-700 text-white text-xs cursor-pointer"></select>
               <label class="text-[11px] opacity-80">إلى:</label>
-              <select id="tamkeenSurahEnd" onchange="applyTamkeenRangeChange()" class="py-0.5 px-2 rounded-lg bg-emerald-900 border border-emerald-700 text-white text-xs cursor-pointer"></select>
+              <select id="tamkeenSurahEnd" onchange="applyTamkeenRangeChange()"
+                class="py-0.5 px-2 rounded-lg bg-emerald-900 border border-emerald-700 text-white text-xs cursor-pointer"></select>
             </div>
 
-            <div id="tamkeenPageRangeInputs" class="hidden flex items-center gap-2 flex-wrap bg-emerald-950/60 p-2 rounded-xl border border-emerald-700/60 text-xs text-emerald-100">
+            <div id="tamkeenPageRangeInputs"
+              class="hidden flex items-center gap-2 flex-wrap bg-emerald-950/60 p-2 rounded-xl border border-emerald-700/60 text-xs text-emerald-100">
               <span class="font-bold text-gold-300">نطاق الصفحات:</span>
               <label class="text-[11px] opacity-80">من صفحة:</label>
-              <input id="tamkeenPageStart" type="number" min="1" max="604" value="1" onchange="applyTamkeenRangeChange()" class="w-16 py-0.5 px-2 rounded-lg bg-emerald-900 border border-emerald-700 text-white text-xs text-center font-bold font-sans">
+              <input id="tamkeenPageStart" type="number" min="1" max="604" value="1"
+                onchange="applyTamkeenRangeChange()"
+                class="w-16 py-0.5 px-2 rounded-lg bg-emerald-900 border border-emerald-700 text-white text-xs text-center font-bold font-sans">
               <label class="text-[11px] opacity-80">إلى صفحة:</label>
-              <input id="tamkeenPageEnd" type="number" min="1" max="604" value="20" onchange="applyTamkeenRangeChange()" class="w-16 py-0.5 px-2 rounded-lg bg-emerald-900 border border-emerald-700 text-white text-xs text-center font-bold font-sans">
+              <input id="tamkeenPageEnd" type="number" min="1" max="604" value="20" onchange="applyTamkeenRangeChange()"
+                class="w-16 py-0.5 px-2 rounded-lg bg-emerald-900 border border-emerald-700 text-white text-xs text-center font-bold font-sans">
             </div>
 
-            <div id="tamkeenJuzRangeInputs" class="hidden flex items-center gap-2 flex-wrap bg-emerald-950/60 p-2 rounded-xl border border-emerald-700/60 text-xs text-emerald-100">
+            <div id="tamkeenJuzRangeInputs"
+              class="hidden flex items-center gap-2 flex-wrap bg-emerald-950/60 p-2 rounded-xl border border-emerald-700/60 text-xs text-emerald-100">
               <span class="font-bold text-gold-300">نطاق الأجزاء:</span>
               <label class="text-[11px] opacity-80">من جزء:</label>
-              <select id="tamkeenJuzStart" onchange="applyTamkeenRangeChange()" class="py-0.5 px-2 rounded-lg bg-emerald-900 border border-emerald-700 text-white text-xs cursor-pointer"></select>
+              <select id="tamkeenJuzStart" onchange="applyTamkeenRangeChange()"
+                class="py-0.5 px-2 rounded-lg bg-emerald-900 border border-emerald-700 text-white text-xs cursor-pointer"></select>
               <label class="text-[11px] opacity-80">إلى جزء:</label>
-              <select id="tamkeenJuzEnd" onchange="applyTamkeenRangeChange()" class="py-0.5 px-2 rounded-lg bg-emerald-900 border border-emerald-700 text-white text-xs cursor-pointer"></select>
+              <select id="tamkeenJuzEnd" onchange="applyTamkeenRangeChange()"
+                class="py-0.5 px-2 rounded-lg bg-emerald-900 border border-emerald-700 text-white text-xs cursor-pointer"></select>
             </div>
           </div>
         </div>
@@ -764,14 +777,16 @@
       <div class="space-y-1">
         <h3 class="font-bold text-slate-900 dark:text-white text-base">تأكيد تصفير السجل والبيانات بالكامل</h3>
         <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-          سيتم حذف جميع بيانات الحفظ، المراجعات، أيام التعويض، دفتر التثبيت ونتائج تمكين والبدء من جديد كأنك تفتح التطبيق لأول مرة. هل أنت متأكد؟
+          سيتم حذف جميع بيانات الحفظ، المراجعات، أيام التعويض، دفتر التثبيت ونتائج تمكين والبدء من جديد كأنك تفتح
+          التطبيق لأول مرة. هل أنت متأكد؟
         </p>
       </div>
       <div class="flex gap-2">
         <button id="btnResetCancel"
           class="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-bold active:scale-95 transition">إلغاء</button>
         <button id="btnResetYes"
-          class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold active:scale-95 transition">نعم، تصفير شامل</button>
+          class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold active:scale-95 transition">نعم،
+          تصفير شامل</button>
       </div>
     </div>
   </div>
@@ -966,72 +981,6 @@
           </div>
         </div>
 
-        <!-- New Updates & Bug Fixes Highlight Card -->
-        <div
-          class="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-emerald-900/10 via-teal-900/10 to-amber-900/10 border-2 border-emerald-500/30 dark:border-emerald-500/20 space-y-2.5">
-          <div class="flex items-center justify-between gap-2 flex-wrap">
-            <span class="font-black text-xs sm:text-sm text-emerald-900 dark:text-emerald-300 flex items-center gap-2">
-              <span class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center">
-                <i data-lucide="sparkles" class="w-4 h-4"></i>
-              </span>
-              أحدث التحديثات والتحسينات (تحديث المنظومة):
-            </span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-500/30">
-              إصدار محسّن ✨
-            </span>
-          </div>
-
-          <div class="space-y-2 text-[11px] sm:text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-            <!-- Bug Fix 1: Pages Selection & Filtering -->
-            <div class="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 space-y-1">
-              <strong class="text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1.5">
-                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
-                ١. تصفية وتحديد الصفحات المحفوظة وغير المحفوظة بسلاسة (إصلاح وتطوير):
-              </strong>
-              <p class="text-slate-600 dark:text-slate-400">
-                • <strong>حل مشكلة التحديد والتصفية:</strong> تم إلغاء قيود النقر السابقة نهائياً؛ يمكنك الآن النقر بحرية على أي صفحة في الشبكة لتبديل حالة حفظها فوراً دون أي تجميد.
-              </p>
-              <p class="text-slate-600 dark:text-slate-400">
-                • <strong>أزرار تصفية تفاعلية سريعة:</strong> إضافة أزرار بأعلى شبكة الصفحات مع عدادات فورية: <code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-bold text-slate-800 dark:text-slate-200">الكل (604)</code> و<code class="px-1 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 font-bold text-emerald-800 dark:text-emerald-300">المحفوظ</code> و<code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-bold text-slate-700 dark:text-slate-300">غير المحفوظ</code>، مع إخفاء الأجزاء الفارغة تلقائياً عند التصفية لسهولة التصفح.
-              </p>
-            </div>
-
-            <!-- Bug Fix 2: Tamkeen Strict Page & Juz Scoping -->
-            <div class="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 space-y-1">
-              <strong class="text-amber-800 dark:text-amber-300 font-bold flex items-center gap-1.5">
-                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-amber-600"></i>
-                ٢. تمكين: اختبار دقيق ومحصور في الصفحة أو الجزء المختار حصراً (إصلاح وتطوير):
-              </strong>
-              <p class="text-slate-600 dark:text-slate-400">
-                • <strong>حصر نطاق الأسئلة بدقة:</strong> تم حل مشكلة شمول الاختبار لكامل السورة عند اختيار صفحة معينة أو جزء معين؛ أصبحت الآيات تُولد <strong>فقط وحصرياً من الآيات التابعة للصفحة أو الجزء المحدد</strong> بالرقم والحدود الدقيقة.
-              </p>
-              <p class="text-slate-600 dark:text-slate-400">
-                • <strong>نطاق الصفحات المحفوظة:</strong> خيار جديد في تمكين: <code class="px-1 py-0.5 rounded bg-amber-100 dark:bg-amber-950 font-bold text-amber-800 dark:text-amber-300">الصفحات التي حفظتها فقط</code> لاختبار صفحاتك المحفوظة دون الحاجة لختم السورة كاملة.
-              </p>
-              <p class="text-slate-600 dark:text-slate-400">
-                • <strong>أزرار الاختبار الفوري (اختبرني 🧠):</strong> إضافة أزرار مباشرة للاختبار في زاوية كل صفحة، وداخل نافذة معاينة المصحف، وفي بطاقات الأجزاء، وأداة نطاق الصفحات للانتقال السريع لاختبار الصفحة أو الجزء بضغطة واحدة.
-              </p>
-            </div>
-
-            <!-- Bug Fix 3: Protection against Accidental Surah Completion & Smart Page Preservation -->
-            <div class="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 space-y-1">
-              <strong class="text-teal-800 dark:text-teal-300 font-bold flex items-center gap-1.5">
-                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-teal-600"></i>
-                ٣. حماية الحفظ ومنع التحديد العرضي للسور واستعادة الصفحات تلقائياً:
-              </strong>
-              <p class="text-slate-600 dark:text-slate-400">
-                • <strong>فصل زر الإتمام عن تصفح السورة:</strong> أصبح النقر على بطاقة السورة يفتح تصفحها في المصحف بأمان تام دون تغيير حالتها، بينما تم تخصيص زر التحقق (✓) المستقل حصراً لإتمام السورة لتفادي أي ضغطة غير مقصودة أثناء التمرير.
-              </p>
-              <p class="text-slate-600 dark:text-slate-400">
-                • <strong>الحفاظ الذكي على الصفحات المحفوظة سابقاً:</strong> عند إلغاء إتمام سورة، يسترجع التطبيق تلقائياً صفحاتك وآياتك التي كنت قد حفظتها مسبقاً بدقة متناهية دون أن تفقد أي صفحة كنت قد حددتها قبل إتمام السورة.
-              </p>
-              <p class="text-slate-600 dark:text-slate-400">
-                • <strong>خاصية التراجع الفوري (تراجع ↩️):</strong> ظهور زر تراجع مباشر عند إتمام أي سورة للرجوع السريع بضغطة واحدة في حال الضغط بالخطأ.
-              </p>
-            </div>
-          </div>
-        </div>
-
         <!-- Interactive UI Tutorial Launcher Card -->
         <div
           class="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-emerald-800 via-emerald-850 to-teal-900 text-white shadow-md border border-emerald-600/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1059,6 +1008,95 @@
           </button>
         </div>
 
+        <!-- New Updates & Bug Fixes Highlight Card -->
+        <div
+          class="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-emerald-900/10 via-teal-900/10 to-amber-900/10 border-2 border-emerald-500/30 dark:border-emerald-500/20 space-y-2.5">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <span class="font-black text-xs sm:text-sm text-emerald-900 dark:text-emerald-300 flex items-center gap-2">
+              <span
+                class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+              </span>
+              أحدث التحديثات والتحسينات (تحديث المنظومة):
+            </span>
+            <span
+              class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-500/30">
+              إصدار محسّن ✨
+            </span>
+          </div>
+
+          <div class="space-y-2 text-[11px] sm:text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+            <!-- Bug Fix 1: Pages Selection & Filtering -->
+            <div
+              class="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 space-y-1">
+              <strong class="text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1.5">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
+                ١. تصفية وتحديد الصفحات المحفوظة وغير المحفوظة بسلاسة (إصلاح وتطوير):
+              </strong>
+              <p class="text-slate-600 dark:text-slate-400">
+                • <strong>حل مشكلة التحديد والتصفية:</strong> تم إلغاء قيود النقر السابقة نهائياً؛ يمكنك الآن النقر
+                بحرية على أي صفحة في الشبكة لتبديل حالة حفظها فوراً دون أي تجميد.
+              </p>
+              <p class="text-slate-600 dark:text-slate-400">
+                • <strong>أزرار تصفية تفاعلية سريعة:</strong> إضافة أزرار بأعلى شبكة الصفحات مع عدادات فورية: <code
+                  class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-bold text-slate-800 dark:text-slate-200">الكل (604)</code>
+                و<code
+                  class="px-1 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 font-bold text-emerald-800 dark:text-emerald-300">المحفوظ</code>
+                و<code
+                  class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-bold text-slate-700 dark:text-slate-300">غير المحفوظ</code>،
+                مع إخفاء الأجزاء الفارغة تلقائياً عند التصفية لسهولة التصفح.
+              </p>
+            </div>
+
+            <!-- Bug Fix 2: Tamkeen Strict Page & Juz Scoping -->
+            <div
+              class="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 space-y-1">
+              <strong class="text-amber-800 dark:text-amber-300 font-bold flex items-center gap-1.5">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-amber-600"></i>
+                ٢. تمكين: اختبار دقيق ومحصور في الصفحة أو الجزء المختار حصراً (إصلاح وتطوير):
+              </strong>
+              <p class="text-slate-600 dark:text-slate-400">
+                • <strong>حصر نطاق الأسئلة بدقة:</strong> تم حل مشكلة شمول الاختبار لكامل السورة عند اختيار صفحة معينة
+                أو جزء معين؛ أصبحت الآيات تُولد <strong>فقط وحصرياً من الآيات التابعة للصفحة أو الجزء المحدد</strong>
+                بالرقم والحدود الدقيقة.
+              </p>
+              <p class="text-slate-600 dark:text-slate-400">
+                • <strong>نطاق الصفحات المحفوظة:</strong> خيار جديد في تمكين: <code
+                  class="px-1 py-0.5 rounded bg-amber-100 dark:bg-amber-950 font-bold text-amber-800 dark:text-amber-300">الصفحات التي حفظتها فقط</code>
+                لاختبار صفحاتك المحفوظة دون الحاجة لختم السورة كاملة.
+              </p>
+              <p class="text-slate-600 dark:text-slate-400">
+                • <strong>أزرار الاختبار الفوري (اختبرني 🧠):</strong> إضافة أزرار مباشرة للاختبار في زاوية كل صفحة،
+                وداخل نافذة معاينة المصحف، وفي بطاقات الأجزاء، وأداة نطاق الصفحات للانتقال السريع لاختبار الصفحة أو
+                الجزء بضغطة واحدة.
+              </p>
+            </div>
+
+            <!-- Bug Fix 3: Protection against Accidental Surah Completion & Smart Page Preservation -->
+            <div
+              class="p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 space-y-1">
+              <strong class="text-teal-800 dark:text-teal-300 font-bold flex items-center gap-1.5">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-teal-600"></i>
+                ٣. حماية الحفظ ومنع التحديد العرضي للسور واستعادة الصفحات تلقائياً:
+              </strong>
+              <p class="text-slate-600 dark:text-slate-400">
+                • <strong>فصل زر الإتمام عن تصفح السورة:</strong> أصبح النقر على بطاقة السورة يفتح تصفحها في المصحف
+                بأمان تام دون تغيير حالتها، بينما تم تخصيص زر التحقق (✓) المستقل حصراً لإتمام السورة لتفادي أي ضغطة غير
+                مقصودة أثناء التمرير.
+              </p>
+              <p class="text-slate-600 dark:text-slate-400">
+                • <strong>الحفاظ الذكي على الصفحات المحفوظة سابقاً:</strong> عند إلغاء إتمام سورة، يسترجع التطبيق
+                تلقائياً صفحاتك وآياتك التي كنت قد حفظتها مسبقاً بدقة متناهية دون أن تفقد أي صفحة كنت قد حددتها قبل
+                إتمام السورة.
+              </p>
+              <p class="text-slate-600 dark:text-slate-400">
+                • <strong>خاصية التراجع الفوري (تراجع ↩️):</strong> ظهور زر تراجع مباشر عند إتمام أي سورة للرجوع السريع
+                بضغطة واحدة في حال الضغط بالخطأ.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- How to Use / Features for User -->
         <div class="space-y-3">
           <h4 class="font-black text-slate-900 dark:text-white text-xs sm:text-sm flex items-center gap-1.5">
@@ -1083,7 +1121,8 @@
               </span>
             </div>
             <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              محرك اختبار تفاعلي لا نهائي يجلب الآيات بالرسم العثماني مباشرة، مع دعم كامل للاختبار الحصري بالصفحة المحددة، أو الجزء، أو السورة، أو الصفحات المحفوظة:
+              محرك اختبار تفاعلي لا نهائي يجلب الآيات بالرسم العثماني مباشرة، مع دعم كامل للاختبار الحصري بالصفحة
+              المحددة، أو الجزء، أو السورة، أو الصفحات المحفوظة:
             </p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">
               <div
@@ -1126,7 +1165,8 @@
                 شبكة الصفحات وتحديد النطاق
               </span>
               <p class="text-[11px] text-slate-500 dark:text-slate-400">
-                انقر على أي صفحة لتحديدها كمحفوظة، أو استخدم أزرار التصفية السريعة (الكل، المحفوظ، غير المحفوظ)، أو أداة "نطاق الصفحات" لتحديد أو إلغاء صفحات متتالية دفعة واحدة مع إمكانية الاختبار الفوري لكل صفحة.
+                انقر على أي صفحة لتحديدها كمحفوظة، أو استخدم أزرار التصفية السريعة (الكل، المحفوظ، غير المحفوظ)، أو أداة
+                "نطاق الصفحات" لتحديد أو إلغاء صفحات متتالية دفعة واحدة مع إمكانية الاختبار الفوري لكل صفحة.
               </p>
             </div>
 
@@ -1137,7 +1177,8 @@
                 معاينة المصحف والتلاوة الصوتية
               </span>
               <p class="text-[11px] text-slate-500 dark:text-slate-400">
-                اضغط على أيقونة العين (`👁️`) لعرض صفحة مصحف المدينة عالي الدقة، مع مشغل صوتي لـ 9 قراء (الشيخ الحصري افتراضياً) وبيان دقيق لرقم الآية بالسورة وموقعها، والتقليب بالسحب (Swipe).
+                اضغط على أيقونة العين (`👁️`) لعرض صفحة مصحف المدينة عالي الدقة، مع مشغل صوتي لـ 9 قراء (الشيخ الحصري
+                افتراضياً) وبيان دقيق لرقم الآية بالسورة وموقعها، والتقليب بالسحب (Swipe).
               </p>
             </div>
 
@@ -1184,7 +1225,8 @@
                 دفتر التثبيت وسجل الأخطاء
               </span>
               <p class="text-[11px] text-slate-500 dark:text-slate-400">
-                تسجيل تلقائي لأي سؤال تخطئ فيه في تمكين مع حفظ الآية والسورة والجواب الخاطئ للتركيز على مواضع اللبس وتثبيتها.
+                تسجيل تلقائي لأي سؤال تخطئ فيه في تمكين مع حفظ الآية والسورة والجواب الخاطئ للتركيز على مواضع اللبس
+                وتثبيتها.
               </p>
             </div>
 
@@ -1195,7 +1237,8 @@
                 حماية السلسلة وأيام التعويض
               </span>
               <p class="text-[11px] text-slate-500 dark:text-slate-400">
-                رصيد تعويض لحماية سلسلتك (تلقائياً أو يدوياً) يبدأ بيوم واحد ويزداد كل 7 أسابيع من الالتزام المتواصل حتى لا تفقد أوسمتك عند الانشغال.
+                رصيد تعويض لحماية سلسلتك (تلقائياً أو يدوياً) يبدأ بيوم واحد ويزداد كل 7 أسابيع من الالتزام المتواصل حتى
+                لا تفقد أوسمتك عند الانشغال.
               </p>
             </div>
 
@@ -1206,7 +1249,8 @@
                 الورد اليومي الذكي ومنبه الحفظ
               </span>
               <p class="text-[11px] text-slate-500 dark:text-slate-400">
-                بطاقة ذكية تقترح ورد مراجعتك وحفظك اليومي، مع منبه محلي يذكرك يومياً بوقت الحفظ والمراجعة دون الحاجة للإنترنت.
+                بطاقة ذكية تقترح ورد مراجعتك وحفظك اليومي، مع منبه محلي يذكرك يومياً بوقت الحفظ والمراجعة دون الحاجة
+                للإنترنت.
               </p>
             </div>
 
@@ -1217,7 +1261,8 @@
                 النسخ الاحتياطي وتصفير السجل
               </span>
               <p class="text-[11px] text-slate-500 dark:text-slate-400">
-                تصدير واستيراد بياناتك بصيغة JSON بأمان تام أسفل بطاقة التخطيط، مع إمكانية تصفير السجل الشامل للبدء من جديد كأول مرة.
+                تصدير واستيراد بياناتك بصيغة JSON بأمان تام أسفل بطاقة التخطيط، مع إمكانية تصفير السجل الشامل للبدء من
+                جديد كأول مرة.
               </p>
             </div>
 
@@ -1364,28 +1409,32 @@
         </div>
 
         <div class="grid grid-cols-4 gap-1 sm:gap-2 text-center text-xs font-sans">
-          <div class="bg-emerald-900/40 p-1.5 sm:p-2.5 rounded-xl border border-emerald-800 flex flex-col justify-center items-center overflow-hidden">
+          <div
+            class="bg-emerald-900/40 p-1.5 sm:p-2.5 rounded-xl border border-emerald-800 flex flex-col justify-center items-center overflow-hidden">
             <span class="text-emerald-300 text-[9px] sm:text-[10px] block font-sans mb-0.5 select-none">الآيات</span>
             <div class="flex items-baseline justify-center gap-0.5 text-white font-sans font-bold leading-none">
               <b id="cardAyahsDisplay" class="text-xs sm:text-sm font-black text-gold-300">0</b>
               <span class="text-[8.5px] sm:text-[9.5px] text-emerald-300/80 font-normal">/ 6,236</span>
             </div>
           </div>
-          <div class="bg-emerald-900/40 p-1.5 sm:p-2.5 rounded-xl border border-emerald-800 flex flex-col justify-center items-center overflow-hidden">
+          <div
+            class="bg-emerald-900/40 p-1.5 sm:p-2.5 rounded-xl border border-emerald-800 flex flex-col justify-center items-center overflow-hidden">
             <span class="text-emerald-300 text-[9px] sm:text-[10px] block font-sans mb-0.5 select-none">الصفحات</span>
             <div class="flex items-baseline justify-center gap-0.5 text-white font-sans font-bold leading-none">
               <b id="cardPagesDisplay" class="text-xs sm:text-sm font-black text-gold-300">0</b>
               <span class="text-[8.5px] sm:text-[9.5px] text-emerald-300/80 font-normal">/ 604</span>
             </div>
           </div>
-          <div class="bg-emerald-900/40 p-1.5 sm:p-2.5 rounded-xl border border-emerald-800 flex flex-col justify-center items-center overflow-hidden">
+          <div
+            class="bg-emerald-900/40 p-1.5 sm:p-2.5 rounded-xl border border-emerald-800 flex flex-col justify-center items-center overflow-hidden">
             <span class="text-emerald-300 text-[9px] sm:text-[10px] block font-sans mb-0.5 select-none">السور</span>
             <div class="flex items-baseline justify-center gap-0.5 text-white font-sans font-bold leading-none">
               <b id="cardSurahsDisplay" class="text-xs sm:text-sm font-black text-gold-300">0</b>
               <span class="text-[8.5px] sm:text-[9.5px] text-emerald-300/80 font-normal">/ 114</span>
             </div>
           </div>
-          <div class="bg-emerald-900/40 p-1.5 sm:p-2.5 rounded-xl border border-emerald-800 flex flex-col justify-center items-center overflow-hidden">
+          <div
+            class="bg-emerald-900/40 p-1.5 sm:p-2.5 rounded-xl border border-emerald-800 flex flex-col justify-center items-center overflow-hidden">
             <span class="text-emerald-300 text-[9px] sm:text-[10px] block font-sans mb-0.5 select-none">الأجزاء</span>
             <div class="flex items-baseline justify-center gap-0.5 text-white font-sans font-bold leading-none">
               <b id="cardJuzDisplay" class="text-xs sm:text-sm font-black text-gold-300">0</b>
@@ -1415,7 +1464,8 @@
     class="fixed bottom-20 md:bottom-5 left-4 sm:left-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2.5 px-4 py-2.5 rounded-2xl shadow-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold border border-slate-700 dark:border-slate-200 font-sans">
     <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 dark:text-emerald-600 shrink-0"></i>
     <span id="toastMessage" class="flex-1">تم الحفظ بنجاح</span>
-    <button id="toastActionBtn" type="button" class="hidden px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition active:scale-95 shrink-0 pointer-events-auto">
+    <button id="toastActionBtn" type="button"
+      class="hidden px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition active:scale-95 shrink-0 pointer-events-auto">
       تراجع ↩️
     </button>
   </div>
@@ -1581,20 +1631,25 @@
             <p class="text-xs text-slate-500 dark:text-slate-400">تذكير يومي لطيف لتثبيت الورد ومنع التفلت</p>
           </div>
         </div>
-        <button id="btnCloseRemindersModal" class="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+        <button id="btnCloseRemindersModal"
+          class="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
       <!-- Toggle reminder -->
-      <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between gap-3">
+      <div
+        class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between gap-3">
         <div class="space-y-0.5">
-          <label for="chkReminderEnabled" class="text-sm font-bold text-slate-900 dark:text-white cursor-pointer">تفعيل التنبيه اليومي</label>
+          <label for="chkReminderEnabled" class="text-sm font-bold text-slate-900 dark:text-white cursor-pointer">تفعيل
+            التنبيه اليومي</label>
           <p class="text-xs text-slate-500 dark:text-slate-400">إشعار محلي بالمتصفح يذكرك بورد اليوم والسور المستحقة</p>
         </div>
         <label class="relative inline-flex items-center cursor-pointer">
           <input type="checkbox" id="chkReminderEnabled" class="sr-only peer">
-          <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+          <div
+            class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600">
+          </div>
         </label>
       </div>
 
@@ -1613,16 +1668,25 @@
         <div class="space-y-1.5">
           <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400">أوقات مقترحة سريعة:</span>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
-            <button type="button" onclick="setQuickReminderTime('05:30')" class="px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 dark:bg-slate-800 dark:hover:bg-emerald-950/50 border border-slate-200 dark:border-slate-700 font-semibold transition text-center">بعد الفجر 05:30</button>
-            <button type="button" onclick="setQuickReminderTime('09:00')" class="px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 dark:bg-slate-800 dark:hover:bg-emerald-950/50 border border-slate-200 dark:border-slate-700 font-semibold transition text-center">الضحى 09:00</button>
-            <button type="button" onclick="setQuickReminderTime('16:30')" class="px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 dark:bg-slate-800 dark:hover:bg-emerald-950/50 border border-slate-200 dark:border-slate-700 font-semibold transition text-center">العصر 16:30</button>
-            <button type="button" onclick="setQuickReminderTime('21:00')" class="px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 dark:bg-slate-800 dark:hover:bg-emerald-950/50 border border-slate-200 dark:border-slate-700 font-semibold transition text-center">العشاء 21:00</button>
+            <button type="button" onclick="setQuickReminderTime('05:30')"
+              class="px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 dark:bg-slate-800 dark:hover:bg-emerald-950/50 border border-slate-200 dark:border-slate-700 font-semibold transition text-center">بعد
+              الفجر 05:30</button>
+            <button type="button" onclick="setQuickReminderTime('09:00')"
+              class="px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 dark:bg-slate-800 dark:hover:bg-emerald-950/50 border border-slate-200 dark:border-slate-700 font-semibold transition text-center">الضحى
+              09:00</button>
+            <button type="button" onclick="setQuickReminderTime('16:30')"
+              class="px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 dark:bg-slate-800 dark:hover:bg-emerald-950/50 border border-slate-200 dark:border-slate-700 font-semibold transition text-center">العصر
+              16:30</button>
+            <button type="button" onclick="setQuickReminderTime('21:00')"
+              class="px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 dark:bg-slate-800 dark:hover:bg-emerald-950/50 border border-slate-200 dark:border-slate-700 font-semibold transition text-center">العشاء
+              21:00</button>
           </div>
         </div>
       </div>
 
       <!-- Browser permission status box -->
-      <div id="reminderPermissionBox" class="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs space-y-2">
+      <div id="reminderPermissionBox"
+        class="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs space-y-2">
         <div class="flex items-center justify-between gap-2">
           <div class="flex items-center gap-1.5 text-amber-800 dark:text-amber-300 font-bold">
             <i data-lucide="info" class="w-4 h-4 shrink-0 text-amber-600"></i>
@@ -1668,7 +1732,9 @@
           <div>
             <div class="flex items-center gap-2">
               <h3 class="font-bold text-slate-900 dark:text-white text-base">دفتر التثبيت وسجل الأخطاء</h3>
-              <span id="mistakesModalCountBadge" class="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 text-xs font-bold font-mono">0 آية</span>
+              <span id="mistakesModalCountBadge"
+                class="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 text-xs font-bold font-mono">0
+                آية</span>
             </div>
             <p class="text-xs text-slate-500 dark:text-slate-400">الآيات التي تحتاج عناية وتكراراً من اختبارات تمكين</p>
           </div>
@@ -1680,17 +1746,20 @@
             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             <span class="hidden sm:inline">مسح السجل</span>
           </button>
-          <button id="btnCloseMistakesModal" class="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+          <button id="btnCloseMistakesModal"
+            class="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
       </div>
 
       <!-- Quick Guidance Banner -->
-      <div class="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-300 flex items-center justify-between gap-2 shrink-0">
+      <div
+        class="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-300 flex items-center justify-between gap-2 shrink-0">
         <div class="flex items-center gap-2">
           <i data-lucide="sparkle" class="w-4 h-4 text-amber-600 shrink-0"></i>
-          <span>راجع الآية جيداً ثم اضغط <b>«إعادة الاختبار»</b> لتأكيد حفظها، أو <b>«تم التثبيت ✓»</b> بعد إتقانها.</span>
+          <span>راجع الآية جيداً ثم اضغط <b>«إعادة الاختبار»</b> لتأكيد حفظها، أو <b>«تم التثبيت ✓»</b> بعد
+            إتقانها.</span>
         </div>
       </div>
 
@@ -1700,9 +1769,11 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 shrink-0">
+      <div
+        class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 shrink-0">
         <span>يتحدث تلقائياً مع كل خطأ في اختبارات تمكين</span>
-        <button type="button" onclick="closeMistakesModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold transition">
+        <button type="button" onclick="closeMistakesModal()"
+          class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold transition">
           إغلاق
         </button>
       </div>
@@ -1740,7 +1811,8 @@
 
       <!-- Popover Body -->
       <div class="space-y-2">
-        <h4 id="coachMarksTitle" class="font-black text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
+        <h4 id="coachMarksTitle"
+          class="font-black text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
           <!-- Injected dynamically -->
         </h4>
         <p id="coachMarksText" class="text-xs sm:text-[13px] text-slate-600 dark:text-slate-300 leading-relaxed">

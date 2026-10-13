@@ -506,7 +506,7 @@ async function generateDynamicTamkeenQuestion(mode, scope) {
     globalAyahNum: (chosenSurahData.ayahs[idx] && chosenSurahData.ayahs[idx].number) || getGlobalAyahNumber(chosenSurahId, idx + 1),
     page: ayahPage,
     juz: ayahJuz,
-    prompt: `في أي سورة كريمة وردت هذه الآية المباركة (صفحة ${formatStdNum(ayahPage)})؟`,
+    prompt: 'في أي سورة كريمة وردت هذه الآية المباركة؟',
     verse: verseText,
     correct,
     options: [correct, ...distractors],
@@ -857,13 +857,13 @@ function renderTamkeenQuiz() {
     `;
   } else if (tamkeenState.singlePageNum) {
     const pNum = tamkeenState.singlePageNum;
-    const pSurahs = getSurahsForPage(pNum);
+    const pSurahs = (q.mode === 'surah_id' && !tamkeenState.isAnswered) ? '' : ` (${getSurahsForPage(pNum)})`;
     const pJuz = getJuzForPage(pNum);
     singleTargetBannerHtml = `
       <div class="p-2 sm:p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-between gap-2 text-xs text-amber-900 dark:text-amber-200">
         <span class="flex items-center gap-1.5 font-bold">
           <i data-lucide="target" class="w-4 h-4 text-amber-600 dark:text-amber-400"></i>
-          اختبار مخصص وحصري لصفحة «${formatStdNum(pNum)}» (${pSurahs} • جزء ${formatStdNum(pJuz)})
+          اختبار مخصص وحصري لصفحة «${formatStdNum(pNum)}»${pSurahs} • جزء ${formatStdNum(pJuz)}
         </span>
         <button onclick="clearTamkeenSingleTarget()" class="px-2 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 font-bold text-[11px] transition active:scale-95">
           إنهاء والعودة للنطاق العام ✕
@@ -895,7 +895,7 @@ function renderTamkeenQuiz() {
         </span>
         <span class="text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-xl">
           ${q.mode === 'surah_id' && !tamkeenState.isAnswered 
-            ? `آية رقم (${formatStdNum(q.ayahNum)}) • ص ${formatStdNum(q.page || 1)} • اسم السورة مطلوب` 
+            ? 'المطلوب: تحديد اسم السورة الكريمة 🎯' 
             : `سورة ${q.surahName} • آية ${formatStdNum(q.ayahNum)} • ص ${formatStdNum(q.page || 1)} • ج ${formatStdNum(q.juz || 1)}`}
         </span>
         ${q.source === 'api' ? `
