@@ -207,6 +207,5 @@ QrnTrc/
 ## 📬 للتواصل والمقترحات
 
 نسعد بتلقي استفساراتكم واقتراحاتكم لتطوير التطبيق:
-* 💬 **واتساب:** [+393520002600](https://wa.me/393520002600)
-* ✉️ **البريد الإلكتروني:** [tamimi7khalil@gmail.com](mailto:tamimi7khalil@gmail.com)
+* ✉️ **البريد الإلكتروني:** [irtaqiquran@gmail.com](mailto:irtaqiquran@gmail.com)
 
