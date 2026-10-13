@@ -1199,7 +1199,10 @@ function changePageReciter(reciterId) {
   }
 }
 
+let savedPagePreviewScrollY = null;
+
 function openPagePreview(pageNum) {
+  savedPagePreviewScrollY = window.scrollY || window.pageYOffset || (document.documentElement ? document.documentElement.scrollTop : 0) || 0;
   const targetPage = Math.min(604, Math.max(1, parseInt(pageNum) || 1));
   if (targetPage !== currentPreviewPage || !currentPageAyahsData) {
     stopPageAudio();
@@ -1218,6 +1221,13 @@ function closePagePreview() {
   stopPageAudio();
   const modal = document.getElementById('pagePreviewModal');
   if (modal) modal.classList.add('hidden');
+  if (typeof savedPagePreviewScrollY === 'number') {
+    const y = savedPagePreviewScrollY;
+    window.scrollTo(0, y);
+    requestAnimationFrame(() => {
+      window.scrollTo(0, y);
+    });
+  }
 }
 
 function navigatePreviewPage(delta) {
@@ -2991,6 +3001,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!modal) return;
   let isGuarded = false;
 
+  if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+    try {
+      window.history.scrollRestoration = 'manual';
+    } catch (e) { }
+  }
+
   function pushGuard() {
     if (!isGuarded) {
       try {
@@ -3005,9 +3021,15 @@ document.addEventListener('DOMContentLoaded', () => {
   pushGuard();
 
   window.addEventListener('popstate', function () {
-    // 1. If Quran page preview modal is open, close it and return to app view
+    const currentScrollY = window.scrollY || window.pageYOffset || (document.documentElement ? document.documentElement.scrollTop : 0) || 0;
+
+    // 1. If Quran page preview modal is open, close it and preserve exact scroll position
     const previewModal = document.getElementById('pagePreviewModal');
     if (previewModal && !previewModal.classList.contains('hidden')) {
+      const scrollYToKeep = (typeof savedPagePreviewScrollY === 'number') 
+        ? savedPagePreviewScrollY 
+        : currentScrollY;
+
       if (typeof closePagePreview === 'function') {
         closePagePreview();
       } else {
@@ -3015,10 +3037,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       isGuarded = false;
       pushGuard();
+
+      window.scrollTo(0, scrollYToKeep);
+      requestAnimationFrame(() => {
+        window.scrollTo(0, scrollYToKeep);
+      });
       return;
     }
 
-    // 2. If any other open modal is active, close it and stay in the app
+    // 2. If any other open modal is active, close it and stay in the app at current scroll position
     const otherModals = [
       document.getElementById('aboutAppModal'),
       document.getElementById('mistakesNotebookModal'),
@@ -3032,6 +3059,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof stopRecitationAudio === 'function') stopRecitationAudio();
       isGuarded = false;
       pushGuard();
+
+      window.scrollTo(0, currentScrollY);
+      requestAnimationFrame(() => {
+        window.scrollTo(0, currentScrollY);
+      });
       return;
     }
 
@@ -3040,6 +3072,11 @@ document.addEventListener('DOMContentLoaded', () => {
       modal.classList.add('hidden');
       isGuarded = false;
       pushGuard();
+
+      window.scrollTo(0, currentScrollY);
+      requestAnimationFrame(() => {
+        window.scrollTo(0, currentScrollY);
+      });
       return;
     }
 
